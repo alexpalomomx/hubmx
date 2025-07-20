@@ -1,9 +1,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, User, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut, isAdmin, isCoordinator } = useAuth();
+  const navigate = useNavigate();
 
   const navigation = [
     { name: "Inicio", href: "#inicio" },
@@ -14,6 +25,14 @@ const Header = () => {
     { name: "Únete", href: "#unete" },
     { name: "Contacto", href: "#contacto" },
   ];
+
+  const handleAuthAction = () => {
+    if (user) {
+      signOut();
+    } else {
+      navigate("/auth");
+    }
+  };
 
   return (
     <header className="fixed top-0 w-full bg-background/95 backdrop-blur-md border-b border-border z-50">
@@ -43,11 +62,49 @@ const Header = () => {
             </div>
           </nav>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
-            <Button variant="hero" size="sm">
-              Registra tu comunidad
-            </Button>
+          {/* Auth Section */}
+          <div className="hidden md:flex items-center space-x-4">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                    <User className="h-4 w-4" />
+                    <span>{user.email}</span>
+                    {(isAdmin || isCoordinator) && (
+                      <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
+                        {isAdmin ? 'Admin' : 'Coordinador'}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
+                    <User className="mr-2 h-4 w-4" />
+                    Mi perfil
+                  </DropdownMenuItem>
+                  {(isAdmin || isCoordinator) && (
+                    <DropdownMenuItem onClick={() => navigate("/admin")}>
+                      <User className="mr-2 h-4 w-4" />
+                      Dashboard Admin
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar sesión
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
+                  Iniciar sesión
+                </Button>
+                <Button variant="hero" size="sm" onClick={() => navigate("/auth")}>
+                  Registrarse
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -77,10 +134,64 @@ const Header = () => {
                 {item.name}
               </a>
             ))}
-            <div className="pt-4">
-              <Button variant="hero" className="w-full">
-                Registra tu comunidad
-              </Button>
+            <div className="pt-4 space-y-2">
+              {user ? (
+                <>
+                  <div className="text-sm text-muted-foreground px-3">
+                    {user.email}
+                    {(isAdmin || isCoordinator) && (
+                      <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
+                        {isAdmin ? 'Admin' : 'Coordinador'}
+                      </span>
+                    )}
+                  </div>
+                  {(isAdmin || isCoordinator) && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        navigate("/admin");
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Dashboard Admin
+                    </Button>
+                  )}
+                  <Button 
+                    variant="hero" 
+                    className="w-full"
+                    onClick={() => {
+                      signOut();
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Cerrar sesión
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      navigate("/auth");
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Iniciar sesión
+                  </Button>
+                  <Button 
+                    variant="hero" 
+                    className="w-full"
+                    onClick={() => {
+                      navigate("/auth");
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Registrarse
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
