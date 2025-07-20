@@ -15,6 +15,8 @@ import {
   Settings
 } from "lucide-react";
 import { useStats, useCommunities, useEvents, useAlliances, useCalls } from "@/hooks/useSupabaseData";
+import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
+import AddCommunityDialog from "@/components/admin/AddCommunityDialog";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -24,6 +26,9 @@ const AdminDashboard = () => {
   const { data: events } = useEvents();
   const { data: alliances } = useAlliances();
   const { data: calls } = useCalls();
+
+  // Habilitar actualizaciones en tiempo real
+  useRealtimeUpdates();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -151,10 +156,12 @@ const AdminDashboard = () => {
                   Administra las comunidades registradas en la plataforma
                 </p>
               </div>
-              <Button variant="hero">
-                <Users className="mr-2 h-4 w-4" />
-                Nueva Comunidad
-              </Button>
+              <AddCommunityDialog>
+                <Button variant="hero">
+                  <Users className="mr-2 h-4 w-4" />
+                  Nueva Comunidad
+                </Button>
+              </AddCommunityDialog>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

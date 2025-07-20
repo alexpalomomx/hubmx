@@ -6,8 +6,11 @@ import EventsSection from "@/components/sections/EventsSection";
 import CallsSection from "@/components/sections/CallsSection";
 import JoinSection from "@/components/sections/JoinSection";
 import Footer from "@/components/sections/Footer";
+import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 
 const Index = () => {
+  // Habilitar actualizaciones en tiempo real
+  useRealtimeUpdates();
   return (
     <div className="min-h-screen">
       <Header />
