@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Lightbulb, Globe } from "lucide-react";
+import { ArrowRight, Users, Lightbulb, Globe, Loader2 } from "lucide-react";
+import { useStats } from "@/hooks/useSupabaseData";
 import heroImage from "@/assets/hero-community.jpg";
 
 const HeroSection = () => {
+  const { data: stats, isLoading } = useStats();
   return (
     <section id="inicio" className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background Image */}
@@ -51,7 +53,9 @@ const HeroSection = () => {
                   <Users className="h-8 w-8 text-white" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white">50+</div>
+              <div className="text-3xl font-bold text-white">
+                {isLoading ? <Loader2 className="h-8 w-8 animate-spin mx-auto" /> : `${stats?.communities || 0}+`}
+              </div>
               <div className="text-white/80">Comunidades activas</div>
             </div>
             <div className="text-center">
@@ -60,7 +64,9 @@ const HeroSection = () => {
                   <Lightbulb className="h-8 w-8 text-white" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white">200+</div>
+              <div className="text-3xl font-bold text-white">
+                {isLoading ? <Loader2 className="h-8 w-8 animate-spin mx-auto" /> : `${stats?.events || 0}+`}
+              </div>
               <div className="text-white/80">Eventos realizados</div>
             </div>
             <div className="text-center">
@@ -69,8 +75,10 @@ const HeroSection = () => {
                   <Globe className="h-8 w-8 text-white" />
                 </div>
               </div>
-              <div className="text-3xl font-bold text-white">15+</div>
-              <div className="text-white/80">Países conectados</div>
+              <div className="text-3xl font-bold text-white">
+                {isLoading ? <Loader2 className="h-8 w-8 animate-spin mx-auto" /> : `${Math.round((stats?.members || 0) / 1000)}K+`}
+              </div>
+              <div className="text-white/80">Miembros conectados</div>
             </div>
           </div>
         </div>
