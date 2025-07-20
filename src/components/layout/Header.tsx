@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, ChevronDown, Info, Handshake, Mail } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,12 +18,15 @@ const Header = () => {
 
   const navigation = [
     { name: "Inicio", href: "#inicio" },
-    { name: "¿Qué es el HUB?", href: "#que-es" },
     { name: "Comunidades", href: "#comunidades" },
     { name: "Eventos", href: "#eventos" },
-    { name: "Alianzas", href: "#alianzas" },
     { name: "Únete", href: "#unete" },
-    { name: "Contacto", href: "#contacto" },
+  ];
+
+  const moreNavigation = [
+    { name: "¿Qué es el HUB?", href: "#que-es", icon: Info },
+    { name: "Alianzas", href: "#alianzas", icon: Handshake },
+    { name: "Contacto", href: "#contacto", icon: Mail },
   ];
 
   const handleAuthAction = () => {
@@ -41,8 +44,8 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-                HUB Comunidades
+              <h1 className="text-xl lg:text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
+                HUB
               </h1>
             </div>
           </div>
@@ -59,6 +62,26 @@ const Header = () => {
                   {item.name}
                 </a>
               ))}
+              
+              {/* More Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="flex items-center space-x-1">
+                    <span>Más</span>
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {moreNavigation.map((item) => (
+                    <DropdownMenuItem key={item.name} asChild>
+                      <a href={item.href} className="flex items-center">
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {item.name}
+                      </a>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </nav>
 
@@ -69,10 +92,12 @@ const Header = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="flex items-center space-x-2">
                     <User className="h-4 w-4" />
-                    <span>{user.email}</span>
+                    <span className="hidden lg:block truncate max-w-32">
+                      {user.email?.split('@')[0]}
+                    </span>
                     {(isAdmin || isCoordinator) && (
                       <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
-                        {isAdmin ? 'Admin' : 'Coordinador'}
+                        {isAdmin ? 'Admin' : 'Coord'}
                       </span>
                     )}
                   </Button>
@@ -134,6 +159,21 @@ const Header = () => {
                 {item.name}
               </a>
             ))}
+            
+            {/* More sections in mobile */}
+            <div className="border-t border-border pt-2 mt-2">
+              {moreNavigation.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="text-muted-foreground hover:text-primary block px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <item.icon className="mr-2 h-4 w-4" />
+                  {item.name}
+                </a>
+              ))}
+            </div>
             <div className="pt-4 space-y-2">
               {user ? (
                 <>
