@@ -12,11 +12,17 @@ import {
   FileText, 
   BarChart3,
   ArrowLeft,
-  Settings
+  Settings,
+  Plus
 } from "lucide-react";
 import { useStats, useCommunities, useEvents, useAlliances, useCalls } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import AddCommunityDialog from "@/components/admin/AddCommunityDialog";
+import AddEventDialog from "@/components/admin/AddEventDialog";
+import AddCallDialog from "@/components/admin/AddCallDialog";
+import ManageCommunities from "@/components/admin/ManageCommunities";
+import ManageEvents from "@/components/admin/ManageEvents";
+import ManageCalls from "@/components/admin/ManageCalls";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -149,86 +155,31 @@ const AdminDashboard = () => {
           </TabsList>
 
           <TabsContent value="communities" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Gestión de Comunidades</h2>
-                <p className="text-muted-foreground">
-                  Administra las comunidades registradas en la plataforma
-                </p>
-              </div>
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Gestión de Comunidades</h2>
               <AddCommunityDialog>
-                <Button variant="hero">
-                  <Users className="mr-2 h-4 w-4" />
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
                   Nueva Comunidad
                 </Button>
               </AddCommunityDialog>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {communities?.slice(0, 6).map((community) => (
-                <Card key={community.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span className="truncate">{community.name}</span>
-                      <Button variant="ghost" size="sm">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                    </CardTitle>
-                    <CardDescription className="line-clamp-2">
-                      {community.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        {community.members_count || 0} miembros
-                      </span>
-                      <span className="capitalize text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                        {community.status}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <ManageCommunities />
           </TabsContent>
 
           <TabsContent value="events" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Gestión de Eventos</h2>
-                <p className="text-muted-foreground">
-                  Administra eventos y actividades
-                </p>
-              </div>
-              <Button variant="hero">
-                <Calendar className="mr-2 h-4 w-4" />
-                Nuevo Evento
-              </Button>
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Gestión de Eventos</h2>
+              <AddEventDialog>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nuevo Evento
+                </Button>
+              </AddEventDialog>
             </div>
             
-            <div className="space-y-4">
-              {events?.slice(0, 5).map((event) => (
-                <Card key={event.id}>
-                  <CardContent className="flex items-center justify-between p-6">
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{event.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {new Date(event.event_date).toLocaleDateString('es-ES')} - {event.location}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded capitalize">
-                        {event.event_type}
-                      </span>
-                      <Button variant="ghost" size="sm">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <ManageEvents />
           </TabsContent>
 
           <TabsContent value="alliances" className="space-y-6">
@@ -274,51 +225,17 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="calls" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Gestión de Convocatorias</h2>
-                <p className="text-muted-foreground">
-                  Administra convocatorias y oportunidades
-                </p>
-              </div>
-              <Button variant="hero">
-                <Megaphone className="mr-2 h-4 w-4" />
-                Nueva Convocatoria
-              </Button>
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Gestión de Convocatorias</h2>
+              <AddCallDialog>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nueva Convocatoria
+                </Button>
+              </AddCallDialog>
             </div>
             
-            <div className="space-y-4">
-              {calls?.map((call) => (
-                <Card key={call.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{call.title}</h3>
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                          {call.description}
-                        </p>
-                        <div className="flex items-center space-x-4 mt-2 text-xs text-muted-foreground">
-                          <span>Tipo: {call.call_type}</span>
-                          <span>Fecha límite: {new Date(call.application_deadline).toLocaleDateString('es-ES')}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`text-xs px-2 py-1 rounded capitalize ${
-                          call.status === 'open' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {call.status === 'open' ? 'Abierta' : 'Cerrada'}
-                        </span>
-                        <Button variant="ghost" size="sm">
-                          <Settings className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <ManageCalls />
           </TabsContent>
 
           <TabsContent value="blog" className="space-y-6">
