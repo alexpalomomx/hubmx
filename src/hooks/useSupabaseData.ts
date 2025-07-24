@@ -105,6 +105,30 @@ export const useBlogPosts = () => {
   });
 };
 
+// Hook para obtener registros de eventos
+export const useEventRegistrations = (eventId?: string) => {
+  return useQuery({
+    queryKey: ["eventRegistrations", eventId],
+    queryFn: async () => {
+      let query = supabase
+        .from("event_registrations")
+        .select(`
+          *,
+          event:event_id(title, event_date)
+        `)
+        .order("created_at", { ascending: false });
+
+      if (eventId) {
+        query = query.eq("event_id", eventId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
 // Hook para obtener estadísticas generales
 export const useStats = () => {
   return useQuery({

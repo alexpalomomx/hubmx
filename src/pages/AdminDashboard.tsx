@@ -23,6 +23,7 @@ import AddCallDialog from "@/components/admin/AddCallDialog";
 import ManageCommunities from "@/components/admin/ManageCommunities";
 import ManageEvents from "@/components/admin/ManageEvents";
 import ManageCalls from "@/components/admin/ManageCalls";
+import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistrations";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -146,9 +147,10 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="communities" className="space-y-6">
-          <TabsList className="grid w-full lg:grid-cols-5">
+          <TabsList className="grid w-full lg:grid-cols-6">
             <TabsTrigger value="communities">Comunidades</TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
+            <TabsTrigger value="registrations">Registros</TabsTrigger>
             <TabsTrigger value="alliances">Alianzas</TabsTrigger>
             <TabsTrigger value="calls">Convocatorias</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
@@ -180,6 +182,10 @@ const AdminDashboard = () => {
             </div>
             
             <ManageEvents />
+          </TabsContent>
+
+          <TabsContent value="registrations" className="space-y-6">
+            <ManageEventRegistrations />
           </TabsContent>
 
           <TabsContent value="alliances" className="space-y-6">
