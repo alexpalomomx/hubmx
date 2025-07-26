@@ -3,9 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users, Building, HandHeart, ArrowRight, CheckCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const JoinSection = () => {
   const [selectedType, setSelectedType] = useState("community");
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    description: "",
+    category: "Tecnología"
+  });
+  const { toast } = useToast();
 
   const registrationTypes = [
     {
@@ -53,6 +63,75 @@ const JoinSection = () => {
   ];
 
   const selectedRegistration = registrationTypes.find(type => type.id === selectedType);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      if (selectedType === "community") {
+        const { error } = await supabase
+          .from("communities")
+          .insert({
+            name: formData.name,
+            description: formData.description,
+            category: formData.category.toLowerCase(),
+            contact_email: formData.email,
+            status: "active"
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "¡Comunidad registrada exitosamente!",
+          description: "Tu comunidad ha sido registrada y será revisada por nuestro equipo.",
+        });
+      } else if (selectedType === "alliance") {
+        const { error } = await supabase
+          .from("alliances")
+          .insert({
+            name: formData.name,
+            description: formData.description,
+            alliance_type: formData.category,
+            contact_email: formData.email,
+            status: "active"
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "¡Alianza registrada exitosamente!",
+          description: "Tu alianza ha sido registrada y será revisada por nuestro equipo.",
+        });
+      }
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        description: "",
+        category: selectedType === 'alliance' ? 'Empresa Privada' : 'Tecnología'
+      });
+
+    } catch (error) {
+      console.error("Error al registrar:", error);
+      toast({
+        title: "Error al registrar",
+        description: "Hubo un problema al procesar tu solicitud. Inténtalo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section id="unete" className="py-20 bg-background">
@@ -124,7 +203,7 @@ const JoinSection = () => {
               </div>
             </div>
 
-            {/* Registration Form Preview */}
+            {/* Registration Form */}
             <Card className="shadow-card">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -132,62 +211,86 @@ const JoinSection = () => {
                   Formulario de {selectedRegistration.title}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Nombre de la {selectedType === 'alliance' ? 'Organización' : 'Comunidad'}
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder={`Nombre de tu ${selectedType === 'alliance' ? 'organización' : 'comunidad'}`}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">Email de contacto</label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="contacto@ejemplo.com"
-                  />
-                </div>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Nombre de la {selectedType === 'alliance' ? 'Organización' : 'Comunidad'}
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder={`Nombre de tu ${selectedType === 'alliance' ? 'organización' : 'comunidad'}`}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Email de contacto</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="contacto@ejemplo.com"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Descripción</label>
-                  <textarea
-                    className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary h-24 resize-none"
-                    placeholder="Cuéntanos sobre tu proyecto..."
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Descripción</label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary h-24 resize-none"
+                      placeholder="Cuéntanos sobre tu proyecto..."
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {selectedType === 'alliance' ? 'Tipo de Alianza' : 'Categoría Principal'}
-                  </label>
-                  <select className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                    {selectedType === 'alliance' ? (
-                      <>
-                        <option>Empresa Privada</option>
-                        <option>Institución Educativa</option>
-                        <option>Organización Gubernamental</option>
-                        <option>ONG/Fundación</option>
-                      </>
-                    ) : (
-                      <>
-                        <option>Tecnología</option>
-                        <option>Educación</option>
-                        <option>Impacto Social</option>
-                        <option>Emprendimiento</option>
-                        <option>Web3</option>
-                      </>
-                    )}
-                  </select>
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      {selectedType === 'alliance' ? 'Tipo de Alianza' : 'Categoría Principal'}
+                    </label>
+                    <select 
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      {selectedType === 'alliance' ? (
+                        <>
+                          <option value="Empresa Privada">Empresa Privada</option>
+                          <option value="Institución Educativa">Institución Educativa</option>
+                          <option value="Organización Gubernamental">Organización Gubernamental</option>
+                          <option value="ONG/Fundación">ONG/Fundación</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="tech">Tecnología</option>
+                          <option value="education">Educación</option>
+                          <option value="social">Impacto Social</option>
+                          <option value="entrepreneurship">Emprendimiento</option>
+                          <option value="web3">Web3</option>
+                        </>
+                      )}
+                    </select>
+                  </div>
 
-                <Button variant="community" className="w-full">
-                  Enviar Solicitud
-                </Button>
+                  <Button 
+                    type="submit" 
+                    variant="community" 
+                    className="w-full" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Enviando..." : "Enviar Solicitud"}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </div>
