@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users, Building, HandHeart, ArrowRight, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const JoinSection = () => {
   const [selectedType, setSelectedType] = useState("community");
@@ -85,14 +85,14 @@ const JoinSection = () => {
             description: formData.description,
             category: formData.category.toLowerCase(),
             contact_email: formData.email,
-            status: "active"
+            status: "pending"
           });
 
         if (error) throw error;
 
         toast({
-          title: "¡Comunidad registrada exitosamente!",
-          description: "Tu comunidad ha sido registrada y será revisada por nuestro equipo.",
+          title: "¡Solicitud enviada exitosamente!",
+          description: "Tu solicitud ha sido enviada y será revisada por nuestro equipo antes de ser publicada.",
         });
       } else if (selectedType === "alliance") {
         const { error } = await supabase
@@ -102,14 +102,14 @@ const JoinSection = () => {
             description: formData.description,
             alliance_type: formData.category,
             contact_email: formData.email,
-            status: "active"
+            status: "pending"
           });
 
         if (error) throw error;
 
         toast({
-          title: "¡Alianza registrada exitosamente!",
-          description: "Tu alianza ha sido registrada y será revisada por nuestro equipo.",
+          title: "¡Solicitud enviada exitosamente!",
+          description: "Tu solicitud ha sido enviada y será revisada por nuestro equipo antes de ser publicada.",
         });
       }
 

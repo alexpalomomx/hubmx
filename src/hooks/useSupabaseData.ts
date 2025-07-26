@@ -157,3 +157,32 @@ export const useStats = () => {
     },
   });
 };
+
+// Hook para obtener solicitudes pendientes de aprobación
+export const usePendingApprovals = () => {
+  return useQuery({
+    queryKey: ['pending-approvals'],
+    queryFn: async () => {
+      const [communitiesRes, alliancesRes] = await Promise.all([
+        supabase
+          .from('communities')
+          .select('*')
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('alliances')
+          .select('*')
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false })
+      ]);
+
+      if (communitiesRes.error) throw communitiesRes.error;
+      if (alliancesRes.error) throw alliancesRes.error;
+
+      return {
+        communities: communitiesRes.data || [],
+        alliances: alliancesRes.data || []
+      };
+    },
+  });
+};

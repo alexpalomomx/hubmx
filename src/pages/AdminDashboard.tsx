@@ -15,7 +15,7 @@ import {
   Settings,
   Plus
 } from "lucide-react";
-import { useStats, useCommunities, useEvents, useAlliances, useCalls } from "@/hooks/useSupabaseData";
+import { useStats, useCommunities, useEvents, useAlliances, useCalls, usePendingApprovals } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import AddCommunityDialog from "@/components/admin/AddCommunityDialog";
 import AddEventDialog from "@/components/admin/AddEventDialog";
@@ -25,6 +25,7 @@ import ManageEvents from "@/components/admin/ManageEvents";
 import ManageCalls from "@/components/admin/ManageCalls";
 import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistrations";
 import { ManageCommunityData } from "@/components/admin/ManageCommunityData";
+import { ManagePendingApprovals } from "@/components/admin/ManagePendingApprovals";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -34,6 +35,7 @@ const AdminDashboard = () => {
   const { data: events } = useEvents();
   const { data: alliances } = useAlliances();
   const { data: calls } = useCalls();
+  const { data: pendingData } = usePendingApprovals();
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
@@ -148,9 +150,17 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="communities" className="space-y-6">
-          <TabsList className="grid w-full lg:grid-cols-7">
+          <TabsList className="grid w-full lg:grid-cols-8">
             <TabsTrigger value="communities">Comunidades</TabsTrigger>
             <TabsTrigger value="community-data">Info Comunidades</TabsTrigger>
+            <TabsTrigger value="approvals" className="relative">
+              Aprobaciones
+              {pendingData && (pendingData.communities.length + pendingData.alliances.length) > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {pendingData.communities.length + pendingData.alliances.length}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
             <TabsTrigger value="registrations">Registros</TabsTrigger>
             <TabsTrigger value="alliances">Alianzas</TabsTrigger>
@@ -174,6 +184,13 @@ const AdminDashboard = () => {
 
           <TabsContent value="community-data" className="space-y-6">
             <ManageCommunityData />
+          </TabsContent>
+
+          <TabsContent value="approvals" className="space-y-6">
+            <ManagePendingApprovals 
+              pendingCommunities={pendingData?.communities || []}
+              pendingAlliances={pendingData?.alliances || []}
+            />
           </TabsContent>
 
           <TabsContent value="events" className="space-y-6">
