@@ -90,7 +90,15 @@ async function syncFromLegion(legionSupabase: any, hubSupabase: any) {
     .from('communities')
     .select('*')
   
-  if (legionError) throw legionError
+  if (legionError) {
+    console.error('Error obteniendo comunidades de Legion:', legionError)
+    throw legionError
+  }
+  
+  console.log(`Encontradas ${legionCommunities?.length || 0} comunidades en Legion Hack MX`)
+  if (legionCommunities && legionCommunities.length > 0) {
+    console.log('Primera comunidad:', JSON.stringify(legionCommunities[0], null, 2))
+  }
 
   for (const legion of legionCommunities as LegionCommunity[]) {
     // Mapear estructura de Legion a HUB
@@ -115,16 +123,26 @@ async function syncFromLegion(legionSupabase: any, hubSupabase: any) {
 
     if (existing) {
       // Actualizar existente
-      await hubSupabase
+      const { error: updateError } = await hubSupabase
         .from('communities')
         .update(hubCommunity)
         .eq('id', existing.id)
+      
+      if (updateError) {
+        console.error(`Error actualizando ${legion.nombre}:`, updateError)
+        throw updateError
+      }
       console.log(`Actualizada: ${legion.nombre}`)
     } else {
       // Crear nueva
-      await hubSupabase
+      const { error: insertError } = await hubSupabase
         .from('communities')
         .insert(hubCommunity)
+      
+      if (insertError) {
+        console.error(`Error creando ${legion.nombre}:`, insertError)
+        throw insertError
+      }
       console.log(`Creada: ${legion.nombre}`)
     }
   }
