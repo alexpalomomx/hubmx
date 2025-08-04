@@ -26,6 +26,7 @@ import ManageCalls from "@/components/admin/ManageCalls";
 import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistrations";
 import { ManageCommunityData } from "@/components/admin/ManageCommunityData";
 import { ManagePendingApprovals } from "@/components/admin/ManagePendingApprovals";
+import { CommunitySync } from "@/components/admin/CommunitySync";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -182,9 +183,12 @@ const AdminDashboard = () => {
             <ManageCommunities />
           </TabsContent>
 
-          <TabsContent value="community-data" className="space-y-6">
-            <ManageCommunityData />
-          </TabsContent>
+            <TabsContent value="community-data" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ManageCommunityData />
+                <CommunitySync />
+              </div>
+            </TabsContent>
 
           <TabsContent value="approvals" className="space-y-6">
             <ManagePendingApprovals 
