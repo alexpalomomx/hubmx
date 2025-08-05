@@ -27,6 +27,7 @@ import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistra
 import { ManageCommunityData } from "@/components/admin/ManageCommunityData";
 import { ManagePendingApprovals } from "@/components/admin/ManagePendingApprovals";
 import { CommunitySync } from "@/components/admin/CommunitySync";
+import { ApiCredentials } from "@/components/admin/ApiCredentials";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -184,9 +185,10 @@ const AdminDashboard = () => {
           </TabsContent>
 
             <TabsContent value="community-data" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <ManageCommunityData />
                 <CommunitySync />
+                <ApiCredentials />
               </div>
             </TabsContent>
 

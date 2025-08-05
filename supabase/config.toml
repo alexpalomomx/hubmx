@@ -51,3 +51,6 @@ inspector_port = 54329
 
 [functions.sync-communities]
 verify_jwt = false
+
+[functions.update-credentials]
+verify_jwt = false
