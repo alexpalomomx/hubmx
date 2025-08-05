@@ -28,6 +28,11 @@ export const ApiCredentials = () => {
 
     setLoading(true);
     try {
+      console.log('Enviando credenciales...', { 
+        legionUrl: credentials.legionUrl, 
+        keyLength: credentials.legionKey.length 
+      });
+
       const { data, error } = await supabase.functions.invoke('update-credentials', {
         body: {
           legionUrl: credentials.legionUrl,
@@ -35,7 +40,17 @@ export const ApiCredentials = () => {
         }
       });
 
-      if (error) throw error;
+      console.log('Respuesta de la función:', { data, error });
+
+      if (error) {
+        console.error('Error de Supabase:', error);
+        throw error;
+      }
+
+      if (!data || !data.success) {
+        console.error('Error en la respuesta:', data);
+        throw new Error(data?.error || 'Error desconocido');
+      }
 
       toast({
         title: "Credenciales actualizadas",
@@ -44,11 +59,20 @@ export const ApiCredentials = () => {
 
       // Limpiar formulario
       setCredentials({ legionUrl: "", legionKey: "" });
-    } catch (error) {
-      console.error('Error actualizando credenciales:', error);
+    } catch (error: any) {
+      console.error('Error completo actualizando credenciales:', error);
+      
+      let errorMessage = "No se pudieron actualizar las credenciales";
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+
       toast({
         title: "Error",
-        description: "No se pudieron actualizar las credenciales",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
