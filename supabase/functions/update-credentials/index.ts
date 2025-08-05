@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -14,7 +15,14 @@ serve(async (req) => {
   try {
     const { legionUrl, legionKey } = await req.json();
 
+    console.log('Datos recibidos:', { 
+      legionUrl, 
+      legionKeyLength: legionKey?.length,
+      legionKeyStart: legionKey?.substring(0, 10) 
+    });
+
     if (!legionUrl || !legionKey) {
+      console.error('Faltan datos:', { legionUrl: !!legionUrl, legionKey: !!legionKey });
       return new Response(
         JSON.stringify({ error: 'URL y API Key son requeridos' }),
         { 
@@ -28,6 +36,7 @@ serve(async (req) => {
     try {
       new URL(legionUrl);
     } catch {
+      console.error('URL inválida:', legionUrl);
       return new Response(
         JSON.stringify({ error: 'URL inválida' }),
         { 
@@ -37,10 +46,12 @@ serve(async (req) => {
       );
     }
 
-    // Validar que la API Key tenga el formato correcto
-    if (!legionKey.startsWith('eyJ')) {
+    // Validar que la API Key tenga un formato válido de Supabase
+    // Las claves de Supabase pueden empezar con "eyJ" (JWT) o "sb_" (service role)
+    if (!legionKey.startsWith('eyJ') && !legionKey.startsWith('sb_')) {
+      console.error('API Key con formato no reconocido:', legionKey.substring(0, 10));
       return new Response(
-        JSON.stringify({ error: 'API Key inválida' }),
+        JSON.stringify({ error: 'API Key debe ser una clave válida de Supabase (JWT o service role)' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -56,12 +67,16 @@ serve(async (req) => {
     // Por ahora solo logueamos y retornamos éxito
     // En producción, esto debería actualizar los secrets LEGION_SUPABASE_URL y LEGION_SUPABASE_KEY
 
+    const response = {
+      success: true, 
+      message: 'Credenciales actualizadas correctamente',
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('Enviando respuesta exitosa:', response);
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Credenciales actualizadas correctamente',
-        timestamp: new Date().toISOString()
-      }),
+      JSON.stringify(response),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -71,7 +86,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error actualizando credenciales:', error);
     return new Response(
-      JSON.stringify({ error: 'Error interno del servidor' }),
+      JSON.stringify({ 
+        error: 'Error interno del servidor',
+        details: error.message 
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
