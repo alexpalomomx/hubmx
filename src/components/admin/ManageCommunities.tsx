@@ -21,6 +21,7 @@ interface Community {
   location: string;
   contact_email: string;
   website_url: string;
+  logo_url: string;
   members_count: number;
   topics: string[];
   status: string;
@@ -151,16 +152,34 @@ export default function ManageCommunities() {
           <Card key={community.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg">{community.name}</CardTitle>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      {community.members_count} miembros
-                    </span>
-                    {community.location && (
-                      <span>{community.location}</span>
-                    )}
+                <div className="flex items-start gap-3">
+                  {community.logo_url ? (
+                    <img
+                      src={community.logo_url}
+                      alt={`Logo de ${community.name}`}
+                      className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary font-semibold text-lg">
+                        {community.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg">{community.name}</CardTitle>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        {community.members_count} miembros
+                      </span>
+                      {community.location && (
+                        <span>{community.location}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

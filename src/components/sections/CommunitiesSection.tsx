@@ -101,8 +101,25 @@ const CommunitiesSection = () => {
               <Card key={community.id} className="group hover:shadow-community transition-all duration-300 hover:-translate-y-2">
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getCommunityColor(community.category)} flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                      {getCommunityIcon(community.category)}
+                    <div className="mb-4">
+                      {community.logo_url ? (
+                        <img
+                          src={community.logo_url}
+                          alt={`Logo de ${community.name}`}
+                          className="w-16 h-16 rounded-2xl object-cover group-hover:scale-110 transition-transform duration-300"
+                          onError={(e) => {
+                            // Si falla la imagen, mostrar el ícono por defecto
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `<div class="w-16 h-16 rounded-2xl bg-gradient-to-br ${getCommunityColor(community.category)} flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">${getCommunityIcon(community.category)}</div>`;
+                            }
+                          }}
+                        />
+                      ) : (
+                        <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getCommunityColor(community.category)} flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300`}>
+                          {getCommunityIcon(community.category)}
+                        </div>
+                      )}
                     </div>
                     {community.website_url && (
                       <Button 
