@@ -106,7 +106,7 @@ async function syncFromLegion(legionSupabase: any, hubSupabase: any) {
       name: legion.nombre,
       category: mapCategoryFromLegion(legion.tipo),
       description: legion.descripcion,
-      created_by: legion.lider_id,
+      created_by: null, // Establecer como null para evitar problemas de foreign key
       members_count: legion.miembros_count || 0,
       location: legion.ubicacion,
       logo_url: legion.imagen_url,
