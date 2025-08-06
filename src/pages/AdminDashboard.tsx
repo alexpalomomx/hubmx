@@ -20,9 +20,13 @@ import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import AddCommunityDialog from "@/components/admin/AddCommunityDialog";
 import AddEventDialog from "@/components/admin/AddEventDialog";
 import AddCallDialog from "@/components/admin/AddCallDialog";
+import AddAllianceDialog from "@/components/admin/AddAllianceDialog";
+import AddBlogPostDialog from "@/components/admin/AddBlogPostDialog";
 import ManageCommunities from "@/components/admin/ManageCommunities";
 import ManageEvents from "@/components/admin/ManageEvents";
 import ManageCalls from "@/components/admin/ManageCalls";
+import ManageAlliances from "@/components/admin/ManageAlliances";
+import ManageBlogPosts from "@/components/admin/ManageBlogPosts";
 import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistrations";
 import { ManageCommunityData } from "@/components/admin/ManageCommunityData";
 import { ManagePendingApprovals } from "@/components/admin/ManagePendingApprovals";
@@ -226,37 +230,16 @@ const AdminDashboard = () => {
                 </p>
               </div>
               {isAdmin && (
-                <Button variant="hero">
-                  <Building className="mr-2 h-4 w-4" />
-                  Nueva Alianza
-                </Button>
+                <AddAllianceDialog>
+                  <Button variant="hero">
+                    <Building className="mr-2 h-4 w-4" />
+                    Nueva Alianza
+                  </Button>
+                </AddAllianceDialog>
               )}
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {alliances?.map((alliance) => (
-                <Card key={alliance.id}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{alliance.name}</span>
-                      {isAdmin && (
-                        <Button variant="ghost" size="sm">
-                          <Settings className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </CardTitle>
-                    <CardDescription>
-                      {alliance.alliance_type}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {alliance.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <ManageAlliances />
           </TabsContent>
 
           <TabsContent value="calls" className="space-y-6">
@@ -281,24 +264,15 @@ const AdminDashboard = () => {
                   Administra publicaciones y contenido
                 </p>
               </div>
-              <Button variant="hero">
-                <FileText className="mr-2 h-4 w-4" />
-                Nueva Publicación
-              </Button>
+              <AddBlogPostDialog>
+                <Button variant="hero">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Nueva Publicación
+                </Button>
+              </AddBlogPostDialog>
             </div>
             
-            <Card>
-              <CardContent className="p-6 text-center">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="font-semibold mb-2">No hay publicaciones</h3>
-                <p className="text-muted-foreground mb-4">
-                  Comienza creando tu primera publicación del blog
-                </p>
-                <Button variant="outline">
-                  Crear publicación
-                </Button>
-              </CardContent>
-            </Card>
+            <ManageBlogPosts />
           </TabsContent>
         </Tabs>
       </div>
