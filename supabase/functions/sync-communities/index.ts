@@ -20,13 +20,18 @@ interface LegionCommunity {
   updated_at: string
 }
 
-interface LegionMember {
+// En Legion Hack, los usuarios tienen comunidad_id directamente en la tabla users
+interface LegionUser {
   id: string
-  community_id: string
-  nickname: string
-  phone: string
-  joined_at: string
-  status: string
+  auth_user_id?: string
+  nombre?: string
+  correo?: string
+  nickname?: string
+  telefono?: string
+  comunidad_id?: string
+  estado?: string
+  created_at?: string
+  updated_at?: string
 }
 
 interface HubMember {
@@ -230,41 +235,49 @@ function mapCategoryFromLegion(legionType: string): string {
 async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
   console.log('Sincronizando miembros desde Legion Hack MX...')
   
-  // Obtener miembros de Legion
-  const { data: legionMembers, error: legionError } = await legionSupabase
-    .from('community_members')
+  // Obtener usuarios de Legion que tienen comunidad_id
+  const { data: legionUsers, error: legionError } = await legionSupabase
+    .from('users')
     .select('*')
+    .not('comunidad_id', 'is', null)
   
   if (legionError) {
-    console.error('Error obteniendo miembros de Legion:', legionError)
-    return // No fallar si no existe la tabla de miembros
+    console.error('Error obteniendo usuarios de Legion:', legionError)
+    return
   }
   
-  console.log(`Encontrados ${legionMembers?.length || 0} miembros en Legion Hack MX`)
+  console.log(`Encontrados ${legionUsers?.length || 0} usuarios con comunidad en Legion Hack MX`)
 
-  for (const legionMember of legionMembers as LegionMember[]) {
-    // Obtener la comunidad correspondiente en HUB
+  for (const legionUser of legionUsers as LegionUser[]) {
+    if (!legionUser.comunidad_id || !legionUser.telefono || !legionUser.nickname) {
+      continue // Saltar usuarios sin datos completos
+    }
+
+    // Buscar la comunidad en HUB por nombre
     const { data: hubCommunity } = await hubSupabase
       .from('communities')
       .select('id')
-      .eq('name', legionMember.community_id) // Asumiendo que community_id contiene el nombre
+      .eq('name', legionUser.comunidad_id)
       .single()
 
-    if (!hubCommunity) continue
+    if (!hubCommunity) {
+      console.log(`Comunidad no encontrada en HUB: ${legionUser.comunidad_id}`)
+      continue
+    }
 
     // Verificar si el miembro ya existe en HUB
     const { data: existing } = await hubSupabase
       .from('community_members')
       .select('id')
       .eq('community_id', hubCommunity.id)
-      .eq('phone', legionMember.phone)
+      .eq('phone', legionUser.telefono)
       .single()
 
     const hubMember: Partial<HubMember> = {
       community_id: hubCommunity.id,
-      nickname: legionMember.nickname,
-      phone: legionMember.phone,
-      status: legionMember.status || 'active'
+      nickname: legionUser.nickname,
+      phone: legionUser.telefono,
+      status: legionUser.estado === 'activo' ? 'active' : 'inactive'
     }
 
     if (existing) {
@@ -273,13 +286,13 @@ async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
         .from('community_members')
         .update(hubMember)
         .eq('id', existing.id)
-      console.log(`Miembro actualizado: ${legionMember.nickname}`)
+      console.log(`Miembro actualizado: ${legionUser.nickname}`)
     } else {
       // Crear nuevo
       await hubSupabase
         .from('community_members')
         .insert(hubMember)
-      console.log(`Miembro creado: ${legionMember.nickname}`)
+      console.log(`Miembro creado: ${legionUser.nickname}`)
     }
   }
 }
@@ -303,47 +316,41 @@ async function syncMembersToLegion(hubSupabase: any, legionSupabase: any) {
   console.log(`Encontrados ${hubMembers?.length || 0} miembros en HUB`)
 
   for (const hubMember of hubMembers as any[]) {
-    // Verificar si el miembro ya existe en Legion
-    const { data: existing } = await legionSupabase
-      .from('community_members')
+    // Buscar si existe un usuario en Legion con el mismo teléfono
+    const { data: existingUser } = await legionSupabase
+      .from('users')
       .select('id')
-      .eq('community_id', hubMember.communities.name) // Usar el nombre de la comunidad
-      .eq('phone', hubMember.phone)
+      .eq('telefono', hubMember.phone)
       .single()
 
-    const legionMember: Partial<LegionMember> = {
-      community_id: hubMember.communities.name,
-      nickname: hubMember.nickname,
-      phone: hubMember.phone,
-      status: hubMember.status || 'active'
-    }
+    if (existingUser) {
+      // Actualizar el usuario existente con la información de la comunidad
+      const legionUser: Partial<LegionUser> = {
+        comunidad_id: hubMember.communities.name,
+        nickname: hubMember.nickname,
+        estado: hubMember.status === 'active' ? 'activo' : 'inactivo'
+      }
 
-    if (existing) {
-      // Actualizar existente
       await legionSupabase
-        .from('community_members')
-        .update(legionMember)
-        .eq('id', existing.id)
-      console.log(`Miembro actualizado en Legion: ${hubMember.nickname}`)
+        .from('users')
+        .update(legionUser)
+        .eq('id', existingUser.id)
+      console.log(`Usuario actualizado en Legion: ${hubMember.nickname}`)
     } else {
-      // Crear nuevo
+      // Crear nuevo usuario en Legion
+      const legionUser: Partial<LegionUser> = {
+        nickname: hubMember.nickname,
+        telefono: hubMember.phone,
+        comunidad_id: hubMember.communities.name,
+        estado: hubMember.status === 'active' ? 'activo' : 'inactivo'
+      }
+
       await legionSupabase
-        .from('community_members')
-        .insert(legionMember)
-      console.log(`Miembro creado en Legion: ${hubMember.nickname}`)
+        .from('users')
+        .insert(legionUser)
+      console.log(`Usuario creado en Legion: ${hubMember.nickname}`)
     }
   }
-}
-
-function mapCategoryFromLegion(legionType: string): string {
-  const mapping: Record<string, string> = {
-    'tech': 'tecnologia',
-    'education': 'educacion',
-    'business': 'emprendimiento',
-    'social': 'social',
-    'cultural': 'cultura'
-  }
-  return mapping[legionType] || 'otros'
 }
 
 function mapCategoryToLegion(hubCategory: string): string {
