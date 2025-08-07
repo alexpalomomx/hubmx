@@ -20,6 +20,24 @@ interface LegionCommunity {
   updated_at: string
 }
 
+interface LegionMember {
+  id: string
+  community_id: string
+  nickname: string
+  phone: string
+  joined_at: string
+  status: string
+}
+
+interface HubMember {
+  id: string
+  community_id: string
+  nickname: string
+  phone: string
+  joined_at: string
+  status: string
+}
+
 interface HubCommunity {
   id: string
   name: string
@@ -58,10 +76,12 @@ serve(async (req) => {
     if (action === 'sync') {
       if (direction === 'from_legion' || direction === 'bidirectional') {
         await syncFromLegion(legionSupabase, hubSupabase)
+        await syncMembersFromLegion(legionSupabase, hubSupabase)
       }
       
       if (direction === 'to_legion' || direction === 'bidirectional') {
         await syncToLegion(hubSupabase, legionSupabase)
+        await syncMembersToLegion(hubSupabase, legionSupabase)
       }
     }
 
@@ -192,6 +212,125 @@ async function syncToLegion(hubSupabase: any, legionSupabase: any) {
         .from('communities')
         .insert(legionCommunity)
       console.log(`Creada en Legion: ${hub.name}`)
+    }
+  }
+}
+
+function mapCategoryFromLegion(legionType: string): string {
+  const mapping: Record<string, string> = {
+    'tech': 'tecnologia',
+    'education': 'educacion',
+    'business': 'emprendimiento',
+    'social': 'social',
+    'cultural': 'cultura'
+  }
+  return mapping[legionType] || 'otros'
+}
+
+async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
+  console.log('Sincronizando miembros desde Legion Hack MX...')
+  
+  // Obtener miembros de Legion
+  const { data: legionMembers, error: legionError } = await legionSupabase
+    .from('community_members')
+    .select('*')
+  
+  if (legionError) {
+    console.error('Error obteniendo miembros de Legion:', legionError)
+    return // No fallar si no existe la tabla de miembros
+  }
+  
+  console.log(`Encontrados ${legionMembers?.length || 0} miembros en Legion Hack MX`)
+
+  for (const legionMember of legionMembers as LegionMember[]) {
+    // Obtener la comunidad correspondiente en HUB
+    const { data: hubCommunity } = await hubSupabase
+      .from('communities')
+      .select('id')
+      .eq('name', legionMember.community_id) // Asumiendo que community_id contiene el nombre
+      .single()
+
+    if (!hubCommunity) continue
+
+    // Verificar si el miembro ya existe en HUB
+    const { data: existing } = await hubSupabase
+      .from('community_members')
+      .select('id')
+      .eq('community_id', hubCommunity.id)
+      .eq('phone', legionMember.phone)
+      .single()
+
+    const hubMember: Partial<HubMember> = {
+      community_id: hubCommunity.id,
+      nickname: legionMember.nickname,
+      phone: legionMember.phone,
+      status: legionMember.status || 'active'
+    }
+
+    if (existing) {
+      // Actualizar existente
+      await hubSupabase
+        .from('community_members')
+        .update(hubMember)
+        .eq('id', existing.id)
+      console.log(`Miembro actualizado: ${legionMember.nickname}`)
+    } else {
+      // Crear nuevo
+      await hubSupabase
+        .from('community_members')
+        .insert(hubMember)
+      console.log(`Miembro creado: ${legionMember.nickname}`)
+    }
+  }
+}
+
+async function syncMembersToLegion(hubSupabase: any, legionSupabase: any) {
+  console.log('Sincronizando miembros hacia Legion Hack MX...')
+  
+  // Obtener miembros del HUB
+  const { data: hubMembers, error: hubError } = await hubSupabase
+    .from('community_members')
+    .select(`
+      *,
+      communities!inner(name)
+    `)
+  
+  if (hubError) {
+    console.error('Error obteniendo miembros del HUB:', hubError)
+    return
+  }
+
+  console.log(`Encontrados ${hubMembers?.length || 0} miembros en HUB`)
+
+  for (const hubMember of hubMembers as any[]) {
+    // Verificar si el miembro ya existe en Legion
+    const { data: existing } = await legionSupabase
+      .from('community_members')
+      .select('id')
+      .eq('community_id', hubMember.communities.name) // Usar el nombre de la comunidad
+      .eq('phone', hubMember.phone)
+      .single()
+
+    const legionMember: Partial<LegionMember> = {
+      community_id: hubMember.communities.name,
+      nickname: hubMember.nickname,
+      phone: hubMember.phone,
+      status: hubMember.status || 'active'
+    }
+
+    if (existing) {
+      // Actualizar existente
+      await legionSupabase
+        .from('community_members')
+        .update(legionMember)
+        .eq('id', existing.id)
+      console.log(`Miembro actualizado en Legion: ${hubMember.nickname}`)
+    } else {
+      // Crear nuevo
+      await legionSupabase
+        .from('community_members')
+        .insert(legionMember)
+      console.log(`Miembro creado en Legion: ${hubMember.nickname}`)
     }
   }
 }

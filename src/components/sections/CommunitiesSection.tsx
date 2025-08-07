@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Filter, Users, MapPin, Loader2 } from "lucide-react";
 import { useCommunities } from "@/hooks/useSupabaseData";
+import { JoinCommunityDialog } from "@/components/JoinCommunityDialog";
 
 const CommunitiesSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -153,7 +154,7 @@ const CommunitiesSection = () => {
                   )}
 
                   {/* Stats */}
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
                       <span>{(community.members_count || 0).toLocaleString()} miembros</span>
@@ -162,6 +163,26 @@ const CommunitiesSection = () => {
                       <MapPin className="h-4 w-4" />
                       <span>{community.location}</span>
                     </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    {community.website_url && (
+                      <Button 
+                        onClick={() => window.open(community.website_url, '_blank')}
+                        variant="outline" 
+                        className="flex-1"
+                        size="sm"
+                      >
+                        Visitar sitio
+                      </Button>
+                    )}
+                    <JoinCommunityDialog community={{ id: community.id, name: community.name }}>
+                      <Button className="flex-1" size="sm">
+                        <Users className="mr-2 h-4 w-4" />
+                        Unirse
+                      </Button>
+                    </JoinCommunityDialog>
                   </div>
                 </CardContent>
               </Card>

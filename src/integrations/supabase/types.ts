@@ -206,6 +206,47 @@ export type Database = {
         }
         Relationships: []
       }
+      community_members: {
+        Row: {
+          community_id: string
+          created_at: string
+          id: string
+          joined_at: string
+          nickname: string
+          phone: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          id?: string
+          joined_at?: string
+          nickname: string
+          phone: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          id?: string
+          joined_at?: string
+          nickname?: string
+          phone?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_registrations: {
         Row: {
           created_at: string
