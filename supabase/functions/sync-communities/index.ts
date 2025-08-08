@@ -234,18 +234,30 @@ function mapCategoryFromLegion(legionType: string): string {
 
 async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
   console.log('Sincronizando miembros desde Legion Hack MX...')
-  
+
+  // Obtener mapa id -> nombre de comunidades en Legion
+  const { data: legionCommunities, error: commErr } = await legionSupabase
+    .from('communities')
+    .select('id,nombre')
+  if (commErr) {
+    console.error('Error obteniendo comunidades (map) de Legion:', commErr)
+  }
+  const legionCommunityMap = new Map<string, string>()
+  for (const c of (legionCommunities || [])) {
+    legionCommunityMap.set(c.id, c.nombre)
+  }
+
   // Obtener usuarios de Legion que tienen comunidad_id
   const { data: legionUsers, error: legionError } = await legionSupabase
     .from('users')
     .select('*')
     .not('comunidad_id', 'is', null)
-  
+
   if (legionError) {
     console.error('Error obteniendo usuarios de Legion:', legionError)
     return
   }
-  
+
   console.log(`Encontrados ${legionUsers?.length || 0} usuarios con comunidad en Legion Hack MX`)
 
   for (const legionUser of legionUsers as LegionUser[]) {
@@ -253,19 +265,26 @@ async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
       continue // Saltar usuarios sin datos completos
     }
 
-    // Buscar la comunidad en HUB por nombre
-    const { data: hubCommunity } = await hubSupabase
-      .from('communities')
-      .select('id')
-      .eq('name', legionUser.comunidad_id)
-      .single()
-
-    if (!hubCommunity) {
-      console.log(`Comunidad no encontrada en HUB: ${legionUser.comunidad_id}`)
+    // Resolver nombre de comunidad a partir del id de Legion
+    const legionCommunityName = legionCommunityMap.get(legionUser.comunidad_id)
+    if (!legionCommunityName) {
+      console.log(`No se encontró nombre de comunidad para id: ${legionUser.comunidad_id}`)
       continue
     }
 
-    // Verificar si el miembro ya existe en HUB
+    // Buscar la comunidad en HUB por nombre (ya sincronizada previamente)
+    const { data: hubCommunity } = await hubSupabase
+      .from('communities')
+      .select('id')
+      .eq('name', legionCommunityName)
+      .single()
+
+    if (!hubCommunity) {
+      console.log(`Comunidad no encontrada en HUB: ${legionCommunityName}`)
+      continue
+    }
+
+    // Verificar si el miembro ya existe en HUB (por teléfono en la misma comunidad)
     const { data: existing } = await hubSupabase
       .from('community_members')
       .select('id')
@@ -282,17 +301,19 @@ async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
 
     if (existing) {
       // Actualizar existente
-      await hubSupabase
+      const { error: updErr } = await hubSupabase
         .from('community_members')
         .update(hubMember)
         .eq('id', existing.id)
-      console.log(`Miembro actualizado: ${legionUser.nickname}`)
+      if (updErr) console.error('Error actualizando miembro:', updErr)
+      else console.log(`Miembro actualizado: ${legionUser.nickname}`)
     } else {
       // Crear nuevo
-      await hubSupabase
+      const { error: insErr } = await hubSupabase
         .from('community_members')
         .insert(hubMember)
-      console.log(`Miembro creado: ${legionUser.nickname}`)
+      if (insErr) console.error('Error creando miembro:', insErr)
+      else console.log(`Miembro creado: ${legionUser.nickname}`)
     }
   }
 }
