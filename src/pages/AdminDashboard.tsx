@@ -32,6 +32,7 @@ import { ManageCommunityData } from "@/components/admin/ManageCommunityData";
 import { ManagePendingApprovals } from "@/components/admin/ManagePendingApprovals";
 import { CommunitySync } from "@/components/admin/CommunitySync";
 import { ApiCredentials } from "@/components/admin/ApiCredentials";
+import { ManageCommunityMembers } from "@/components/admin/ManageCommunityMembers";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -156,7 +157,7 @@ const AdminDashboard = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="communities" className="space-y-6">
-          <TabsList className="grid w-full lg:grid-cols-8">
+          <TabsList className="grid w-full lg:grid-cols-9">
             <TabsTrigger value="communities">Comunidades</TabsTrigger>
             <TabsTrigger value="community-data">Info Comunidades</TabsTrigger>
             <TabsTrigger value="approvals" className="relative">
@@ -169,6 +170,7 @@ const AdminDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
             <TabsTrigger value="registrations">Registros</TabsTrigger>
+            <TabsTrigger value="members">Miembros</TabsTrigger>
             <TabsTrigger value="alliances">Alianzas</TabsTrigger>
             <TabsTrigger value="calls">Convocatorias</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
@@ -219,6 +221,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="registrations" className="space-y-6">
             <ManageEventRegistrations />
+          </TabsContent>
+
+          <TabsContent value="members" className="space-y-6">
+            <ManageCommunityMembers />
           </TabsContent>
 
           <TabsContent value="alliances" className="space-y-6">

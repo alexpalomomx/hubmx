@@ -186,3 +186,24 @@ export const usePendingApprovals = () => {
     },
   });
 };
+
+// Hook para obtener miembros de comunidades
+export const useCommunityMembers = (communityId?: string) => {
+  return useQuery({
+    queryKey: ['community-members', communityId],
+    queryFn: async () => {
+      let query = supabase
+        .from('community_members')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (communityId) {
+        query = query.eq('community_id', communityId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+};
