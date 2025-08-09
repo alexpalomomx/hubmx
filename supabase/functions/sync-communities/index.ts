@@ -39,6 +39,7 @@ interface HubMember {
   community_id: string
   nickname: string
   phone: string
+  full_name?: string
   joined_at: string
   status: string
 }
@@ -296,6 +297,7 @@ async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
       community_id: hubCommunity.id,
       nickname: legionUser.nickname,
       phone: legionUser.telefono,
+      full_name: legionUser.nombre,
       status: legionUser.estado === 'activo' ? 'active' : 'inactive'
     }
 
@@ -320,6 +322,19 @@ async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
 
 async function syncMembersToLegion(hubSupabase: any, legionSupabase: any) {
   console.log('Sincronizando miembros hacia Legion Hack MX...')
+
+  // Mapa nombre -> id de comunidades en Legion
+  const { data: legionCommunities, error: lCommErr } = await legionSupabase
+    .from('communities')
+    .select('id,nombre')
+  if (lCommErr) {
+    console.error('Error obteniendo comunidades de Legion:', lCommErr)
+    return
+  }
+  const legionNameToId = new Map<string, string>()
+  for (const c of (legionCommunities || [])) {
+    legionNameToId.set(c.nombre, c.id)
+  }
   
   // Obtener miembros del HUB
   const { data: hubMembers, error: hubError } = await hubSupabase
@@ -337,35 +352,34 @@ async function syncMembersToLegion(hubSupabase: any, legionSupabase: any) {
   console.log(`Encontrados ${hubMembers?.length || 0} miembros en HUB`)
 
   for (const hubMember of hubMembers as any[]) {
+    const legionCommunityId = legionNameToId.get(hubMember.communities.name)
+    if (!legionCommunityId) {
+      console.log(`No se encontró comunidad en Legion para: ${hubMember.communities.name}`)
+      continue
+    }
+
     // Buscar si existe un usuario en Legion con el mismo teléfono
     const { data: existingUser } = await legionSupabase
       .from('users')
       .select('id')
       .eq('telefono', hubMember.phone)
-      .single()
+      .maybeSingle()
+
+    const legionUser: Partial<LegionUser> = {
+      comunidad_id: legionCommunityId,
+      nickname: hubMember.nickname,
+      nombre: hubMember.full_name || null,
+      telefono: hubMember.phone,
+      estado: hubMember.status === 'active' ? 'activo' : 'inactivo'
+    }
 
     if (existingUser) {
-      // Actualizar el usuario existente con la información de la comunidad
-      const legionUser: Partial<LegionUser> = {
-        comunidad_id: hubMember.communities.name,
-        nickname: hubMember.nickname,
-        estado: hubMember.status === 'active' ? 'activo' : 'inactivo'
-      }
-
       await legionSupabase
         .from('users')
         .update(legionUser)
         .eq('id', existingUser.id)
       console.log(`Usuario actualizado en Legion: ${hubMember.nickname}`)
     } else {
-      // Crear nuevo usuario en Legion
-      const legionUser: Partial<LegionUser> = {
-        nickname: hubMember.nickname,
-        telefono: hubMember.phone,
-        comunidad_id: hubMember.communities.name,
-        estado: hubMember.status === 'active' ? 'activo' : 'inactivo'
-      }
-
       await legionSupabase
         .from('users')
         .insert(legionUser)

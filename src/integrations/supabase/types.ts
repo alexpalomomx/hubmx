@@ -210,6 +210,7 @@ export type Database = {
         Row: {
           community_id: string
           created_at: string
+          full_name: string | null
           id: string
           joined_at: string
           nickname: string
@@ -220,6 +221,7 @@ export type Database = {
         Insert: {
           community_id: string
           created_at?: string
+          full_name?: string | null
           id?: string
           joined_at?: string
           nickname: string
@@ -230,6 +232,7 @@ export type Database = {
         Update: {
           community_id?: string
           created_at?: string
+          full_name?: string | null
           id?: string
           joined_at?: string
           nickname?: string

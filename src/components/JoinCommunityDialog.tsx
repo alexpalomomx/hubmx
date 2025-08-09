@@ -57,6 +57,15 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
 
       if (error) throw error;
 
+      // Disparar sincronización hacia Legion Hack MX (no bloqueante)
+      try {
+        await supabase.functions.invoke('sync-communities', {
+          body: { action: 'sync', direction: 'to_legion' }
+        });
+      } catch (syncErr) {
+        console.warn('Fallo al sincronizar con LegionHack:', syncErr);
+      }
+
       toast({
         title: "¡Te has unido exitosamente!",
         description: `Ahora eres miembro de ${community.name}`,
