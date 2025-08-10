@@ -248,28 +248,39 @@ async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
     legionCommunityMap.set(c.id, c.nombre)
   }
 
-  // Obtener usuarios de Legion que tienen comunidad_id
-  const { data: legionUsers, error: legionError } = await legionSupabase
-    .from('users')
+  // Obtener membresías de Legion
+  const { data: memberships, error: memErr } = await legionSupabase
+    .from('community_members')
     .select('*')
-    .not('comunidad_id', 'is', null)
 
-  if (legionError) {
-    console.error('Error obteniendo usuarios de Legion:', legionError)
+  if (memErr) {
+    console.error('Error obteniendo membresías de Legion:', memErr)
     return
   }
 
-  console.log(`Encontrados ${legionUsers?.length || 0} usuarios con comunidad en Legion Hack MX`)
+  console.log(`Encontradas ${memberships?.length || 0} membresías en Legion Hack MX`)
 
-  for (const legionUser of legionUsers as LegionUser[]) {
-    if (!legionUser.comunidad_id || !legionUser.telefono || !legionUser.nickname) {
-      continue // Saltar usuarios sin datos completos
+  for (const membership of (memberships || [])) {
+    const legionCommunityName = legionCommunityMap.get(membership.community_id)
+    if (!legionCommunityName) {
+      console.log(`No se encontró nombre de comunidad para id: ${membership.community_id}`)
+      continue
     }
 
-    // Resolver nombre de comunidad a partir del id de Legion
-    const legionCommunityName = legionCommunityMap.get(legionUser.comunidad_id)
-    if (!legionCommunityName) {
-      console.log(`No se encontró nombre de comunidad para id: ${legionUser.comunidad_id}`)
+    // Obtener datos del usuario
+    const { data: user, error: userErr } = await legionSupabase
+      .from('users')
+      .select('nickname, telefono, nombre, estado')
+      .eq('id', membership.user_id)
+      .maybeSingle()
+
+    if (userErr) {
+      console.error('Error obteniendo usuario de Legion:', userErr)
+      continue
+    }
+
+    if (!user?.telefono || !user?.nickname) {
+      // Saltar usuarios sin datos mínimos
       continue
     }
 
@@ -290,32 +301,34 @@ async function syncMembersFromLegion(legionSupabase: any, hubSupabase: any) {
       .from('community_members')
       .select('id')
       .eq('community_id', hubCommunity.id)
-      .eq('phone', legionUser.telefono)
-      .single()
+      .eq('phone', user.telefono)
+      .maybeSingle()
 
     const hubMember: Partial<HubMember> = {
       community_id: hubCommunity.id,
-      nickname: legionUser.nickname,
-      phone: legionUser.telefono,
-      full_name: legionUser.nombre,
-      status: legionUser.estado === 'activo' ? 'active' : 'inactive'
+      nickname: user.nickname,
+      phone: user.telefono,
+      full_name: user.nombre,
+      status: user.estado === 'activo' ? 'active' : 'inactive',
+      joined_at: membership.joined_at || new Date().toISOString()
     }
 
     if (existing) {
-      // Actualizar existente
+      // No cambiar joined_at al actualizar
+      const { joined_at, ...updatePayload } = hubMember as any
       const { error: updErr } = await hubSupabase
         .from('community_members')
-        .update(hubMember)
+        .update(updatePayload)
         .eq('id', existing.id)
       if (updErr) console.error('Error actualizando miembro:', updErr)
-      else console.log(`Miembro actualizado: ${legionUser.nickname}`)
+      else console.log(`Miembro actualizado: ${user.nickname}`)
     } else {
       // Crear nuevo
       const { error: insErr } = await hubSupabase
         .from('community_members')
         .insert(hubMember)
       if (insErr) console.error('Error creando miembro:', insErr)
-      else console.log(`Miembro creado: ${legionUser.nickname}`)
+      else console.log(`Miembro creado: ${user.nickname}`)
     }
   }
 }

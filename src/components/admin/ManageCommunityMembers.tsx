@@ -26,9 +26,10 @@ export const ManageCommunityMembers: React.FC = () => {
     return members.filter((m: any) => {
       if (!q) return true;
       const nick = (m.nickname || "").toLowerCase();
+      const fullName = (m.full_name || "").toLowerCase();
       const phone = (m.phone || "").toLowerCase();
       const communityName = (communityMap.get(m.community_id) || "").toLowerCase();
-      return nick.includes(q) || phone.includes(q) || communityName.includes(q);
+      return nick.includes(q) || fullName.includes(q) || phone.includes(q) || communityName.includes(q);
     });
   }, [members, search, communityMap]);
 
@@ -78,6 +79,7 @@ export const ManageCommunityMembers: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nickname</TableHead>
+                    <TableHead>Nombre</TableHead>
                     <TableHead>Teléfono</TableHead>
                     <TableHead>Comunidad</TableHead>
                     <TableHead>Estado</TableHead>
@@ -88,6 +90,7 @@ export const ManageCommunityMembers: React.FC = () => {
                   {filtered.map((m: any) => (
                     <TableRow key={m.id}>
                       <TableCell className="font-medium">{m.nickname || "-"}</TableCell>
+                      <TableCell>{m.full_name || "-"}</TableCell>
                       <TableCell>{m.phone || "-"}</TableCell>
                       <TableCell>{communityMap.get(m.community_id) || m.community_id}</TableCell>
                       <TableCell>
