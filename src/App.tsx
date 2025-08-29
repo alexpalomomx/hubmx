@@ -10,6 +10,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import CommunityLeaderDashboard from "./pages/CommunityLeaderDashboard";
 import CollaboratorDashboard from "./pages/CollaboratorDashboard";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/community-leader" element={<CommunityLeaderDashboard />} />
             <Route path="/collaborator" element={<CollaboratorDashboard />} />
+            <Route path="/profile" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

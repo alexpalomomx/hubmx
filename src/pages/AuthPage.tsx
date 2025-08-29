@@ -29,11 +29,12 @@ const AuthPage = () => {
     }
   }, []);
 
-  // Redirect if already authenticated
-  if (user) {
-    navigate("/");
-    return null;
-  }
+  // Redirect if already authenticated (except invite flow)
+  useEffect(() => {
+    if (user && !inviteMode) {
+      navigate("/");
+    }
+  }, [user, inviteMode, navigate]);
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
