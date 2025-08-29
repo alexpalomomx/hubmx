@@ -290,6 +290,7 @@ export type Database = {
         Row: {
           community_id: string
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
           joined_at: string
@@ -297,10 +298,12 @@ export type Database = {
           phone: string
           status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           community_id: string
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           joined_at?: string
@@ -308,10 +311,12 @@ export type Database = {
           phone: string
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           community_id?: string
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           joined_at?: string
@@ -319,6 +324,7 @@ export type Database = {
           phone?: string
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {

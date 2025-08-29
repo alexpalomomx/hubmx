@@ -235,12 +235,12 @@ export const useCommunityMembers = (communityId?: string) => {
   });
 };
 
-// Hook para obtener las comunidades de un usuario específico (usando email)
-export const useUserCommunities = (userEmail?: string) => {
+// Hook para obtener las comunidades de un usuario específico (usando user_id)
+export const useUserCommunities = (userId?: string) => {
   return useQuery({
-    queryKey: ['user-communities', userEmail],
+    queryKey: ['user-communities', userId],
     queryFn: async () => {
-      if (!userEmail) return [];
+      if (!userId) return [];
       
       const { data, error } = await supabase
         .from('community_members')
@@ -249,7 +249,7 @@ export const useUserCommunities = (userEmail?: string) => {
           community_id,
           joined_at,
           nickname,
-          communities!inner(
+          communities (
             id,
             name,
             description,
@@ -260,15 +260,15 @@ export const useUserCommunities = (userEmail?: string) => {
             topics
           )
         `)
-        .eq('email', userEmail)
+        .eq('user_id', userId)
         .eq('status', 'active')
         .order('joined_at', { ascending: false });
 
       if (error) throw error;
       return data || [];
     },
-    enabled: !!userEmail,
-  });
+    enabled: !!userId,
+  }) as any;
 };
 
 // Hook para obtener los eventos registrados por un usuario (usando email)
@@ -284,7 +284,7 @@ export const useUserEventRegistrations = (userEmail?: string) => {
           id,
           event_id,
           created_at,
-          events!inner(
+          events (
             id,
             title,
             description,
@@ -304,5 +304,5 @@ export const useUserEventRegistrations = (userEmail?: string) => {
       return data || [];
     },
     enabled: !!userEmail,
-  });
+  }) as any;
 };

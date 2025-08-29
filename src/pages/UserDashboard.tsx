@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 const UserDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: userCommunities, isLoading: communitiesLoading } = useUserCommunities(user?.email);
+  const { data: userCommunities, isLoading: communitiesLoading } = useUserCommunities(user?.id);
   const { data: userEvents, isLoading: eventsLoading } = useUserEventRegistrations(user?.email);
 
   if (!user) {

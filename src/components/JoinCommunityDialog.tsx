@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Users } from "lucide-react";
 
 interface Community {
@@ -21,6 +22,7 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,16 +31,17 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
     const formData = new FormData(e.currentTarget);
     const nickname = formData.get("nickname") as string;
     const phone = formData.get("phone") as string;
+    const email = formData.get("email") as string;
 
     try {
-      // Check if user already joined this community
+      // Check if user already joined this community (by user_id or email)
       const { data: existingMember } = await supabase
         .from("community_members")
         .select("id")
         .eq("community_id", community.id)
-        .eq("phone", phone)
+        .or(`user_id.eq.${user?.id},email.eq.${email}`)
         .eq("status", "active")
-        .single();
+        .maybeSingle();
 
       if (existingMember) {
         toast({
@@ -53,6 +56,8 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
         community_id: community.id,
         nickname,
         phone,
+        email,
+        user_id: user?.id || null,
       });
 
       if (error) throw error;
@@ -107,6 +112,17 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
               id="nickname"
               name="nickname"
               placeholder="Tu nickname"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Tu email"
+              defaultValue={user?.email || ""}
               required
             />
           </div>
