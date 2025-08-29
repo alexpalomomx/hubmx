@@ -54,3 +54,6 @@ verify_jwt = false
 
 [functions.update-credentials]
 verify_jwt = false
+
+[functions.admin-create-user]
+verify_jwt = true

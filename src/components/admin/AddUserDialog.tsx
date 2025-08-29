@@ -36,43 +36,18 @@ export default function AddUserDialog({ children }: AddUserDialogProps) {
     const displayName = formData.get("display_name")?.toString() || "";
     
     try {
-      // Create user in auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: displayName || email.split('@')[0]
-        }
+      // Llamar función Edge para crear usuario de forma segura
+      const { data, error } = await supabase.functions.invoke('admin-create-user', {
+        body: {
+          email,
+          password,
+          display_name: displayName,
+          role: selectedRole,
+        },
       });
 
-      if (authError) throw authError;
-
-      if (!authData.user) {
-        throw new Error("No se pudo crear el usuario");
-      }
-
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: authData.user.id,
-          display_name: displayName || email.split('@')[0]
-        });
-
-      if (profileError) throw profileError;
-
-      // Assign role if not default user role
-      if (selectedRole !== 'user') {
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: selectedRole as any
-          });
-
-        if (roleError) throw roleError;
-      }
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
 
       toast({
         title: "Usuario creado",
