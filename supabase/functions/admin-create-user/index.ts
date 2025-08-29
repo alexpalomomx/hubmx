@@ -84,30 +84,41 @@ serve(async (req) => {
       });
     }
 
-    // Create auth user with invitation
+    // Create or find auth user via invitation
     const { data: created, error: createErr } = await service.auth.admin.inviteUserByEmail(email, {
-      data: { 
+      data: {
         full_name: display_name || email.split("@")[0],
-        invited_by_admin: true 
+        invited_by_admin: true,
       },
-      redirectTo: `${redirectBase || "https://" + new URL(SUPABASE_URL).host}/auth`
+      redirectTo: `${redirectBase || "https://" + new URL(SUPABASE_URL).host}/auth`,
     });
 
-    if (createErr || !created.user) {
-      return new Response(JSON.stringify({ error: createErr?.message || "Error creando usuario" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let newUserId: string | null = created?.user?.id ?? null;
+
+    // If user already exists, try to find the user id by email and continue gracefully
+    if ((!newUserId || createErr) && (createErr?.message || "").toLowerCase().includes("already")) {
+      const { data: list, error: listErr } = await service.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      if (!listErr && list?.users?.length) {
+        const found = list.users.find((u: any) => (u.email || u.user_metadata?.email) === email);
+        if (found) newUserId = found.id;
+      }
     }
 
-    const newUserId = created.user.id;
+    if (!newUserId) {
+      return new Response(
+        JSON.stringify({ error: createErr?.message || "No se pudo obtener el ID de usuario" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-    // Create profile
-    const { error: profileErr } = await service.from("profiles").insert({
-      user_id: newUserId,
-      display_name: display_name || email.split("@")[0],
-    });
-    if (profileErr) {
+    // Ensure profile (idempotent)
+    const { error: profileErr } = await service
+      .from("profiles")
+      .upsert(
+        { user_id: newUserId, display_name: display_name || email.split("@")[0] },
+        { onConflict: "user_id", ignoreDuplicates: true }
+      );
+    if (profileErr && (profileErr as any).code !== "23505") {
       return new Response(JSON.stringify({ error: profileErr.message }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -116,10 +127,12 @@ serve(async (req) => {
 
     // Assign role if provided and not 'user'
     if (role && role !== "user") {
-      const { error: userRoleErr } = await service.from("user_roles").insert({
-        user_id: newUserId,
-        role,
-      });
+      const { error: userRoleErr } = await service
+        .from("user_roles")
+        .upsert(
+          { user_id: newUserId, role },
+          { onConflict: "user_id" }
+        );
       if (userRoleErr) {
         return new Response(JSON.stringify({ error: userRoleErr.message }), {
           status: 400,
