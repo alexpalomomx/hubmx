@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen } from "lucide-react";
+import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -73,10 +73,21 @@ const UserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 pt-24">
+      <div className="border-b border-border bg-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Button variant="ghost" onClick={() => navigate("/")}> 
+              <ArrowLeft className="h-4 w-4 mr-2" /> Volver al inicio
+            </Button>
+            <h1 className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">Mi Dashboard</h1>
+            <div></div> {/* Spacer for centering */}
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Mi Dashboard</h1>
           <p className="text-muted-foreground">
             Bienvenido, {user.email?.split('@')[0]}. Aquí puedes ver tus comunidades y eventos.
           </p>
