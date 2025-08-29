@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Event {
   id: string;
@@ -23,8 +24,25 @@ interface EventRegistrationDialogProps {
 
 export function EventRegistrationDialog({ event, open, onOpenChange }: EventRegistrationDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  // Load user profile data when dialog opens
+  useEffect(() => {
+    if (open && user) {
+      const loadProfile = async () => {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setUserProfile(data);
+      };
+      loadProfile();
+    }
+  }, [open, user]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,18 +52,36 @@ export function EventRegistrationDialog({ event, open, onOpenChange }: EventRegi
     const formData = new FormData(e.currentTarget);
 
     try {
+      const whatsapp = formData.get("whatsapp") as string;
+      const email = formData.get("email") as string;
+      const nickname = formData.get("nickname") as string;
+
       const { error } = await supabase
         .from("event_registrations")
         .insert([
           {
             event_id: event.id,
-            whatsapp: formData.get("whatsapp") as string,
-            email: formData.get("email") as string,
-            nickname: formData.get("nickname") as string,
+            whatsapp,
+            email,
+            nickname,
           },
         ]);
 
       if (error) throw error;
+
+      // Update user profile if data changed
+      if (user && userProfile) {
+        const updates: any = {};
+        if (userProfile.phone !== whatsapp) updates.phone = whatsapp;
+        if (userProfile.display_name !== nickname) updates.display_name = nickname;
+        
+        if (Object.keys(updates).length > 0) {
+          await supabase
+            .from("profiles")
+            .update(updates)
+            .eq("user_id", user.id);
+        }
+      }
 
       toast({
         title: "¡Registro exitoso!",
@@ -83,6 +119,7 @@ export function EventRegistrationDialog({ event, open, onOpenChange }: EventRegi
               id="nickname"
               name="nickname"
               placeholder="@tunickname"
+              defaultValue={userProfile?.display_name || ""}
               required
             />
           </div>
@@ -93,6 +130,7 @@ export function EventRegistrationDialog({ event, open, onOpenChange }: EventRegi
               name="email"
               type="email"
               placeholder="tu@email.com"
+              defaultValue={user?.email || ""}
               required
             />
           </div>
@@ -102,6 +140,7 @@ export function EventRegistrationDialog({ event, open, onOpenChange }: EventRegi
               id="whatsapp"
               name="whatsapp"
               placeholder="+52 1234567890"
+              defaultValue={userProfile?.phone || ""}
               required
             />
           </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -21,8 +21,24 @@ interface JoinCommunityDialogProps {
 export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  // Load user profile data when dialog opens
+  useEffect(() => {
+    if (open && user) {
+      const loadProfile = async () => {
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setUserProfile(data);
+      };
+      loadProfile();
+    }
+  }, [open, user]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,6 +77,20 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
       });
 
       if (error) throw error;
+
+      // Update user profile if data changed
+      if (user && userProfile) {
+        const updates: any = {};
+        if (userProfile.phone !== phone) updates.phone = phone;
+        if (userProfile.display_name !== nickname) updates.display_name = nickname;
+        
+        if (Object.keys(updates).length > 0) {
+          await supabase
+            .from("profiles")
+            .update(updates)
+            .eq("user_id", user.id);
+        }
+      }
 
       // Disparar sincronización hacia Legion Hack MX (no bloqueante)
       try {
@@ -112,6 +142,7 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
               id="nickname"
               name="nickname"
               placeholder="Tu nickname"
+              defaultValue={userProfile?.display_name || ""}
               required
             />
           </div>
@@ -133,6 +164,7 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
               name="phone"
               type="tel"
               placeholder="Tu número de celular"
+              defaultValue={userProfile?.phone || ""}
               required
             />
           </div>

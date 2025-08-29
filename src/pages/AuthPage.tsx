@@ -59,9 +59,16 @@ const AuthPage = () => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const displayName = formData.get("displayName") as string;
+    const phone = formData.get("phone") as string;
 
     const { error } = await signUp(email, password, displayName);
     if (!error) {
+      // Update profile with phone after successful signup
+      try {
+        await supabase.from("profiles").update({ phone }).eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+      } catch (profileError) {
+        console.warn("Could not update phone in profile:", profileError);
+      }
       navigate("/");
     }
     setLoading(false);
@@ -162,6 +169,10 @@ const AuthPage = () => {
                     <div className="space-y-2">
                       <Label htmlFor="signup-name">Nombre completo</Label>
                       <Input id="signup-name" name="displayName" type="text" placeholder="Tu nombre completo" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-phone">Teléfono</Label>
+                      <Input id="signup-phone" name="phone" type="tel" placeholder="+52 1234567890" required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
