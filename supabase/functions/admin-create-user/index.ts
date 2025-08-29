@@ -111,6 +111,8 @@ serve(async (req) => {
       );
     }
 
+    console.log("Creating user profile for user:", newUserId);
+    
     // Ensure profile (idempotent)
     const { error: profileErr } = await service
       .from("profiles")
@@ -119,25 +121,60 @@ serve(async (req) => {
         { onConflict: "user_id", ignoreDuplicates: true }
       );
     if (profileErr && (profileErr as any).code !== "23505") {
+      console.error("Profile creation error:", profileErr);
       return new Response(JSON.stringify({ error: profileErr.message }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    console.log("Profile created successfully. Now assigning role:", role);
+
     // Assign role if provided and not 'user'
     if (role && role !== "user") {
-      const { error: userRoleErr } = await service
+      console.log("Attempting to assign role:", role, "to user:", newUserId);
+      
+      // First check if user already has a role
+      const { data: existingRole, error: checkRoleErr } = await service
         .from("user_roles")
-        .upsert(
-          { user_id: newUserId, role },
-          { onConflict: "user_id" }
-        );
-      if (userRoleErr) {
-        return new Response(JSON.stringify({ error: userRoleErr.message }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        .select("*")
+        .eq("user_id", newUserId)
+        .maybeSingle();
+      
+      console.log("Existing role check result:", existingRole, checkRoleErr);
+      
+      if (existingRole && existingRole.role === "user") {
+        // Update the existing user role instead of inserting
+        const { error: updateRoleErr } = await service
+          .from("user_roles")
+          .update({ role })
+          .eq("user_id", newUserId)
+          .eq("role", "user");
+        
+        console.log("Role update result, error:", updateRoleErr);
+        
+        if (updateRoleErr) {
+          console.error("Role update error details:", updateRoleErr);
+          return new Response(JSON.stringify({ error: updateRoleErr.message }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } else {
+        // Insert the new role
+        const { error: userRoleErr } = await service
+          .from("user_roles")
+          .insert({ user_id: newUserId, role });
+        
+        console.log("Role insertion result, error:", userRoleErr);
+        
+        if (userRoleErr) {
+          console.error("Role assignment error details:", userRoleErr);
+          return new Response(JSON.stringify({ error: userRoleErr.message }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
     }
 
