@@ -5,10 +5,34 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Filter, Users, MapPin, Loader2 } from "lucide-react";
 import { useCommunities } from "@/hooks/useSupabaseData";
 import { JoinCommunityDialog } from "@/components/JoinCommunityDialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const CommunitiesSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { data: communities, isLoading, error } = useCommunities(selectedCategory);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleJoinCommunity = (community: { id: string; name: string }) => {
+    if (!user) {
+      toast({
+        title: "Registro requerido",
+        description: "Para unirte a una comunidad, primero debes crear una cuenta para que tu información se guarde automáticamente.",
+        action: (
+          <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+            Crear cuenta
+          </Button>
+        ),
+      });
+      return;
+    }
+    
+    // Si está autenticado, no hacer nada aquí, el JoinCommunityDialog se encargará
+    return true;
+  };
 
   const categories = [
     { id: "all", name: "Todas" },
@@ -177,12 +201,23 @@ const CommunitiesSection = () => {
                         Visitar sitio
                       </Button>
                     )}
-                    <JoinCommunityDialog community={{ id: community.id, name: community.name }}>
-                      <Button className="flex-1" size="sm">
+                    {user ? (
+                      <JoinCommunityDialog community={{ id: community.id, name: community.name }}>
+                        <Button className="flex-1" size="sm">
+                          <Users className="mr-2 h-4 w-4" />
+                          Unirse
+                        </Button>
+                      </JoinCommunityDialog>
+                    ) : (
+                      <Button 
+                        className="flex-1" 
+                        size="sm"
+                        onClick={() => handleJoinCommunity(community)}
+                      >
                         <Users className="mr-2 h-4 w-4" />
                         Unirse
                       </Button>
-                    </JoinCommunityDialog>
+                    )}
                   </div>
                 </CardContent>
               </Card>

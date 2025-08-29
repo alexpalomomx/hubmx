@@ -6,16 +6,35 @@ import { useEvents } from "@/hooks/useSupabaseData";
 import { EventRegistrationDialog } from "@/components/EventRegistrationDialog";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const EventsSection = () => {
   const { data: events, isLoading } = useEvents();
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const upcomingEvents = events?.filter(event => event.status === "upcoming") || [];
   const pastEvents = events?.filter(event => event.status === "past") || [];
 
   const handleRegister = (event: any) => {
+    if (!user) {
+      toast({
+        title: "Inicia sesión requerido",
+        description: "Para registrarte a un evento, primero debes crear una cuenta o iniciar sesión para que tu información se guarde automáticamente.",
+        action: (
+          <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+            Ir a registro
+          </Button>
+        ),
+      });
+      return;
+    }
+    
     setSelectedEvent(event);
     setIsRegistrationOpen(true);
   };
