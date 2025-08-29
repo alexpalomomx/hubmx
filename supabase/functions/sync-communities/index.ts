@@ -83,11 +83,13 @@ serve(async (req) => {
       if (direction === 'from_legion' || direction === 'bidirectional') {
         await syncFromLegion(legionSupabase, hubSupabase)
         await syncMembersFromLegion(legionSupabase, hubSupabase)
+        await syncPointsFromLegion(legionSupabase, hubSupabase)
       }
       
       if (direction === 'to_legion' || direction === 'bidirectional') {
         await syncToLegion(hubSupabase, legionSupabase)
         await syncMembersToLegion(hubSupabase, legionSupabase)
+        await syncPointsToLegion(hubSupabase, legionSupabase)
       }
     }
 
@@ -410,4 +412,135 @@ function mapCategoryToLegion(hubCategory: string): string {
     'cultura': 'cultural'
   }
   return mapping[hubCategory] || 'tech'
+}
+
+async function syncPointsFromLegion(legionSupabase: any, hubSupabase: any) {
+  console.log('Sincronizando puntos desde Legion Hack MX...')
+  
+  // Obtener puntos de usuarios desde Legion
+  const { data: legionPoints, error: pointsError } = await legionSupabase
+    .from('user_points')
+    .select('*')
+  
+  if (pointsError) {
+    console.error('Error obteniendo puntos de Legion:', pointsError)
+    return
+  }
+
+  console.log(`Encontrados ${legionPoints?.length || 0} registros de puntos en Legion Hack MX`)
+
+  for (const legionPoint of (legionPoints || [])) {
+    // Buscar usuario en HUB por teléfono
+    const { data: hubUser } = await hubSupabase
+      .from('profiles')
+      .select('user_id, phone')
+      .eq('phone', legionPoint.phone)
+      .maybeSingle()
+
+    if (!hubUser) {
+      console.log(`Usuario no encontrado en HUB para teléfono: ${legionPoint.phone}`)
+      continue
+    }
+
+    // Verificar si ya existe registro de puntos
+    const { data: existingPoints } = await hubSupabase
+      .from('user_points')
+      .select('id')
+      .eq('user_id', hubUser.user_id)
+      .maybeSingle()
+
+    const hubPoints = {
+      user_id: hubUser.user_id,
+      total_points: legionPoint.total_points || 0,
+      community_joins: legionPoint.community_joins || 0,
+      event_registrations: legionPoint.event_registrations || 0
+    }
+
+    if (existingPoints) {
+      const { error: updateError } = await hubSupabase
+        .from('user_points')
+        .update(hubPoints)
+        .eq('id', existingPoints.id)
+      
+      if (updateError) {
+        console.error('Error actualizando puntos:', updateError)
+      } else {
+        console.log(`Puntos actualizados para usuario: ${hubUser.user_id}`)
+      }
+    } else {
+      const { error: insertError } = await hubSupabase
+        .from('user_points')
+        .insert(hubPoints)
+      
+      if (insertError) {
+        console.error('Error creando puntos:', insertError)
+      } else {
+        console.log(`Puntos creados para usuario: ${hubUser.user_id}`)
+      }
+    }
+  }
+}
+
+async function syncPointsToLegion(hubSupabase: any, legionSupabase: any) {
+  console.log('Sincronizando puntos hacia Legion Hack MX...')
+  
+  // Obtener puntos de usuarios desde HUB
+  const { data: hubPoints, error: pointsError } = await hubSupabase
+    .from('user_points')
+    .select(`
+      *,
+      profiles!inner(phone, display_name)
+    `)
+  
+  if (pointsError) {
+    console.error('Error obteniendo puntos del HUB:', pointsError)
+    return
+  }
+
+  console.log(`Encontrados ${hubPoints?.length || 0} registros de puntos en HUB`)
+
+  for (const hubPoint of (hubPoints as any[])) {
+    if (!hubPoint.profiles.phone) {
+      console.log(`Usuario sin teléfono en HUB: ${hubPoint.profiles.display_name}`)
+      continue
+    }
+
+    // Buscar si existe registro en Legion por teléfono
+    const { data: existingPoints } = await legionSupabase
+      .from('user_points')
+      .select('id')
+      .eq('phone', hubPoint.profiles.phone)
+      .maybeSingle()
+
+    const legionPoints = {
+      phone: hubPoint.profiles.phone,
+      nickname: hubPoint.profiles.display_name,
+      total_points: hubPoint.total_points || 0,
+      community_joins: hubPoint.community_joins || 0,
+      event_registrations: hubPoint.event_registrations || 0
+    }
+
+    if (existingPoints) {
+      const { error: updateError } = await legionSupabase
+        .from('user_points')
+        .update(legionPoints)
+        .eq('id', existingPoints.id)
+      
+      if (updateError) {
+        console.error('Error actualizando puntos en Legion:', updateError)
+      } else {
+        console.log(`Puntos actualizados en Legion para: ${hubPoint.profiles.display_name}`)
+      }
+    } else {
+      const { error: insertError } = await legionSupabase
+        .from('user_points')
+        .insert(legionPoints)
+      
+      if (insertError) {
+        console.error('Error creando puntos en Legion:', insertError)
+      } else {
+        console.log(`Puntos creados en Legion para: ${hubPoint.profiles.display_name}`)
+      }
+    }
+  }
 }

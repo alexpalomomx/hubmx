@@ -306,3 +306,22 @@ export const useUserEventRegistrations = (userEmail?: string) => {
     enabled: !!userEmail,
   }) as any;
 };
+
+export const useUserPoints = () => {
+  return useQuery({
+    queryKey: ['user-points'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_points')
+        .select(`
+          *,
+          profiles(display_name, avatar_url)
+        `)
+        .order('total_points', { ascending: false })
+        .limit(20);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+};

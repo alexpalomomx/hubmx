@@ -13,7 +13,11 @@ import {
   BarChart3,
   ArrowLeft,
   Settings,
-  Plus
+  Plus,
+  Award,
+  Briefcase,
+  RefreshCw,
+  Trophy
 } from "lucide-react";
 import { useStats, useCommunities, useEvents, useAlliances, useCalls, usePendingApprovals } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
@@ -31,10 +35,11 @@ import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistra
 import { ManageCommunityData } from "@/components/admin/ManageCommunityData";
 import { ManagePendingApprovals } from "@/components/admin/ManagePendingApprovals";
 import ManageContentApprovals from "@/components/admin/ManageContentApprovals";
+import ManageUsers from "@/components/admin/ManageUsers";
 import { CommunitySync } from "@/components/admin/CommunitySync";
 import { ApiCredentials } from "@/components/admin/ApiCredentials";
+import { GamificationManager } from "@/components/admin/GamificationManager";
 import { ManageCommunityMembers } from "@/components/admin/ManageCommunityMembers";
-import ManageUsers from "@/components/admin/ManageUsers";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -197,6 +202,7 @@ const AdminDashboard = () => {
                   <SelectItem value="alliances">Alianzas</SelectItem>
                   <SelectItem value="calls">Convocatorias</SelectItem>
                   <SelectItem value="blog">Blog</SelectItem>
+                  <SelectItem value="gamification">Gamificación</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -335,6 +341,12 @@ const AdminDashboard = () => {
                 </AddBlogPostDialog>
               </div>
               <ManageBlogPosts />
+            </div>
+          )}
+
+          {selectedSection === "gamification" && (
+            <div className="space-y-6">
+              <GamificationManager />
             </div>
           )}
         </div>
