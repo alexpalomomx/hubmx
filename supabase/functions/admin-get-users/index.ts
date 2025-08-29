@@ -25,7 +25,7 @@ serve(async (req) => {
   const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   try {
-    if (req.method !== "GET") {
+    if (!(req.method === "POST" || req.method === "GET")) {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
