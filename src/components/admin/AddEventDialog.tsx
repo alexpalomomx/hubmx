@@ -15,6 +15,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCommunities } from "@/hooks/useSupabaseData";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AddEventDialogProps {
   children: React.ReactNode;
@@ -23,8 +25,11 @@ interface AddEventDialogProps {
 export default function AddEventDialog({ children }: AddEventDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCommunity, setSelectedCommunity] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: communities } = useCommunities();
+  const { user, isCollaborator } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,7 +38,7 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
     const formData = new FormData(e.currentTarget);
     
     try {
-      const { error } = await supabase.from("events").insert({
+      const eventData: any = {
         title: formData.get("title")?.toString() || "",
         description: formData.get("description")?.toString() || "",
         event_date: formData.get("event_date")?.toString() || "",
@@ -45,18 +50,31 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
         registration_url: formData.get("registration_url")?.toString() || "",
         image_url: formData.get("image_url")?.toString() || "",
         status: "upcoming",
-      });
+        organizer_id: selectedCommunity || null,
+      };
+
+      // If user is collaborator, set approval status to pending and submitted_by
+      if (isCollaborator) {
+        eventData.approval_status = 'pending';
+        eventData.submitted_by = user?.id;
+      }
+
+      const { error } = await supabase.from("events").insert(eventData);
 
       if (error) throw error;
 
       toast({
         title: "Evento creado",
-        description: "El evento ha sido creado exitosamente.",
+        description: isCollaborator 
+          ? "El evento ha sido enviado para aprobación."
+          : "El evento ha sido creado exitosamente.",
       });
 
       setOpen(false);
       (e.target as HTMLFormElement).reset();
+      setSelectedCommunity("");
       queryClient.invalidateQueries({ queryKey: ["events"] });
+      queryClient.invalidateQueries({ queryKey: ["pending-approvals"] });
     } catch (error) {
       console.error("Error creating event:", error);
       toast({
@@ -79,6 +97,7 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
           <DialogTitle>Crear Nuevo Evento</DialogTitle>
           <DialogDescription>
             Completa la información para crear un nuevo evento.
+            {isCollaborator && " Tu evento será enviado para aprobación."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,6 +109,23 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
               placeholder="Nombre del evento"
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="organizer_community">Comunidad Organizadora</Label>
+            <Select value={selectedCommunity} onValueChange={setSelectedCommunity}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona una comunidad" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Sin comunidad específica</SelectItem>
+                {communities?.map((community) => (
+                  <SelectItem key={community.id} value={community.id}>
+                    {community.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

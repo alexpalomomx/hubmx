@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { User, Settings, Shield, Users, Crown } from "lucide-react";
+import { User, Settings, Shield, Users, Crown, Plus } from "lucide-react";
+import AddUserDialog from "./AddUserDialog";
 
 interface UserProfile {
   id: string;
@@ -167,13 +168,23 @@ const ManageUsers = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Gestión de Usuarios
-          </CardTitle>
-          <CardDescription>
-            Administra los roles y permisos de los usuarios del sistema
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Gestión de Usuarios
+              </CardTitle>
+              <CardDescription>
+                Administra los roles y permisos de los usuarios del sistema
+              </CardDescription>
+            </div>
+            <AddUserDialog>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nuevo Usuario
+              </Button>
+            </AddUserDialog>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
