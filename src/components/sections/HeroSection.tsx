@@ -15,7 +15,7 @@ const HeroSection = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 text-xl">
         <div className="text-center">
           {/* Main Title */}
           <h1 className="text-4xl lg:text-7xl font-bold text-white mb-6 animate-slide-up md:text-4xl">
