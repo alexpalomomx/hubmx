@@ -82,12 +82,14 @@ serve(async (req) => {
     if (action === 'sync') {
       if (direction === 'from_legion' || direction === 'bidirectional') {
         await syncFromLegion(legionSupabase, hubSupabase)
+        await syncUsersFromLegion(legionSupabase, hubSupabase)
         await syncMembersFromLegion(legionSupabase, hubSupabase)
         await syncPointsFromLegion(legionSupabase, hubSupabase)
       }
       
       if (direction === 'to_legion' || direction === 'bidirectional') {
         await syncToLegion(hubSupabase, legionSupabase)
+        await syncUsersToLegion(hubSupabase, legionSupabase)
         await syncMembersToLegion(hubSupabase, legionSupabase)
         await syncPointsToLegion(hubSupabase, legionSupabase)
       }
@@ -412,6 +414,161 @@ function mapCategoryToLegion(hubCategory: string): string {
     'cultura': 'cultural'
   }
   return mapping[hubCategory] || 'tech'
+}
+
+async function syncUsersFromLegion(legionSupabase: any, hubSupabase: any) {
+  console.log('Sincronizando usuarios desde Legion Hack MX...')
+  
+  // Obtener usuarios de Legion
+  const { data: legionUsers, error: legionError } = await legionSupabase
+    .from('users')
+    .select('*')
+    .neq('estado', 'eliminado')
+  
+  if (legionError) {
+    console.error('Error obteniendo usuarios de Legion:', legionError)
+    return
+  }
+
+  console.log(`Encontrados ${legionUsers?.length || 0} usuarios en Legion Hack MX`)
+
+  for (const legionUser of (legionUsers || [])) {
+    if (!legionUser.correo || !legionUser.nickname) {
+      console.log(`Usuario sin datos mínimos: ${legionUser.id}`)
+      continue
+    }
+
+    // Buscar si ya existe un perfil con el mismo email en HUB
+    const { data: existingProfile } = await hubSupabase
+      .from('profiles')
+      .select('id, user_id, display_name, phone')
+      .eq('display_name', legionUser.nickname)
+      .maybeSingle()
+
+    // Buscar si existe usuario en auth.users con el mismo email
+    let hubUserId = null
+    if (legionUser.auth_user_id) {
+      const { data: authUser } = await hubSupabase
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', legionUser.auth_user_id)
+        .maybeSingle()
+      
+      if (authUser) {
+        hubUserId = authUser.user_id
+      }
+    }
+
+    const profileData = {
+      display_name: legionUser.nickname,
+      phone: legionUser.telefono,
+      bio: legionUser.descripcion || null
+    }
+
+    if (existingProfile) {
+      // Actualizar perfil existente
+      const { error: updateError } = await hubSupabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', existingProfile.id)
+      
+      if (updateError) {
+        console.error('Error actualizando perfil:', updateError)
+      } else {
+        console.log(`Perfil actualizado: ${legionUser.nickname}`)
+      }
+    } else if (hubUserId) {
+      // Crear nuevo perfil para usuario existente
+      const { error: insertError } = await hubSupabase
+        .from('profiles')
+        .insert({
+          user_id: hubUserId,
+          ...profileData
+        })
+      
+      if (insertError) {
+        console.error('Error creando perfil:', insertError)
+      } else {
+        console.log(`Perfil creado para usuario existente: ${legionUser.nickname}`)
+      }
+    } else {
+      console.log(`Usuario no encontrado en HUB auth: ${legionUser.correo}`)
+    }
+  }
+}
+
+async function syncUsersToLegion(hubSupabase: any, legionSupabase: any) {
+  console.log('Sincronizando usuarios hacia Legion Hack MX...')
+  
+  // Obtener usuarios del HUB (perfiles con información)
+  const { data: hubProfiles, error: hubError } = await hubSupabase
+    .from('profiles')
+    .select('*')
+    .not('display_name', 'is', null)
+  
+  if (hubError) {
+    console.error('Error obteniendo perfiles del HUB:', hubError)
+    return
+  }
+
+  console.log(`Encontrados ${hubProfiles?.length || 0} perfiles en HUB`)
+
+  for (const hubProfile of (hubProfiles || [])) {
+    if (!hubProfile.display_name) {
+      continue
+    }
+
+    // Obtener email del usuario desde auth
+    const { data: userEmail, error: emailError } = await hubSupabase
+      .rpc('get_user_email', { _user_id: hubProfile.user_id })
+
+    if (emailError || !userEmail) {
+      console.log(`No se pudo obtener email para usuario: ${hubProfile.display_name}`)
+      continue
+    }
+
+    // Buscar si ya existe usuario en Legion con el mismo email o nickname
+    const { data: existingUser } = await legionSupabase
+      .from('users')
+      .select('id')
+      .or(`correo.eq.${userEmail},nickname.eq.${hubProfile.display_name}`)
+      .maybeSingle()
+
+    const legionUserData = {
+      nickname: hubProfile.display_name,
+      correo: userEmail,
+      telefono: hubProfile.phone,
+      nombre: hubProfile.display_name,
+      descripcion: hubProfile.bio,
+      auth_user_id: hubProfile.user_id,
+      estado: 'activo'
+    }
+
+    if (existingUser) {
+      // Actualizar usuario existente
+      const { error: updateError } = await legionSupabase
+        .from('users')
+        .update(legionUserData)
+        .eq('id', existingUser.id)
+      
+      if (updateError) {
+        console.error('Error actualizando usuario en Legion:', updateError)
+      } else {
+        console.log(`Usuario actualizado en Legion: ${hubProfile.display_name}`)
+      }
+    } else {
+      // Crear nuevo usuario
+      const { error: insertError } = await legionSupabase
+        .from('users')
+        .insert(legionUserData)
+      
+      if (insertError) {
+        console.error('Error creando usuario en Legion:', insertError)
+      } else {
+        console.log(`Usuario creado en Legion: ${hubProfile.display_name}`)
+      }
+    }
+  }
 }
 
 async function syncPointsFromLegion(legionSupabase: any, hubSupabase: any) {

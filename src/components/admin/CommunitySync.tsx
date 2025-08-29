@@ -54,11 +54,11 @@ export const CommunitySync = () => {
   const getSyncDescription = () => {
     switch (direction) {
       case 'from_legion':
-        return "Importar comunidades desde Legion Hack MX al HUB";
+        return "Importar usuarios, comunidades y datos desde Legion Hack MX al HUB";
       case 'to_legion':
-        return "Exportar comunidades del HUB a Legion Hack MX";
+        return "Exportar usuarios, comunidades y datos del HUB a Legion Hack MX";
       default:
-        return "Sincronización bidireccional entre ambas plataformas";
+        return "Sincronización bidireccional completa entre ambas plataformas";
     }
   };
 
@@ -111,14 +111,14 @@ export const CommunitySync = () => {
         </div>
 
         <div className="space-y-2">
-          <p className="text-sm font-medium">Campos sincronizados:</p>
+          <p className="text-sm font-medium">Datos sincronizados:</p>
           <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">Nombre</Badge>
-            <Badge variant="secondary">Descripción</Badge>
-            <Badge variant="secondary">Categoría</Badge>
-            <Badge variant="secondary">Ubicación</Badge>
-            <Badge variant="secondary">Líder</Badge>
+            <Badge variant="secondary">Usuarios</Badge>
+            <Badge variant="secondary">Perfiles</Badge>
+            <Badge variant="secondary">Comunidades</Badge>
             <Badge variant="secondary">Miembros</Badge>
+            <Badge variant="secondary">Puntos</Badge>
+            <Badge variant="secondary">Gamificación</Badge>
           </div>
         </div>
 
