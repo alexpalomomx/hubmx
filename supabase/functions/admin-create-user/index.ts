@@ -32,10 +32,10 @@ serve(async (req) => {
       });
     }
 
-    const { email, password, display_name, role } = await req.json();
+    const { email, display_name, role } = await req.json();
 
-    if (!email || !password) {
-      return new Response(JSON.stringify({ error: "Email y contraseña son obligatorios" }), {
+    if (!email) {
+      return new Response(JSON.stringify({ error: "Email es obligatorio" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -72,12 +72,13 @@ serve(async (req) => {
       });
     }
 
-    // Create auth user
-    const { data: created, error: createErr } = await service.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name: display_name || email.split("@")[0] },
+    // Create auth user with invitation
+    const { data: created, error: createErr } = await service.auth.admin.inviteUserByEmail(email, {
+      data: { 
+        full_name: display_name || email.split("@")[0],
+        invited_by_admin: true 
+      },
+      redirectTo: `${req.headers.get("origin") || "http://localhost:3000"}/auth`
     });
 
     if (createErr || !created.user) {
@@ -116,7 +117,11 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, user_id: newUserId }),
+      JSON.stringify({ 
+        success: true, 
+        message: "Invitación enviada por email",
+        user_id: newUserId 
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e: any) {

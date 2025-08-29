@@ -32,7 +32,6 @@ export default function AddUserDialog({ children }: AddUserDialogProps) {
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email")?.toString() || "";
-    const password = formData.get("password")?.toString() || "";
     const displayName = formData.get("display_name")?.toString() || "";
     
     try {
@@ -40,7 +39,6 @@ export default function AddUserDialog({ children }: AddUserDialogProps) {
       const { data, error } = await supabase.functions.invoke('admin-create-user', {
         body: {
           email,
-          password,
           display_name: displayName,
           role: selectedRole,
         },
@@ -50,8 +48,8 @@ export default function AddUserDialog({ children }: AddUserDialogProps) {
       if ((data as any)?.error) throw new Error((data as any).error);
 
       toast({
-        title: "Usuario creado",
-        description: `Usuario ${email} creado exitosamente con rol ${getRoleLabel(selectedRole)}`,
+        title: "Invitación enviada",
+        description: `Se ha enviado una invitación a ${email} para que establezca su contraseña y acceda con rol ${getRoleLabel(selectedRole)}`,
       });
 
       setOpen(false);
@@ -92,9 +90,9 @@ export default function AddUserDialog({ children }: AddUserDialogProps) {
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+          <DialogTitle>Invitar Nuevo Usuario</DialogTitle>
           <DialogDescription>
-            Completa la información para crear un nuevo usuario en el sistema.
+            Envía una invitación por email para que el usuario establezca su propia contraseña y acceda al sistema.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -107,18 +105,9 @@ export default function AddUserDialog({ children }: AddUserDialogProps) {
               placeholder="usuario@ejemplo.com"
               required
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Contraseña *</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Contraseña segura"
-              required
-              minLength={6}
-            />
+            <p className="text-xs text-muted-foreground">
+              Se enviará una invitación a este email para que el usuario establezca su contraseña
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -156,7 +145,7 @@ export default function AddUserDialog({ children }: AddUserDialogProps) {
               Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Creando..." : "Crear Usuario"}
+              {isLoading ? "Enviando invitación..." : "Enviar Invitación"}
             </Button>
           </div>
         </form>

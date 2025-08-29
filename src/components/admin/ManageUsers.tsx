@@ -181,7 +181,7 @@ const ManageUsers = () => {
             <AddUserDialog>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Nuevo Usuario
+                Invitar Usuario
               </Button>
             </AddUserDialog>
           </div>
