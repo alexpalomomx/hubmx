@@ -545,7 +545,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_points_user_id"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -583,6 +591,10 @@ export type Database = {
         Returns: undefined
       }
       get_user_email: {
+        Args: { _user_id: string }
+        Returns: string
+      }
+      get_user_email_by_profile: {
         Args: { _user_id: string }
         Returns: string
       }

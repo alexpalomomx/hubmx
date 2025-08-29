@@ -461,8 +461,7 @@ async function syncUsersFromLegion(legionSupabase: any, hubSupabase: any) {
 
     const profileData = {
       display_name: legionUser.nickname,
-      phone: legionUser.telefono,
-      bio: legionUser.descripcion || null
+      phone: legionUser.telefono
     }
 
     if (existingProfile) {
@@ -518,9 +517,9 @@ async function syncUsersToLegion(hubSupabase: any, legionSupabase: any) {
       continue
     }
 
-    // Obtener email del usuario desde auth
+    // Obtener email del usuario desde auth usando función auxiliar
     const { data: userEmail, error: emailError } = await hubSupabase
-      .rpc('get_user_email', { _user_id: hubProfile.user_id })
+      .rpc('get_user_email_by_profile', { _user_id: hubProfile.user_id })
 
     if (emailError || !userEmail) {
       console.log(`No se pudo obtener email para usuario: ${hubProfile.display_name}`)
@@ -539,7 +538,6 @@ async function syncUsersToLegion(hubSupabase: any, legionSupabase: any) {
       correo: userEmail,
       telefono: hubProfile.phone,
       nombre: hubProfile.display_name,
-      descripcion: hubProfile.bio,
       auth_user_id: hubProfile.user_id,
       estado: 'activo'
     }
