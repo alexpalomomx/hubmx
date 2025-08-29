@@ -56,6 +56,7 @@ export default function AddUserDialog({ children }: AddUserDialogProps) {
           email,
           display_name: displayName,
           role: selectedRole,
+          frontend_url: window.location.origin,
         },
       });
 

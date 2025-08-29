@@ -32,7 +32,7 @@ serve(async (req) => {
       });
     }
 
-    const { email, display_name, role } = await req.json();
+    const { email, display_name, role, frontend_url } = await req.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: "Email es obligatorio" }), {
@@ -40,6 +40,18 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Derivar dominio para redirect de forma robusta
+    const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
+    const forwardedHost = req.headers.get("x-forwarded-host");
+    const referer = req.headers.get("referer");
+    const headerOrigin = req.headers.get("origin");
+
+    // Preferir valor explícito desde el cliente; luego Origin/Referer; luego X-Forwarded-Host
+    const redirectBase = frontend_url
+      || headerOrigin
+      || (referer ? new URL(referer).origin : null)
+      || (forwardedHost ? `${forwardedProto}://${forwardedHost}` : null);
 
     const allowedRoles = ["user", "admin", "coordinator", "community_leader", "collaborator"];
     if (role && !allowedRoles.includes(role)) {
@@ -78,7 +90,7 @@ serve(async (req) => {
         full_name: display_name || email.split("@")[0],
         invited_by_admin: true 
       },
-      redirectTo: `${req.headers.get("origin") || "http://localhost:3000"}/auth`
+      redirectTo: `${redirectBase || "https://" + new URL(SUPABASE_URL).host}/auth`
     });
 
     if (createErr || !created.user) {
