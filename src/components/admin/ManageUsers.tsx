@@ -34,34 +34,12 @@ const ManageUsers = () => {
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['users-with-roles'],
     queryFn: async () => {
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('display_name');
-
-      if (profilesError) throw profilesError;
-
-      // Get user roles and emails
-      const usersWithDetails = await Promise.all(
-        profiles.map(async (profile) => {
-          const [{ data: roleData }, { data: userData }] = await Promise.all([
-            supabase
-              .from('user_roles')
-              .select('role')
-              .eq('user_id', profile.user_id)
-              .single(),
-            supabase.auth.admin.getUserById(profile.user_id)
-          ]);
-
-          return {
-            ...profile,
-            role: roleData?.role || 'user',
-            email: userData.user?.email || 'Sin email'
-          };
-        })
-      );
-
-      return usersWithDetails;
+      const { data, error } = await supabase.functions.invoke('admin-get-users');
+      
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      
+      return (data as any)?.users || [];
     },
   });
 
