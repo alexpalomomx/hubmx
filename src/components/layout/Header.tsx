@@ -13,7 +13,7 @@ import {
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, signOut, isAdmin, isCoordinator } = useAuth();
+  const { user, signOut, isAdmin, isCoordinator, isCommunityLeader, isCollaborator } = useAuth();
   const navigate = useNavigate();
 
   const navigation = [
@@ -95,9 +95,9 @@ const Header = () => {
                     <span className="hidden lg:block truncate max-w-32">
                       {user.email?.split('@')[0]}
                     </span>
-                    {(isAdmin || isCoordinator) && (
+                    {(isAdmin || isCoordinator || isCommunityLeader || isCollaborator) && (
                       <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
-                        {isAdmin ? 'Admin' : 'Coord'}
+                        {isAdmin ? 'Admin' : isCoordinator ? 'Coord' : isCommunityLeader ? 'Líder' : 'Colab'}
                       </span>
                     )}
                   </Button>
@@ -111,6 +111,18 @@ const Header = () => {
                     <DropdownMenuItem onClick={() => navigate("/admin")}>
                       <User className="mr-2 h-4 w-4" />
                       Dashboard Admin
+                    </DropdownMenuItem>
+                  )}
+                  {isCommunityLeader && (
+                    <DropdownMenuItem onClick={() => navigate("/community-leader")}>
+                      <User className="mr-2 h-4 w-4" />
+                      Dashboard Líder
+                    </DropdownMenuItem>
+                  )}
+                  {isCollaborator && (
+                    <DropdownMenuItem onClick={() => navigate("/collaborator")}>
+                      <User className="mr-2 h-4 w-4" />
+                      Dashboard Colaborador
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
@@ -179,9 +191,9 @@ const Header = () => {
                 <>
                   <div className="text-sm text-muted-foreground px-3">
                     {user.email}
-                    {(isAdmin || isCoordinator) && (
+                    {(isAdmin || isCoordinator || isCommunityLeader || isCollaborator) && (
                       <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded">
-                        {isAdmin ? 'Admin' : 'Coordinador'}
+                        {isAdmin ? 'Admin' : isCoordinator ? 'Coordinador' : isCommunityLeader ? 'Líder' : 'Colaborador'}
                       </span>
                     )}
                   </div>
@@ -195,6 +207,30 @@ const Header = () => {
                       }}
                     >
                       Dashboard Admin
+                    </Button>
+                  )}
+                  {isCommunityLeader && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        navigate("/community-leader");
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Dashboard Líder
+                    </Button>
+                  )}
+                  {isCollaborator && (
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => {
+                        navigate("/collaborator");
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Dashboard Colaborador
                     </Button>
                   )}
                   <Button 

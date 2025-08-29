@@ -163,7 +163,13 @@ export const usePendingApprovals = () => {
   return useQuery({
     queryKey: ['pending-approvals'],
     queryFn: async () => {
-      const [communitiesRes, alliancesRes] = await Promise.all([
+      const [
+        communitiesRes, 
+        alliancesRes, 
+        eventsRes, 
+        callsRes, 
+        blogPostsRes
+      ] = await Promise.all([
         supabase
           .from('communities')
           .select('*')
@@ -172,16 +178,37 @@ export const usePendingApprovals = () => {
         supabase
           .from('alliances')
           .select('*')
-          .eq('status', 'pending')
+          .eq('approval_status', 'pending')
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('events')
+          .select('*, organizer:organizer_id(name)')
+          .eq('approval_status', 'pending')
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('calls')
+          .select('*')
+          .eq('approval_status', 'pending')
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('blog_posts')
+          .select('*, author:author_id(display_name)')
+          .eq('approval_status', 'pending')
           .order('created_at', { ascending: false })
       ]);
 
       if (communitiesRes.error) throw communitiesRes.error;
       if (alliancesRes.error) throw alliancesRes.error;
+      if (eventsRes.error) throw eventsRes.error;
+      if (callsRes.error) throw callsRes.error;
+      if (blogPostsRes.error) throw blogPostsRes.error;
 
       return {
         communities: communitiesRes.data || [],
-        alliances: alliancesRes.data || []
+        alliances: alliancesRes.data || [],
+        events: eventsRes.data || [],
+        calls: callsRes.data || [],
+        blogPosts: blogPostsRes.data || []
       };
     },
   });

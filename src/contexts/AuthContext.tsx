@@ -13,6 +13,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   isAdmin: boolean;
   isCoordinator: boolean;
+  isCommunityLeader: boolean;
+  isCollaborator: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -173,6 +175,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const isAdmin = userRole === 'admin';
   const isCoordinator = userRole === 'coordinator';
+  const isCommunityLeader = userRole === 'community_leader';
+  const isCollaborator = userRole === 'collaborator';
 
   const value = {
     user,
@@ -184,6 +188,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signOut,
     isAdmin,
     isCoordinator,
+    isCommunityLeader,
+    isCollaborator,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

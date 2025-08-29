@@ -30,9 +30,11 @@ import ManageBlogPosts from "@/components/admin/ManageBlogPosts";
 import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistrations";
 import { ManageCommunityData } from "@/components/admin/ManageCommunityData";
 import { ManagePendingApprovals } from "@/components/admin/ManagePendingApprovals";
+import ManageContentApprovals from "@/components/admin/ManageContentApprovals";
 import { CommunitySync } from "@/components/admin/CommunitySync";
 import { ApiCredentials } from "@/components/admin/ApiCredentials";
 import { ManageCommunityMembers } from "@/components/admin/ManageCommunityMembers";
+import ManageUsers from "@/components/admin/ManageUsers";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -170,7 +172,7 @@ const AdminDashboard = () => {
                   <SelectItem value="community-data">Info Comunidades</SelectItem>
                   <SelectItem value="approvals" className="relative">
                     <div className="flex items-center justify-between w-full">
-                      <span>Aprobaciones</span>
+                      <span>Aprobaciones Comunidades</span>
                       {pendingData && (pendingData.communities.length + pendingData.alliances.length) > 0 && (
                         <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                           {pendingData.communities.length + pendingData.alliances.length}
@@ -178,9 +180,20 @@ const AdminDashboard = () => {
                       )}
                     </div>
                   </SelectItem>
+                  <SelectItem value="content-approvals" className="relative">
+                    <div className="flex items-center justify-between w-full">
+                      <span>Aprobaciones Contenido</span>
+                      {pendingData && (pendingData.events?.length + pendingData.calls?.length + pendingData.blogPosts?.length + pendingData.alliances?.length) > 0 && (
+                        <span className="ml-2 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {(pendingData.events?.length || 0) + (pendingData.calls?.length || 0) + (pendingData.blogPosts?.length || 0) + (pendingData.alliances?.length || 0)}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
                   <SelectItem value="events">Eventos</SelectItem>
                   <SelectItem value="registrations">Registros</SelectItem>
                   <SelectItem value="members">Miembros</SelectItem>
+                  <SelectItem value="users">Usuarios</SelectItem>
                   <SelectItem value="alliances">Alianzas</SelectItem>
                   <SelectItem value="calls">Convocatorias</SelectItem>
                   <SelectItem value="blog">Blog</SelectItem>
@@ -224,6 +237,17 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {selectedSection === "content-approvals" && (
+            <div className="space-y-6">
+              <ManageContentApprovals 
+                pendingEvents={pendingData?.events || []}
+                pendingAlliances={pendingData?.alliances || []}
+                pendingCalls={pendingData?.calls || []}
+                pendingBlogPosts={pendingData?.blogPosts || []}
+              />
+            </div>
+          )}
+
           {selectedSection === "events" && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
@@ -248,6 +272,12 @@ const AdminDashboard = () => {
           {selectedSection === "members" && (
             <div className="space-y-6">
               <ManageCommunityMembers />
+            </div>
+          )}
+
+          {selectedSection === "users" && (
+            <div className="space-y-6">
+              <ManageUsers />
             </div>
           )}
 
