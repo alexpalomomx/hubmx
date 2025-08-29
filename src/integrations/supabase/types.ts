@@ -457,6 +457,33 @@ export type Database = {
           },
         ]
       }
+      points_history: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string | null
+          id: string
+          points_awarded: number
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          points_awarded: number
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          points_awarded?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -490,6 +517,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_points: {
+        Row: {
+          community_joins: number
+          created_at: string
+          event_registrations: number
+          id: string
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          community_joins?: number
+          created_at?: string
+          event_registrations?: number
+          id?: string
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          community_joins?: number
+          created_at?: string
+          event_registrations?: number
+          id?: string
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -516,6 +573,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_points: {
+        Args: {
+          _action_type: string
+          _description?: string
+          _points: number
+          _user_id: string
+        }
+        Returns: undefined
+      }
       get_user_email: {
         Args: { _user_id: string }
         Returns: string
