@@ -3,6 +3,15 @@ import { ArrowRight } from "lucide-react";
 import heroImage from "@/assets/hero-community.jpg";
 
 const HeroSection = () => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
   return (
     <section id="inicio" className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background Image */}
@@ -34,11 +43,21 @@ const HeroSection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up" style={{ animationDelay: '0.4s' }}>
-            <Button size="lg" variant="community" className="text-lg px-8 py-3">
+            <Button 
+              size="lg" 
+              variant="community" 
+              className="text-lg px-8 py-3"
+              onClick={() => scrollToSection('comunidades')}
+            >
               Explorar comunidades
               <ArrowRight className="ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-3 bg-white/10 border-white/30 text-white hover:bg-white/20">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="text-lg px-8 py-3 bg-white/10 border-white/30 text-white hover:bg-white/20"
+              onClick={() => scrollToSection('unete')}
+            >
               Únete al HUB
             </Button>
           </div>
