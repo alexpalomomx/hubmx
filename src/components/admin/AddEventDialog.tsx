@@ -50,7 +50,7 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
         registration_url: formData.get("registration_url")?.toString() || "",
         image_url: formData.get("image_url")?.toString() || "",
         status: "upcoming",
-        organizer_id: selectedCommunity || null,
+        organizer_id: selectedCommunity && selectedCommunity !== "none" ? selectedCommunity : null,
       };
 
       // If user is collaborator, set approval status to pending and submitted_by
@@ -118,7 +118,7 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
                 <SelectValue placeholder="Selecciona una comunidad" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sin comunidad específica</SelectItem>
+                <SelectItem value="none">Sin comunidad específica</SelectItem>
                 {communities?.map((community) => (
                   <SelectItem key={community.id} value={community.id}>
                     {community.name}
