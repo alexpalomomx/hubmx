@@ -8,6 +8,7 @@ import AlliancesSection from "@/components/sections/AlliancesSection";
 import BlogSection from "@/components/sections/BlogSection";
 import JoinSection from "@/components/sections/JoinSection";
 import Footer from "@/components/sections/Footer";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 
 const Index = () => {
@@ -17,16 +18,31 @@ const Index = () => {
     <div className="min-h-screen">
       <Header />
       <main>
-        <HeroSection />
-        <AboutSection />
-        <CommunitiesSection />
-        <EventsSection />
+        <div id="inicio">
+          <HeroSection />
+        </div>
+        <div id="que-es">
+          <AboutSection />
+        </div>
+        <div id="comunidades">
+          <CommunitiesSection />
+        </div>
+        <div id="eventos">
+          <EventsSection />
+        </div>
         <CallsSection />
-        <AlliancesSection />
+        <div id="alianzas">
+          <AlliancesSection />
+        </div>
         <BlogSection />
-        <JoinSection />
+        <div id="unete">
+          <JoinSection />
+        </div>
       </main>
-      <Footer />
+      <div id="contacto">
+        <Footer />
+      </div>
+      <ScrollToTop />
     </div>
   );
 };
