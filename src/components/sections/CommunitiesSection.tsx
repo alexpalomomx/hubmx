@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Filter, Users, MapPin, Loader2 } from "lucide-react";
 import { useCommunities } from "@/hooks/useSupabaseData";
 import { JoinCommunityDialog } from "@/components/JoinCommunityDialog";
+import { SocialShare } from "@/components/ui/social-share";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -190,34 +191,42 @@ const CommunitiesSection = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2">
-                    {community.website_url && (
-                      <Button 
-                        onClick={() => window.open(community.website_url, '_blank')}
-                        variant="outline" 
-                        className="flex-1"
-                        size="sm"
-                      >
-                        Visitar sitio
-                      </Button>
-                    )}
-                    {user ? (
-                      <JoinCommunityDialog community={{ id: community.id, name: community.name }}>
-                        <Button className="flex-1" size="sm">
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      {community.website_url && (
+                        <Button 
+                          onClick={() => window.open(community.website_url, '_blank')}
+                          variant="outline" 
+                          className="flex-1"
+                          size="sm"
+                        >
+                          Visitar sitio
+                        </Button>
+                      )}
+                      {user ? (
+                        <JoinCommunityDialog community={{ id: community.id, name: community.name }}>
+                          <Button className="flex-1" size="sm">
+                            <Users className="mr-2 h-4 w-4" />
+                            Unirse
+                          </Button>
+                        </JoinCommunityDialog>
+                      ) : (
+                        <Button 
+                          className="flex-1" 
+                          size="sm"
+                          onClick={() => handleJoinCommunity(community)}
+                        >
                           <Users className="mr-2 h-4 w-4" />
                           Unirse
                         </Button>
-                      </JoinCommunityDialog>
-                    ) : (
-                      <Button 
-                        className="flex-1" 
-                        size="sm"
-                        onClick={() => handleJoinCommunity(community)}
-                      >
-                        <Users className="mr-2 h-4 w-4" />
-                        Unirse
-                      </Button>
-                    )}
+                      )}
+                    </div>
+                    <SocialShare 
+                      url={window.location.origin}
+                      title={`Únete a ${community.name}`}
+                      description={community.description}
+                      hashtags={[community.category, 'comunidad', ...community.topics?.slice(0, 3) || []]}
+                    />
                   </div>
                 </CardContent>
               </Card>

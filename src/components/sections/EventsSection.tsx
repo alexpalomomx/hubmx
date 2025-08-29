@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Users, ExternalLink } from "lucide-react";
 import { useEvents } from "@/hooks/useSupabaseData";
 import { EventRegistrationDialog } from "@/components/EventRegistrationDialog";
+import { SocialShare } from "@/components/ui/social-share";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
@@ -143,14 +144,22 @@ const EventsSection = () => {
                     </div>
                   </div>
 
-                  <Button 
-                    variant="hero" 
-                    size="sm" 
-                    className="w-full"
-                    onClick={() => handleRegister(event)}
-                  >
-                    Registrarse
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="hero" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleRegister(event)}
+                    >
+                      Registrarse
+                    </Button>
+                    <SocialShare 
+                      url={window.location.origin}
+                      title={`${event.title} - ${formatDate(event.event_date)}`}
+                      description={event.description}
+                      hashtags={['evento', 'comunidad', event.category]}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -195,9 +204,17 @@ const EventsSection = () => {
                     </div>
                   </div>
 
-                  <Button variant="outline" size="sm" className="w-full">
-                    Ver evidencia
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      Ver evidencia
+                    </Button>
+                    <SocialShare 
+                      url={window.location.origin}
+                      title={`${event.title} - Evento finalizado`}
+                      description={event.description}
+                      hashtags={['evento', 'comunidad', 'finalizado']}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             ))}
