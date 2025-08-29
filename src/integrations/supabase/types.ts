@@ -518,6 +518,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_community_leader: {
+        Args: { _community_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role:
