@@ -17,6 +17,9 @@ export type Database = {
       alliances: {
         Row: {
           alliance_type: string
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           benefits: string[] | null
           contact_email: string | null
           created_at: string
@@ -25,12 +28,17 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
+          rejection_reason: string | null
           status: string | null
+          submitted_by: string | null
           updated_at: string
           website_url: string | null
         }
         Insert: {
           alliance_type: string
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           benefits?: string[] | null
           contact_email?: string | null
           created_at?: string
@@ -39,12 +47,17 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
+          rejection_reason?: string | null
           status?: string | null
+          submitted_by?: string | null
           updated_at?: string
           website_url?: string | null
         }
         Update: {
           alliance_type?: string
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           benefits?: string[] | null
           contact_email?: string | null
           created_at?: string
@@ -53,7 +66,9 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
+          rejection_reason?: string | null
           status?: string | null
+          submitted_by?: string | null
           updated_at?: string
           website_url?: string | null
         }
@@ -61,6 +76,9 @@ export type Database = {
       }
       blog_posts: {
         Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           author_id: string | null
           content: string | null
           created_at: string
@@ -68,13 +86,18 @@ export type Database = {
           featured_image_url: string | null
           id: string
           published_at: string | null
+          rejection_reason: string | null
           slug: string | null
           status: string | null
+          submitted_by: string | null
           tags: string[] | null
           title: string
           updated_at: string
         }
         Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           author_id?: string | null
           content?: string | null
           created_at?: string
@@ -82,13 +105,18 @@ export type Database = {
           featured_image_url?: string | null
           id?: string
           published_at?: string | null
+          rejection_reason?: string | null
           slug?: string | null
           status?: string | null
+          submitted_by?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
         }
         Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           author_id?: string | null
           content?: string | null
           created_at?: string
@@ -96,8 +124,10 @@ export type Database = {
           featured_image_url?: string | null
           id?: string
           published_at?: string | null
+          rejection_reason?: string | null
           slug?: string | null
           status?: string | null
+          submitted_by?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
@@ -108,6 +138,9 @@ export type Database = {
         Row: {
           application_deadline: string | null
           application_url: string | null
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           benefits: string[] | null
           call_type: string
           created_at: string
@@ -115,14 +148,19 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          rejection_reason: string | null
           requirements: string[] | null
           status: string | null
+          submitted_by: string | null
           title: string
           updated_at: string
         }
         Insert: {
           application_deadline?: string | null
           application_url?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           benefits?: string[] | null
           call_type: string
           created_at?: string
@@ -130,14 +168,19 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          rejection_reason?: string | null
           requirements?: string[] | null
           status?: string | null
+          submitted_by?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           application_deadline?: string | null
           application_url?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           benefits?: string[] | null
           call_type?: string
           created_at?: string
@@ -145,8 +188,10 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          rejection_reason?: string | null
           requirements?: string[] | null
           status?: string | null
+          submitted_by?: string | null
           title?: string
           updated_at?: string
         }
@@ -205,6 +250,41 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: []
+      }
+      community_leaders: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          community_id: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          community_id: string
+          id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          community_id?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_leaders_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       community_members: {
         Row: {
@@ -290,6 +370,9 @@ export type Database = {
       }
       events: {
         Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           category: string | null
           created_at: string
           created_by: string | null
@@ -304,11 +387,16 @@ export type Database = {
           max_attendees: number | null
           organizer_id: string | null
           registration_url: string | null
+          rejection_reason: string | null
           status: string | null
+          submitted_by: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           category?: string | null
           created_at?: string
           created_by?: string | null
@@ -323,11 +411,16 @@ export type Database = {
           max_attendees?: number | null
           organizer_id?: string | null
           registration_url?: string | null
+          rejection_reason?: string | null
           status?: string | null
+          submitted_by?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           category?: string | null
           created_at?: string
           created_by?: string | null
@@ -342,7 +435,9 @@ export type Database = {
           max_attendees?: number | null
           organizer_id?: string | null
           registration_url?: string | null
+          rejection_reason?: string | null
           status?: string | null
+          submitted_by?: string | null
           title?: string
           updated_at?: string
         }
