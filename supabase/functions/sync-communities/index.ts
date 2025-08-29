@@ -527,23 +527,44 @@ async function syncUsersToLegion(hubSupabase: any, legionSupabase: any) {
     }
 
     // Buscar si ya existe usuario en Legion con el mismo email o nickname
+    // Generar nickname único si es necesario
+    let uniqueNickname = hubProfile.display_name
+    let counter = 1
+    
+    // Verificar si el nickname ya existe
+    let nicknameExists = true
+    while (nicknameExists) {
+      const { data: existingNickname } = await legionSupabase
+        .from('users')
+        .select('id')
+        .eq('nickname', uniqueNickname)
+        .maybeSingle()
+      
+      if (!existingNickname) {
+        nicknameExists = false
+      } else {
+        uniqueNickname = `${hubProfile.display_name}_${counter}`
+        counter++
+      }
+    }
+
+    // Buscar usuario existente por email (más confiable que nickname)
     const { data: existingUser } = await legionSupabase
       .from('users')
       .select('id')
-      .or(`correo.eq.${userEmail},nickname.eq.${hubProfile.display_name}`)
+      .eq('correo', userEmail)
       .maybeSingle()
 
     const legionUserData = {
-      nickname: hubProfile.display_name,
+      nickname: uniqueNickname,
       correo: userEmail,
       telefono: hubProfile.phone,
       nombre: hubProfile.display_name,
-      auth_user_id: hubProfile.user_id,
       estado: 'activo'
     }
 
     if (existingUser) {
-      // Actualizar usuario existente
+      // Actualizar usuario existente (sin auth_user_id para evitar errores de autorización)
       const { error: updateError } = await legionSupabase
         .from('users')
         .update(legionUserData)
@@ -552,7 +573,7 @@ async function syncUsersToLegion(hubSupabase: any, legionSupabase: any) {
       if (updateError) {
         console.error('Error actualizando usuario en Legion:', updateError)
       } else {
-        console.log(`Usuario actualizado en Legion: ${hubProfile.display_name}`)
+        console.log(`Usuario actualizado en Legion: ${uniqueNickname}`)
       }
     } else {
       // Crear nuevo usuario
@@ -563,7 +584,7 @@ async function syncUsersToLegion(hubSupabase: any, legionSupabase: any) {
       if (insertError) {
         console.error('Error creando usuario en Legion:', insertError)
       } else {
-        console.log(`Usuario creado en Legion: ${hubProfile.display_name}`)
+        console.log(`Usuario creado en Legion: ${uniqueNickname}`)
       }
     }
   }
@@ -572,12 +593,16 @@ async function syncUsersToLegion(hubSupabase: any, legionSupabase: any) {
 async function syncPointsFromLegion(legionSupabase: any, hubSupabase: any) {
   console.log('Sincronizando puntos desde Legion Hack MX...')
   
-  // Obtener puntos de usuarios desde Legion
+  // Verificar si la tabla user_points existe en Legion
   const { data: legionPoints, error: pointsError } = await legionSupabase
     .from('user_points')
     .select('*')
   
   if (pointsError) {
+    if (pointsError.code === '42P01') {
+      console.log('La tabla user_points no existe en Legion Hack MX, saltando sincronización de puntos')
+      return
+    }
     console.error('Error obteniendo puntos de Legion:', pointsError)
     return
   }
@@ -638,6 +663,17 @@ async function syncPointsFromLegion(legionSupabase: any, hubSupabase: any) {
 
 async function syncPointsToLegion(hubSupabase: any, legionSupabase: any) {
   console.log('Sincronizando puntos hacia Legion Hack MX...')
+  
+  // Verificar si la tabla user_points existe en Legion
+  const { error: tableError } = await legionSupabase
+    .from('user_points')
+    .select('id')
+    .limit(1)
+  
+  if (tableError && tableError.code === '42P01') {
+    console.log('La tabla user_points no existe en Legion Hack MX, saltando sincronización de puntos')
+    return
+  }
   
   // Obtener puntos de usuarios desde HUB
   const { data: hubPoints, error: pointsError } = await hubSupabase
