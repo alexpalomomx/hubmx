@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { User, Settings, Shield, Users, Crown, Plus } from "lucide-react";
+import { User, Settings, Shield, Users, Crown, Plus, Trash2 } from "lucide-react";
 import AddUserDialog from "./AddUserDialog";
 
 interface UserProfile {
@@ -25,8 +25,10 @@ const ManageUsers = () => {
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [newRole, setNewRole] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch users with their roles
   const { data: users, isLoading: usersLoading } = useQuery({
@@ -112,6 +114,44 @@ const ManageUsers = () => {
     setSelectedUser(user);
     setNewRole(user.role || 'user');
     setIsRoleDialogOpen(true);
+  };
+
+  const handleDeleteUser = (user: UserProfile) => {
+    setSelectedUser(user);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!selectedUser) return;
+
+    setIsDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: {
+          user_id: selectedUser.user_id,
+        },
+      });
+
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      toast({
+        title: "Usuario eliminado",
+        description: `El usuario ${selectedUser.display_name || selectedUser.email} ha sido eliminado correctamente`,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['users-with-roles'] });
+      setIsDeleteDialogOpen(false);
+      setSelectedUser(null);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo eliminar el usuario",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleUpdateRole = async () => {
@@ -220,6 +260,14 @@ const ManageUsers = () => {
                   >
                     Cambiar Rol
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteUser(user)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             ))}
@@ -265,6 +313,34 @@ const ManageUsers = () => {
               disabled={isLoading}
             >
               {isLoading ? "Actualizando..." : "Actualizar Rol"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar Usuario</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar a {selectedUser?.display_name || selectedUser?.email}? 
+              Esta acción no se puede deshacer y eliminará todos los datos relacionados con este usuario.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteUser}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Eliminando..." : "Eliminar Usuario"}
             </Button>
           </DialogFooter>
         </DialogContent>
