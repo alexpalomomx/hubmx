@@ -234,3 +234,75 @@ export const useCommunityMembers = (communityId?: string) => {
     },
   });
 };
+
+// Hook para obtener las comunidades de un usuario específico (usando email)
+export const useUserCommunities = (userEmail?: string) => {
+  return useQuery({
+    queryKey: ['user-communities', userEmail],
+    queryFn: async () => {
+      if (!userEmail) return [];
+      
+      const { data, error } = await supabase
+        .from('community_members')
+        .select(`
+          id,
+          community_id,
+          joined_at,
+          nickname,
+          communities!inner(
+            id,
+            name,
+            description,
+            category,
+            logo_url,
+            website_url,
+            members_count,
+            topics
+          )
+        `)
+        .eq('email', userEmail)
+        .eq('status', 'active')
+        .order('joined_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!userEmail,
+  });
+};
+
+// Hook para obtener los eventos registrados por un usuario (usando email)
+export const useUserEventRegistrations = (userEmail?: string) => {
+  return useQuery({
+    queryKey: ['user-event-registrations', userEmail],
+    queryFn: async () => {
+      if (!userEmail) return [];
+      
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .select(`
+          id,
+          event_id,
+          created_at,
+          events!inner(
+            id,
+            title,
+            description,
+            event_date,
+            event_time,
+            location,
+            event_type,
+            status,
+            current_attendees,
+            max_attendees
+          )
+        `)
+        .eq('email', userEmail)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!userEmail,
+  });
+};

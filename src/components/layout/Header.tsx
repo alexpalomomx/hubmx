@@ -103,6 +103,10 @@ const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                    <User className="mr-2 h-4 w-4" />
+                    Mi Dashboard
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
                     <User className="mr-2 h-4 w-4" />
                     Mi perfil
@@ -197,6 +201,16 @@ const Header = () => {
                       </span>
                     )}
                   </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      navigate("/dashboard");
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Mi Dashboard
+                  </Button>
                   {(isAdmin || isCoordinator) && (
                     <Button 
                       variant="outline" 
