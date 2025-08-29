@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect, useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -43,6 +43,7 @@ const AdminDashboard = () => {
   const { data: alliances } = useAlliances();
   const { data: calls } = useCalls();
   const { data: pendingData } = usePendingApprovals();
+  const [selectedSection, setSelectedSection] = useState("communities");
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
@@ -156,131 +157,157 @@ const AdminDashboard = () => {
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="communities" className="space-y-6">
-          <TabsList className="grid w-full lg:grid-cols-9">
-            <TabsTrigger value="communities">Comunidades</TabsTrigger>
-            <TabsTrigger value="community-data">Info Comunidades</TabsTrigger>
-            <TabsTrigger value="approvals" className="relative">
-              Aprobaciones
-              {pendingData && (pendingData.communities.length + pendingData.alliances.length) > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {pendingData.communities.length + pendingData.alliances.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="events">Eventos</TabsTrigger>
-            <TabsTrigger value="registrations">Registros</TabsTrigger>
-            <TabsTrigger value="members">Miembros</TabsTrigger>
-            <TabsTrigger value="alliances">Alianzas</TabsTrigger>
-            <TabsTrigger value="calls">Convocatorias</TabsTrigger>
-            <TabsTrigger value="blog">Blog</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="communities" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Gestión de Comunidades</h2>
-              <AddCommunityDialog>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nueva Comunidad
-                </Button>
-              </AddCommunityDialog>
+        <div className="space-y-6">
+          {/* Section Selector */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="w-full sm:w-auto">
+              <Select value={selectedSection} onValueChange={setSelectedSection}>
+                <SelectTrigger className="w-full sm:w-[280px] bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border shadow-lg z-50">
+                  <SelectItem value="communities">Comunidades</SelectItem>
+                  <SelectItem value="community-data">Info Comunidades</SelectItem>
+                  <SelectItem value="approvals" className="relative">
+                    <div className="flex items-center justify-between w-full">
+                      <span>Aprobaciones</span>
+                      {pendingData && (pendingData.communities.length + pendingData.alliances.length) > 0 && (
+                        <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {pendingData.communities.length + pendingData.alliances.length}
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="events">Eventos</SelectItem>
+                  <SelectItem value="registrations">Registros</SelectItem>
+                  <SelectItem value="members">Miembros</SelectItem>
+                  <SelectItem value="alliances">Alianzas</SelectItem>
+                  <SelectItem value="calls">Convocatorias</SelectItem>
+                  <SelectItem value="blog">Blog</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            
-            <ManageCommunities />
-          </TabsContent>
+          </div>
 
-            <TabsContent value="community-data" className="space-y-6">
+          {/* Content Sections */}
+          {selectedSection === "communities" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Gestión de Comunidades</h2>
+                <AddCommunityDialog>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nueva Comunidad
+                  </Button>
+                </AddCommunityDialog>
+              </div>
+              <ManageCommunities />
+            </div>
+          )}
+
+          {selectedSection === "community-data" && (
+            <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <ManageCommunityData />
                 <CommunitySync />
                 <ApiCredentials />
               </div>
-            </TabsContent>
-
-          <TabsContent value="approvals" className="space-y-6">
-            <ManagePendingApprovals 
-              pendingCommunities={pendingData?.communities || []}
-              pendingAlliances={pendingData?.alliances || []}
-            />
-          </TabsContent>
-
-          <TabsContent value="events" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Gestión de Eventos</h2>
-              <AddEventDialog>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nuevo Evento
-                </Button>
-              </AddEventDialog>
             </div>
-            
-            <ManageEvents />
-          </TabsContent>
+          )}
 
-          <TabsContent value="registrations" className="space-y-6">
-            <ManageEventRegistrations />
-          </TabsContent>
+          {selectedSection === "approvals" && (
+            <div className="space-y-6">
+              <ManagePendingApprovals 
+                pendingCommunities={pendingData?.communities || []}
+                pendingAlliances={pendingData?.alliances || []}
+              />
+            </div>
+          )}
 
-          <TabsContent value="members" className="space-y-6">
-            <ManageCommunityMembers />
-          </TabsContent>
-
-          <TabsContent value="alliances" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Gestión de Alianzas</h2>
-                <p className="text-muted-foreground">
-                  Administra alianzas y colaboradores
-                </p>
-              </div>
-              {isAdmin && (
-                <AddAllianceDialog>
-                  <Button variant="hero">
-                    <Building className="mr-2 h-4 w-4" />
-                    Nueva Alianza
+          {selectedSection === "events" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Gestión de Eventos</h2>
+                <AddEventDialog>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nuevo Evento
                   </Button>
-                </AddAllianceDialog>
-              )}
-            </div>
-            
-            <ManageAlliances />
-          </TabsContent>
-
-          <TabsContent value="calls" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Gestión de Convocatorias</h2>
-              <AddCallDialog>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nueva Convocatoria
-                </Button>
-              </AddCallDialog>
-            </div>
-            
-            <ManageCalls />
-          </TabsContent>
-
-          <TabsContent value="blog" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Gestión del Blog</h2>
-                <p className="text-muted-foreground">
-                  Administra publicaciones y contenido
-                </p>
+                </AddEventDialog>
               </div>
-              <AddBlogPostDialog>
-                <Button variant="hero">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Nueva Publicación
-                </Button>
-              </AddBlogPostDialog>
+              <ManageEvents />
             </div>
-            
-            <ManageBlogPosts />
-          </TabsContent>
-        </Tabs>
+          )}
+
+          {selectedSection === "registrations" && (
+            <div className="space-y-6">
+              <ManageEventRegistrations />
+            </div>
+          )}
+
+          {selectedSection === "members" && (
+            <div className="space-y-6">
+              <ManageCommunityMembers />
+            </div>
+          )}
+
+          {selectedSection === "alliances" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Gestión de Alianzas</h2>
+                  <p className="text-muted-foreground">
+                    Administra alianzas y colaboradores
+                  </p>
+                </div>
+                {isAdmin && (
+                  <AddAllianceDialog>
+                    <Button variant="hero">
+                      <Building className="mr-2 h-4 w-4" />
+                      Nueva Alianza
+                    </Button>
+                  </AddAllianceDialog>
+                )}
+              </div>
+              <ManageAlliances />
+            </div>
+          )}
+
+          {selectedSection === "calls" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Gestión de Convocatorias</h2>
+                <AddCallDialog>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nueva Convocatoria
+                  </Button>
+                </AddCallDialog>
+              </div>
+              <ManageCalls />
+            </div>
+          )}
+
+          {selectedSection === "blog" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Gestión del Blog</h2>
+                  <p className="text-muted-foreground">
+                    Administra publicaciones y contenido
+                  </p>
+                </div>
+                <AddBlogPostDialog>
+                  <Button variant="hero">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Nueva Publicación
+                  </Button>
+                </AddBlogPostDialog>
+              </div>
+              <ManageBlogPosts />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
