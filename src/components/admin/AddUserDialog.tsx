@@ -35,6 +35,21 @@ export default function AddUserDialog({ children }: AddUserDialogProps) {
     const displayName = formData.get("display_name")?.toString() || "";
     
     try {
+      // Verificar que el usuario actual es admin antes de invocar la función
+      const { data: authUser } = await supabase.auth.getUser();
+      const currentUserId = authUser?.user?.id;
+      if (!currentUserId) {
+        throw new Error("No autenticado. Inicia sesión para continuar.");
+      }
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+      if (roleRow?.role !== "admin") {
+        throw new Error("No autorizado. Solo los administradores pueden invitar usuarios.");
+      }
+
       // Llamar función Edge para crear usuario de forma segura
       const { data, error } = await supabase.functions.invoke('admin-create-user', {
         body: {
