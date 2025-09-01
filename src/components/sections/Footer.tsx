@@ -134,7 +134,7 @@ const Footer = () => {
           </div>
           
           <div className="text-sm text-muted-foreground">
-            Powered by Lovable
+            Powered by Alex Palomo
           </div>
         </div>
       </div>
