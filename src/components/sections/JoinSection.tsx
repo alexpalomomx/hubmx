@@ -305,7 +305,12 @@ const JoinSection = () => {
             <p className="text-white/90 mb-6">
               Nuestro equipo está aquí para ayudarte. Agenda una sesión de orientación gratuita.
             </p>
-            <Button variant="outline" size="lg" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+              onClick={() => window.open('https://wa.me/4424344276', '_blank')}
+            >
               Agendar Sesión
             </Button>
           </Card>
