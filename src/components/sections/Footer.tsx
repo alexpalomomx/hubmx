@@ -70,15 +70,15 @@ const Footer = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>contacto@hubcomunidades.org</span>
+                <span>hola@hubcomunidadesmx.com</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4" />
-                <span>+57 (1) 234-5678</span>
+                <span>(442) 434 4276</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>América Latina</span>
+                <span>LATAM</span>
               </div>
             </div>
           </div>
