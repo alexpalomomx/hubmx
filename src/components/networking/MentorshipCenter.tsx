@@ -15,7 +15,7 @@ import {
   Search,
   Send
 } from "lucide-react";
-import { useMentorshipRequests, useCreateMentorshipRequest, useMemberDirectory } from "@/hooks/useNetworkingData";
+import { useMentorshipRequests, useCreateMentorshipRequest, useMemberDirectory, useUpdateMentorship } from "@/hooks/useNetworkingData";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
@@ -31,6 +31,7 @@ const MentorshipCenter = () => {
   const { data: mentorshipRequests } = useMentorshipRequests();
   const { data: members } = useMemberDirectory({ available_for_mentoring: true });
   const createMentorshipRequest = useCreateMentorshipRequest();
+  const updateMentorship = useUpdateMentorship();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMentor, setSelectedMentor] = useState<any>(null);
@@ -67,6 +68,29 @@ const MentorshipCenter = () => {
         setSelectedMentor(null);
         setRequestForm({ skill_area: "", message: "" });
       }
+    });
+  };
+
+  const handleAcceptMentorship = (mentorshipId: string) => {
+    updateMentorship.mutate({
+      id: mentorshipId,
+      status: "active" as const,
+      start_date: new Date().toISOString().split('T')[0]
+    });
+  };
+
+  const handleRejectMentorship = (mentorshipId: string) => {
+    updateMentorship.mutate({
+      id: mentorshipId,
+      status: "cancelled" as const
+    });
+  };
+
+  const handleCompleteMentorship = (mentorshipId: string) => {
+    updateMentorship.mutate({
+      id: mentorshipId,
+      status: "completed" as const,
+      end_date: new Date().toISOString().split('T')[0]
     });
   };
 
@@ -280,16 +304,30 @@ const MentorshipCenter = () => {
                               </Button>
                               {mentorship.status === "pending" && isMentor && (
                                 <>
-                                  <Button size="sm" variant="outline">
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => handleAcceptMentorship(mentorship.id)}
+                                    disabled={updateMentorship.isPending}
+                                  >
                                     Aceptar
                                   </Button>
-                                  <Button size="sm" variant="outline">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleRejectMentorship(mentorship.id)}
+                                    disabled={updateMentorship.isPending}
+                                  >
                                     Rechazar
                                   </Button>
                                 </>
                               )}
                               {mentorship.status === "active" && (
-                                <Button size="sm" variant="outline">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleCompleteMentorship(mentorship.id)}
+                                  disabled={updateMentorship.isPending}
+                                >
                                   Completar
                                 </Button>
                               )}

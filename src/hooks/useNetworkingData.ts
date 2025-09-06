@@ -497,3 +497,59 @@ export const useAddInterest = () => {
     },
   });
 };
+
+// Update mentorship request status
+export const useUpdateMentorship = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updateData }: { 
+      id: string; 
+      status?: "pending" | "active" | "completed" | "cancelled"; 
+      start_date?: string; 
+      end_date?: string; 
+    }) => {
+      console.log('Updating mentorship:', id, updateData);
+      
+      const { data, error } = await supabase
+        .from("mentorship_requests")
+        .update(updateData)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating mentorship:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: (data) => {
+      console.log('Mentorship updated successfully:', data);
+      queryClient.invalidateQueries({ queryKey: ["mentorship-requests"] });
+      
+      const statusMessage = data.status === "active" 
+        ? "Mentoría aceptada exitosamente"
+        : data.status === "cancelled"
+        ? "Mentoría rechazada"  
+        : data.status === "completed"
+        ? "Mentoría marcada como completada"
+        : "Mentoría actualizada";
+      
+      toast({
+        title: "Éxito",
+        description: statusMessage,
+      });
+    },
+    onError: (error) => {
+      console.error('Error updating mentorship:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la mentoría",
+        variant: "destructive",
+      });
+    },
+  });
+};

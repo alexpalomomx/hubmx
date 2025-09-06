@@ -16,7 +16,9 @@ import {
   Network,
   Star,
   MapPin,
-  ArrowLeft
+  ArrowLeft,
+  Sparkles,
+  BarChart3
 } from "lucide-react";
 import { 
   useUserConnections, 
@@ -27,6 +29,12 @@ import {
   useCreateConnection
 } from "@/hooks/useNetworkingData";
 import { useToast } from "@/hooks/use-toast";
+import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
+import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
+import NetworkingProfileForm from "@/components/networking/NetworkingProfileForm";
+import MentorshipCenter from "@/components/networking/MentorshipCenter";
+import { useConversations } from "@/hooks/useMessaging";
+import { useMentorshipRequests } from "@/hooks/useNetworkingData";
 
 const NetworkingDashboard = () => {
   const { user, loading } = useAuth();
@@ -40,6 +48,8 @@ const NetworkingDashboard = () => {
     search: searchQuery
   });
   const { data: networkingProfile } = useNetworkingProfile(user?.id);
+  const { data: conversations } = useConversations();
+  const { data: mentorshipRequests } = useMentorshipRequests();
   
   const updateConnection = useUpdateConnection();
   const createConnection = useCreateConnection();
@@ -81,6 +91,10 @@ const NetworkingDashboard = () => {
 
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
   const pendingRequests = connectionRequests?.filter(req => req.requested_id === user.id) || [];
+  const unreadMessages = conversations?.length || 0;
+  const activeMentorships = mentorshipRequests?.filter(req => 
+    (req.mentor_id === user.id || req.mentee_id === user.id) && req.status === "active"
+  )?.length || 0;
   
   const connectedUserIds = new Set([
     ...acceptedConnections.map(conn => 
@@ -146,8 +160,8 @@ const NetworkingDashboard = () => {
               <div className="flex items-center gap-3">
                 <MessageSquare className="h-8 w-8 text-purple-500" />
                 <div>
-                  <p className="text-2xl font-bold">0</p>
-                  <p className="text-sm text-muted-foreground">Mensajes</p>
+                  <p className="text-2xl font-bold">{unreadMessages}</p>
+                  <p className="text-sm text-muted-foreground">Conversaciones</p>
                 </div>
               </div>
             </CardContent>
@@ -158,8 +172,8 @@ const NetworkingDashboard = () => {
               <div className="flex items-center gap-3">
                 <BookOpen className="h-8 w-8 text-orange-500" />
                 <div>
-                  <p className="text-2xl font-bold">0</p>
-                  <p className="text-sm text-muted-foreground">Mentorías</p>
+                  <p className="text-2xl font-bold">{activeMentorships}</p>
+                  <p className="text-sm text-muted-foreground">Mentorías Activas</p>
                 </div>
               </div>
             </CardContent>
@@ -167,10 +181,13 @@ const NetworkingDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="directory">Directorio de Miembros</TabsTrigger>
-            <TabsTrigger value="connections">Mis Conexiones</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="directory">Directorio</TabsTrigger>
+            <TabsTrigger value="connections">Conexiones</TabsTrigger>
             <TabsTrigger value="requests">Solicitudes</TabsTrigger>
+            <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
+            <TabsTrigger value="mentorship">Mentorías</TabsTrigger>
+            <TabsTrigger value="profile">Mi Perfil</TabsTrigger>
           </TabsList>
 
           {/* Member Directory Tab */}
@@ -381,6 +398,21 @@ const NetworkingDashboard = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Suggestions Tab */}
+          <TabsContent value="suggestions" className="mt-6">
+            <NetworkingSuggestions />
+          </TabsContent>
+
+          {/* Mentorship Tab */}
+          <TabsContent value="mentorship" className="mt-6">
+            <MentorshipCenter />
+          </TabsContent>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="mt-6">
+            <NetworkingProfileForm />
           </TabsContent>
         </Tabs>
       </div>
