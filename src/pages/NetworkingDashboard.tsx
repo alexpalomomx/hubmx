@@ -33,7 +33,8 @@ import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggest
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
 import NetworkingProfileForm from "@/components/networking/NetworkingProfileForm";
 import MentorshipCenter from "@/components/networking/MentorshipCenter";
-import { useConversations } from "@/hooks/useMessaging";
+import { MessagingInterface } from "@/components/messaging/MessagingInterface";
+import { useConversations, useGetOrCreateConversation } from "@/hooks/useMessaging";
 import { useMentorshipRequests } from "@/hooks/useNetworkingData";
 
 const NetworkingDashboard = () => {
@@ -50,6 +51,7 @@ const NetworkingDashboard = () => {
   const { data: networkingProfile } = useNetworkingProfile(user?.id);
   const { data: conversations } = useConversations();
   const { data: mentorshipRequests } = useMentorshipRequests();
+  const getOrCreateConversation = useGetOrCreateConversation();
   
   const updateConnection = useUpdateConnection();
   const createConnection = useCreateConnection();
@@ -87,6 +89,16 @@ const NetworkingDashboard = () => {
       requested_id: userId, 
       message: "Me gustaría conectar contigo en la plataforma." 
     });
+  };
+
+  const handleStartConversation = async (otherUserId: string) => {
+    try {
+      const conversation = await getOrCreateConversation.mutateAsync(otherUserId);
+      // Switch to messages tab and set initial conversation
+      setActiveTab("messages");
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+    }
   };
 
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
@@ -181,6 +193,15 @@ const NetworkingDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-7">
+            <TabsTrigger value="directory">Directorio</TabsTrigger>
+            <TabsTrigger value="connections">Conexiones</TabsTrigger>
+            <TabsTrigger value="requests">Solicitudes</TabsTrigger>
+            <TabsTrigger value="messages">Mensajes</TabsTrigger>
+            <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
+            <TabsTrigger value="mentorship">Mentorías</TabsTrigger>
+            <TabsTrigger value="profile">Mi Perfil</TabsTrigger>
+          </TabsList>
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="directory">Directorio</TabsTrigger>
             <TabsTrigger value="connections">Conexiones</TabsTrigger>
@@ -313,9 +334,14 @@ const NetworkingDashboard = () => {
                                   Conectado desde {new Date(connection.created_at).toLocaleDateString()}
                                 </p>
                               </div>
-                              <Button variant="outline" size="sm">
-                                <MessageSquare className="h-4 w-4" />
-                              </Button>
+                               <Button 
+                                 variant="outline" 
+                                 size="sm"
+                                 onClick={() => handleStartConversation(otherUser?.user_id || '')}
+                                 disabled={getOrCreateConversation.isPending}
+                               >
+                                 <MessageSquare className="h-4 w-4" />
+                               </Button>
                             </div>
                           </CardContent>
                         </Card>
@@ -396,6 +422,26 @@ const NetworkingDashboard = () => {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Messages Tab */}
+          <TabsContent value="messages" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Mensajes
+                </CardTitle>
+                <CardDescription>
+                  Gestiona tus conversaciones con otros miembros
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div style={{ height: '500px' }}>
+                  <MessagingInterface />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

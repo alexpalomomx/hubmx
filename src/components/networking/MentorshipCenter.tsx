@@ -298,10 +298,14 @@ const MentorshipCenter = () => {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
-                                <MessageSquare className="h-4 w-4" />
-                              </Button>
+                             <div className="flex gap-2">
+                               <Button 
+                                 variant="outline" 
+                                 size="sm"
+                                 onClick={() => {/* TODO: Implementar mensajería */}}
+                               >
+                                 <MessageSquare className="h-4 w-4" />
+                               </Button>
                               {mentorship.status === "pending" && isMentor && (
                                 <>
                                   <Button 
