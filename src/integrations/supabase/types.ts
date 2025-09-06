@@ -457,6 +457,45 @@ export type Database = {
           },
         ]
       }
+      mentorship_requests: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          mentee_id: string
+          mentor_id: string
+          message: string | null
+          skill_area: string
+          start_date: string | null
+          status: Database["public"]["Enums"]["mentorship_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          mentee_id: string
+          mentor_id: string
+          message?: string | null
+          skill_area: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["mentorship_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          mentee_id?: string
+          mentor_id?: string
+          message?: string | null
+          skill_area?: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["mentorship_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       points_history: {
         Row: {
           action_type: string
@@ -514,6 +553,102 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_connections: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          requested_id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["connection_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          requested_id: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["connection_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          requested_id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["connection_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_interests: {
+        Row: {
+          created_at: string
+          id: string
+          interest_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interest_name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interest_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_networking_profile: {
+        Row: {
+          available_for_connections: boolean | null
+          created_at: string
+          id: string
+          is_available_for_mentoring: boolean | null
+          is_seeking_mentorship: boolean | null
+          linkedin_url: string | null
+          location: string | null
+          networking_bio: string | null
+          twitter_url: string | null
+          updated_at: string
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          available_for_connections?: boolean | null
+          created_at?: string
+          id?: string
+          is_available_for_mentoring?: boolean | null
+          is_seeking_mentorship?: boolean | null
+          linkedin_url?: string | null
+          location?: string | null
+          networking_bio?: string | null
+          twitter_url?: string | null
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          available_for_connections?: boolean | null
+          created_at?: string
+          id?: string
+          is_available_for_mentoring?: boolean | null
+          is_seeking_mentorship?: boolean | null
+          linkedin_url?: string | null
+          location?: string | null
+          networking_bio?: string | null
+          twitter_url?: string | null
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -576,6 +711,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_skills: {
+        Row: {
+          created_at: string
+          id: string
+          is_offering_mentorship: boolean | null
+          is_seeking_mentorship: boolean | null
+          proficiency_level: number | null
+          skill_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_offering_mentorship?: boolean | null
+          is_seeking_mentorship?: boolean | null
+          proficiency_level?: number | null
+          skill_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_offering_mentorship?: boolean | null
+          is_seeking_mentorship?: boolean | null
+          proficiency_level?: number | null
+          skill_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -617,6 +785,8 @@ export type Database = {
         | "user"
         | "community_leader"
         | "collaborator"
+      connection_status: "pending" | "accepted" | "blocked" | "cancelled"
+      mentorship_status: "pending" | "active" | "completed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -751,6 +921,8 @@ export const Constants = {
         "community_leader",
         "collaborator",
       ],
+      connection_status: ["pending", "accepted", "blocked", "cancelled"],
+      mentorship_status: ["pending", "active", "completed", "cancelled"],
     },
   },
 } as const

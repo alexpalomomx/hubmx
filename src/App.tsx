@@ -12,6 +12,7 @@ import CollaboratorDashboard from "./pages/CollaboratorDashboard";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import UserDashboard from "./pages/UserDashboard";
+import SimpleNetworkingDashboard from "./pages/SimpleNetworkingDashboard";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/collaborator" element={<CollaboratorDashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/networking" element={<SimpleNetworkingDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
