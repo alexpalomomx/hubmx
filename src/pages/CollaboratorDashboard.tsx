@@ -11,7 +11,9 @@ import {
   FileText, 
   ArrowLeft,
   Plus,
-  Clock
+  Clock,
+  Network,
+  Users
 } from "lucide-react";
 import { useEvents, useAlliances, useCalls, useBlogPosts } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
@@ -23,6 +25,8 @@ import ManageEvents from "@/components/admin/ManageEvents";
 import ManageAlliances from "@/components/admin/ManageAlliances";
 import ManageCalls from "@/components/admin/ManageCalls";
 import ManageBlogPosts from "@/components/admin/ManageBlogPosts";
+import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
+import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
 
 const CollaboratorDashboard = () => {
   const { user, isCollaborator, loading } = useAuth();
@@ -184,6 +188,7 @@ const CollaboratorDashboard = () => {
                   <SelectItem value="alliances">Alianzas</SelectItem>
                   <SelectItem value="calls">Convocatorias</SelectItem>
                   <SelectItem value="blog">Blog</SelectItem>
+                  <SelectItem value="networking">Networking</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -247,6 +252,32 @@ const CollaboratorDashboard = () => {
                 </AddBlogPostDialog>
               </div>
               <ManageBlogPosts />
+            </div>
+          )}
+
+          {selectedSection === "networking" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Network className="h-6 w-6" />
+                  Networking
+                </h2>
+                <Button onClick={() => window.open("/networking", "_blank")}>
+                  <Users className="h-4 w-4 mr-2" />
+                  Ver Dashboard Completo
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-semibold mb-4">Sugerencias de Conexión</h3>
+                  <NetworkingSuggestions />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-4">Analytics de Networking</h3>
+                  <NetworkingAnalyticsDashboard userId={user?.id} />
+                </div>
+              </div>
             </div>
           )}
         </div>
