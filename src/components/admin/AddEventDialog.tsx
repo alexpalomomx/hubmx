@@ -29,7 +29,7 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: communities } = useCommunities();
-  const { user, isCollaborator } = useAuth();
+  const { user, isCollaborator, isCommunityLeader, isAdmin, isCoordinator } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,10 +53,18 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
         organizer_id: selectedCommunity && selectedCommunity !== "none" ? selectedCommunity : null,
       };
 
-      // If user is collaborator, set approval status to pending and submitted_by
+      // Set fields based on user role
       if (isCollaborator) {
         eventData.approval_status = 'pending';
         eventData.submitted_by = user?.id;
+      } else if (isCommunityLeader) {
+        // For community leaders, always set submitted_by
+        eventData.submitted_by = user?.id;
+        eventData.approval_status = 'approved'; // Community leaders can approve their own events
+      } else if (isAdmin || isCoordinator) {
+        // Admins and coordinators create approved events directly
+        eventData.approval_status = 'approved';
+        eventData.created_by = user?.id;
       }
 
       const { error } = await supabase.from("events").insert(eventData);
@@ -67,6 +75,8 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
         title: "Evento creado",
         description: isCollaborator 
           ? "El evento ha sido enviado para aprobación."
+          : isCommunityLeader
+          ? "El evento ha sido creado y aprobado automáticamente."
           : "El evento ha sido creado exitosamente.",
       });
 
@@ -98,6 +108,7 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
           <DialogDescription>
             Completa la información para crear un nuevo evento.
             {isCollaborator && " Tu evento será enviado para aprobación."}
+            {isCommunityLeader && " Como líder de comunidad, tu evento será aprobado automáticamente."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
