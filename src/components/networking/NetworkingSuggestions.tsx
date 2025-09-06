@@ -12,11 +12,13 @@ import {
   RefreshCw,
   Star
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useNetworkingSuggestions, useUpdateSuggestionStatus, useGenerateSuggestions } from "@/hooks/useNetworkingSuggestions";
 import { useCreateConnection } from "@/hooks/useNetworkingData";
 import { useTrackNetworkingAction } from "@/hooks/useNetworkingAnalytics";
 
 export const NetworkingSuggestions = () => {
+  const { user } = useAuth();
   const { data: suggestions, isLoading } = useNetworkingSuggestions();
   const updateSuggestionStatus = useUpdateSuggestionStatus();
   const generateSuggestions = useGenerateSuggestions();
@@ -24,31 +26,38 @@ export const NetworkingSuggestions = () => {
   const trackAction = useTrackNetworkingAction();
 
   const handleAcceptSuggestion = async (suggestion: any) => {
-    // Accept suggestion
-    await updateSuggestionStatus.mutateAsync({
-      suggestionId: suggestion.id,
-      status: "accepted"
-    });
+    try {
+      console.log('Accepting suggestion:', suggestion.id);
+      
+      // Accept suggestion
+      await updateSuggestionStatus.mutateAsync({
+        suggestionId: suggestion.id,
+        status: "accepted"
+      });
 
-    // Create connection request
-    await createConnection.mutateAsync({
-      requested_id: suggestion.suggested_user_id,
-      message: `¡Hola! La plataforma sugirió que nos conectáramos basado en nuestros intereses comunes. Me gustaría conocerte mejor.`
-    });
+      // Create connection request
+      await createConnection.mutateAsync({
+        requested_id: suggestion.suggested_user_id,
+        message: `¡Hola! La plataforma sugirió que nos conectáramos basado en nuestros intereses comunes. Me gustaría conocerte mejor.`
+      });
 
-    // Track analytics
-    trackAction.mutate({
-      action_type: "suggestion_accepted",
-      target_user_id: suggestion.suggested_user_id,
-      metadata: {
-        suggestion_id: suggestion.id,
-        match_score: suggestion.match_score,
-        reason: suggestion.suggestion_reason
-      }
-    });
+      // Track analytics
+      trackAction.mutate({
+        action_type: "suggestion_accepted",
+        target_user_id: suggestion.suggested_user_id,
+        metadata: {
+          suggestion_id: suggestion.id,
+          match_score: suggestion.match_score,
+          reason: suggestion.suggestion_reason
+        }
+      });
+    } catch (error) {
+      console.error('Error accepting suggestion:', error);
+    }
   };
 
   const handleDismissSuggestion = (suggestionId: string, suggestedUserId: string) => {
+    console.log('Dismissing suggestion:', suggestionId);
     updateSuggestionStatus.mutate({
       suggestionId,
       status: "dismissed"
@@ -63,7 +72,10 @@ export const NetworkingSuggestions = () => {
   };
 
   const handleGenerateMore = () => {
-    generateSuggestions.mutate(undefined);
+    console.log('Generating more suggestions for user:', user?.id);
+    if (user?.id) {
+      generateSuggestions.mutate(user.id);
+    }
   };
 
   if (isLoading) {
@@ -102,60 +114,60 @@ export const NetworkingSuggestions = () => {
         {suggestions && suggestions.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {suggestions.map((suggestion) => {
-              const user = suggestion.suggested_user;
+              const suggestedUser = suggestion.suggested_user;
               
               return (
                 <Card key={suggestion.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <Avatar className="w-12 h-12">
-                        <AvatarImage src={user.avatar_url} />
+                        <AvatarImage src={suggestedUser?.avatar_url} />
                         <AvatarFallback>
-                          {user.display_name?.charAt(0).toUpperCase()}
+                          {suggestedUser?.display_name?.charAt(0).toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <h3 className="font-semibold">{user.display_name}</h3>
-                            {user.networking_profile?.location && (
+                            <h3 className="font-semibold">{suggestedUser?.display_name || 'Usuario'}</h3>
+                            {suggestedUser?.networking_profile?.location && (
                               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                 <MapPin className="h-3 w-3" />
-                                {user.networking_profile.location}
+                                {suggestedUser.networking_profile.location}
                               </div>
                             )}
                           </div>
                           <div className="flex items-center gap-1">
                             <Star className="h-3 w-3 text-yellow-500 fill-current" />
                             <span className="text-sm font-medium">
-                              {(suggestion.match_score * 100).toFixed(0)}%
+                              {Math.round(suggestion.match_score * 100)}%
                             </span>
                           </div>
                         </div>
 
                         {/* Skills */}
                         <div className="mt-2">
-                          {user.skills?.slice(0, 3).map((skill: any) => (
+                          {suggestedUser?.skills?.slice(0, 3).map((skill: any) => (
                             <Badge key={skill.id} variant="secondary" className="mr-1 mb-1 text-xs">
                               {skill.skill_name}
                             </Badge>
                           ))}
-                          {user.skills?.length > 3 && (
+                          {suggestedUser?.skills && suggestedUser.skills.length > 3 && (
                             <Badge variant="outline" className="text-xs">
-                              +{user.skills.length - 3}
+                              +{suggestedUser.skills.length - 3}
                             </Badge>
                           )}
                         </div>
 
                         {/* Mentoring Status */}
                         <div className="mt-2 flex gap-1">
-                          {user.networking_profile?.is_available_for_mentoring && (
+                          {suggestedUser?.networking_profile?.is_available_for_mentoring && (
                             <Badge variant="outline" className="text-xs">
                               <BookOpen className="h-3 w-3 mr-1" />
                               Mentor
                             </Badge>
                           )}
-                          {user.networking_profile?.is_seeking_mentorship && (
+                          {suggestedUser?.networking_profile?.is_seeking_mentorship && (
                             <Badge variant="outline" className="text-xs">
                               Busca mentoría
                             </Badge>
@@ -203,7 +215,10 @@ export const NetworkingSuggestions = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Completa tu perfil de networking para recibir mejores sugerencias
             </p>
-            <Button onClick={handleGenerateMore} disabled={generateSuggestions.isPending}>
+            <Button 
+              onClick={handleGenerateMore} 
+              disabled={generateSuggestions.isPending}
+            >
               <Sparkles className="h-4 w-4 mr-2" />
               Generar Sugerencias
             </Button>

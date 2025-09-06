@@ -301,26 +301,33 @@ export const useUpdateConnection = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating connection:', error);
+        throw error;
+      }
       return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["user-connections"] });
       queryClient.invalidateQueries({ queryKey: ["connection-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["member-directory"] });
       
       const message = variables.status === "accepted" 
-        ? "Conexión aceptada"
-        : "Conexión rechazada";
+        ? "Conexión aceptada exitosamente"
+        : variables.status === "cancelled"
+        ? "Conexión rechazada"
+        : "Conexión actualizada";
       
       toast({
-        title: "Actualizado",
+        title: "Éxito",
         description: message,
       });
     },
     onError: (error: any) => {
+      console.error('Connection update error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "No se pudo actualizar la conexión",
         variant: "destructive",
       });
     },

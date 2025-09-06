@@ -57,11 +57,19 @@ const NetworkingDashboard = () => {
   }
 
   const handleAcceptConnection = (connectionId: string) => {
-    updateConnection.mutate({ id: connectionId, status: "accepted" });
+    console.log('Accepting connection:', connectionId);
+    updateConnection.mutate({ 
+      id: connectionId, 
+      status: "accepted" as const 
+    });
   };
 
   const handleRejectConnection = (connectionId: string) => {
-    updateConnection.mutate({ id: connectionId, status: "cancelled" });
+    console.log('Rejecting connection:', connectionId);
+    updateConnection.mutate({ 
+      id: connectionId, 
+      status: "cancelled" as const 
+    });
   };
 
   const handleSendConnection = (userId: string) => {

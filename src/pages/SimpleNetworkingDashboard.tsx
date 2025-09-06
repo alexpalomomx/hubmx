@@ -22,7 +22,8 @@ import {
   useCreateConnection,
   useUserConnections,
   useConnectionRequests,
-  useMentorshipRequests 
+  useMentorshipRequests,
+  useUpdateConnection
 } from "@/hooks/useNetworkingData";
 import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 import { MemberCard } from "@/components/networking/MemberCard";
@@ -47,6 +48,7 @@ const SimpleNetworkingDashboard = () => {
   const { data: unreadNotifications } = useUnreadNotificationCount();
   
   const createConnection = useCreateConnection();
+  const updateConnection = useUpdateConnection();
 
   // Calculate stats
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
@@ -282,11 +284,33 @@ const SimpleNetworkingDashboard = () => {
                               <div>
                                 <p className="font-medium">{request.requester?.display_name || 'Usuario'}</p>
                                 <p className="text-sm text-muted-foreground">Quiere conectar contigo</p>
+                                {request.message && (
+                                  <p className="text-sm text-muted-foreground italic">"{request.message}"</p>
+                                )}
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button size="sm">Aceptar</Button>
-                              <Button variant="outline" size="sm">Rechazar</Button>
+                              <Button 
+                                size="sm" 
+                                onClick={() => {
+                                  console.log('Accepting connection:', request.id);
+                                  updateConnection.mutate({ id: request.id, status: "accepted" });
+                                }}
+                                disabled={updateConnection.isPending}
+                              >
+                                Aceptar
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  console.log('Rejecting connection:', request.id);
+                                  updateConnection.mutate({ id: request.id, status: "cancelled" });
+                                }}
+                                disabled={updateConnection.isPending}
+                              >
+                                Rechazar
+                              </Button>
                             </div>
                           </div>
                         ))}
