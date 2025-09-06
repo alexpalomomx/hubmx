@@ -336,6 +336,33 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string | null
+          participant1_id: string
+          participant2_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          participant1_id: string
+          participant2_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          participant1_id?: string
+          participant2_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       event_registrations: {
         Row: {
           created_at: string
@@ -493,6 +520,143 @@ export type Database = {
           start_date?: string | null
           status?: Database["public"]["Enums"]["mentorship_status"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          message_type: string
+          sender_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message_type?: string
+          sender_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message_type?: string
+          sender_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      networking_analytics: {
+        Row: {
+          action_type: string
+          created_at: string
+          event_id: string | null
+          id: string
+          metadata: Json | null
+          target_user_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          metadata?: Json | null
+          target_user_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          metadata?: Json | null
+          target_user_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      networking_suggestions: {
+        Row: {
+          created_at: string
+          id: string
+          match_score: number | null
+          status: string
+          suggested_user_id: string
+          suggestion_reason: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          status?: string
+          suggested_user_id: string
+          suggestion_reason?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          status?: string
+          suggested_user_id?: string
+          suggestion_reason?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean
+          message: string
+          notification_type: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          message: string
+          notification_type: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean
+          message?: string
+          notification_type?: string
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
