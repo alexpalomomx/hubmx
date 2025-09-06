@@ -9,7 +9,8 @@ import {
   Users, 
   ArrowLeft,
   Plus,
-  BarChart3
+  BarChart3,
+  Network
 } from "lucide-react";
 import { useEvents, useEventRegistrations } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
@@ -142,6 +143,7 @@ const CommunityLeaderDashboard = () => {
                 <SelectContent className="bg-background border border-border shadow-lg z-50">
                   <SelectItem value="events">Mis Eventos</SelectItem>
                   <SelectItem value="registrations">Registros</SelectItem>
+                  <SelectItem value="networking">Networking</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -169,6 +171,58 @@ const CommunityLeaderDashboard = () => {
                 <h2 className="text-2xl font-bold">Registros a Eventos</h2>
               </div>
               <ManageEventRegistrations />
+            </div>
+          )}
+
+          {selectedSection === "networking" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Network className="h-6 w-6" />
+                  Networking de la Comunidad
+                </h2>
+              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Networking de la Comunidad</CardTitle>
+                  <CardDescription>
+                    Gestiona las conexiones y actividad de networking en tu comunidad
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold">0</p>
+                          <p className="text-sm text-muted-foreground">Conexiones activas</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold">0</p>
+                          <p className="text-sm text-muted-foreground">Mentorías en curso</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold">0</p>
+                          <p className="text-sm text-muted-foreground">Eventos de networking</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <div className="mt-6 text-center">
+                    <Button onClick={() => navigate("/networking")}>
+                      Ver Dashboard de Networking Completo
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </div>
