@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut, ChevronDown, Info, Handshake, Mail } from "lucide-react";
+import { Menu, X, User, LogOut, ChevronDown, Info, Handshake, Mail, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -117,6 +117,10 @@ const Header = () => {
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
                     <User className="mr-2 h-4 w-4" />
                     Mi perfil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/networking")}>
+                    <Users className="mr-2 h-4 w-4" />
+                    Networking
                   </DropdownMenuItem>
                   {(isAdmin || isCoordinator) && <DropdownMenuItem onClick={() => navigate("/admin")}>
                       <User className="mr-2 h-4 w-4" />

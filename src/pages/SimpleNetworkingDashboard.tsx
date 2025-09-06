@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { useMemberDirectory, useCreateConnection } from "@/hooks/useNetworkingData";
 import { MemberCard } from "@/components/networking/MemberCard";
+import NetworkingProfileForm from "@/components/networking/NetworkingProfileForm";
+import MentorshipCenter from "@/components/networking/MentorshipCenter";
 
 const SimpleNetworkingDashboard = () => {
   const { user, loading } = useAuth();
@@ -126,9 +128,10 @@ const SimpleNetworkingDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="directory">Directorio de Miembros</TabsTrigger>
-            <TabsTrigger value="connections">Mis Conexiones</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="directory">Directorio</TabsTrigger>
+            <TabsTrigger value="connections">Conexiones</TabsTrigger>
+            <TabsTrigger value="mentorship">Mentoría</TabsTrigger>
             <TabsTrigger value="profile">Mi Perfil</TabsTrigger>
           </TabsList>
 
@@ -191,21 +194,14 @@ const SimpleNetworkingDashboard = () => {
             </Card>
           </TabsContent>
 
+          {/* Mentorship Tab */}
+          <TabsContent value="mentorship" className="mt-6">
+            <MentorshipCenter />
+          </TabsContent>
+
           {/* Profile Tab */}
           <TabsContent value="profile" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Mi Perfil de Networking</CardTitle>
-                <CardDescription>
-                  Gestiona tu perfil para networking y conexiones
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  Configuración de perfil próximamente
-                </div>
-              </CardContent>
-            </Card>
+            <NetworkingProfileForm />
           </TabsContent>
         </Tabs>
       </div>

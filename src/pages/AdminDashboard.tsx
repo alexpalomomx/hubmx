@@ -40,6 +40,7 @@ import { CommunitySync } from "@/components/admin/CommunitySync";
 import { ApiCredentials } from "@/components/admin/ApiCredentials";
 import { GamificationManager } from "@/components/admin/GamificationManager";
 import { ManageCommunityMembers } from "@/components/admin/ManageCommunityMembers";
+import ManageNetworking from "@/components/admin/ManageNetworking";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -202,6 +203,7 @@ const AdminDashboard = () => {
                   <SelectItem value="alliances">Alianzas</SelectItem>
                   <SelectItem value="calls">Convocatorias</SelectItem>
                   <SelectItem value="blog">Blog</SelectItem>
+                  <SelectItem value="networking">Networking</SelectItem>
                   <SelectItem value="gamification">Gamificación</SelectItem>
                 </SelectContent>
               </Select>
@@ -341,6 +343,12 @@ const AdminDashboard = () => {
                 </AddBlogPostDialog>
               </div>
               <ManageBlogPosts />
+            </div>
+          )}
+
+          {selectedSection === "networking" && (
+            <div className="space-y-6">
+              <ManageNetworking />
             </div>
           )}
 

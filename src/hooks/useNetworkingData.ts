@@ -215,17 +215,34 @@ export const useMentorshipRequests = () => {
   return useQuery({
     queryKey: ["mentorship-requests"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get mentorship requests and then fetch profile data separately
+      const { data: requests, error } = await supabase
         .from("mentorship_requests")
-        .select(`
-          *,
-          mentor:profiles!mentorship_requests_mentor_id_fkey(display_name, avatar_url, id, user_id),
-          mentee:profiles!mentorship_requests_mentee_id_fkey(display_name, avatar_url, id, user_id)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data;
+
+      // Get all unique user IDs
+      const userIds = [
+        ...requests.map(r => r.mentor_id),
+        ...requests.map(r => r.mentee_id)
+      ];
+
+      // Get profile data for all users
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("*")
+        .in("user_id", userIds);
+
+      // Combine data
+      const requestsWithProfiles = requests.map(request => ({
+        ...request,
+        mentor: profiles?.find(p => p.user_id === request.mentor_id),
+        mentee: profiles?.find(p => p.user_id === request.mentee_id)
+      }));
+
+      return requestsWithProfiles;
     },
   });
 };

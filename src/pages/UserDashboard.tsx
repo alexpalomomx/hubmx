@@ -173,9 +173,19 @@ const UserDashboard = () => {
                 <CardContent className="text-center py-8">
                   <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">No te has unido a ninguna comunidad aún.</p>
-                  <Button variant="outline" className="mt-4" onClick={() => navigate("/#comunidades")}>
-                    Explorar Comunidades
-                  </Button>
+              <div className="flex gap-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => navigate("/networking")}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Explorar Networking
+                </Button>
+              </div>
+              <Button variant="outline" className="mt-4" onClick={() => navigate("/#comunidades")}>
+                Explorar Comunidades
+              </Button>
                 </CardContent>
               </Card>
             )}
@@ -256,9 +266,19 @@ const UserDashboard = () => {
                 <CardContent className="text-center py-8">
                   <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">No te has registrado a ningún evento aún.</p>
-                  <Button variant="outline" className="mt-4" onClick={() => navigate("/#eventos")}>
-                    Explorar Eventos
-                  </Button>
+              <div className="flex gap-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => navigate("/networking")}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Explorar Networking
+                </Button>
+              </div>
+              <Button variant="outline" className="mt-4" onClick={() => navigate("/#eventos")}>
+                Explorar Eventos
+              </Button>
                 </CardContent>
               </Card>
             )}
