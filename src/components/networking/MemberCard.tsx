@@ -13,6 +13,8 @@ interface MemberCardProps {
     networking_profile?: {
       location?: string;
       is_available_for_mentoring?: boolean;
+      is_seeking_mentorship?: boolean;
+      available_for_connections?: boolean;
     };
     skills?: Array<{ id: string; skill_name: string; }>;
   };
@@ -55,6 +57,16 @@ export const MemberCard = ({ member, onConnect, isConnecting }: MemberCardProps)
               <Badge variant="outline" className="mt-2">
                 <Star className="h-3 w-3 mr-1" />
                 Mentor
+              </Badge>
+            )}
+            {member.networking_profile?.is_seeking_mentorship && (
+              <Badge variant="outline" className="mt-2 ml-2">
+                Busca mentoría
+              </Badge>
+            )}
+            {member.networking_profile?.available_for_connections && (
+              <Badge variant="secondary" className="mt-2 ml-2">
+                Abierto a conectar
               </Badge>
             )}
             <Button 
