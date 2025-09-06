@@ -33,11 +33,14 @@ import { MessagingInterface } from "@/components/messaging/MessagingInterface";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { useGetOrCreateConversation } from "@/hooks/useMessaging";
 
 const SimpleNetworkingDashboard = () => {
   const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("directory");
+  const [initialConversationId, setInitialConversationId] = useState<string | undefined>(undefined);
+  const [initialOtherUser, setInitialOtherUser] = useState<any>(undefined);
   
   const { data: members, isLoading: membersLoading } = useMemberDirectory({
     search: searchQuery
@@ -49,6 +52,7 @@ const SimpleNetworkingDashboard = () => {
   
   const createConnection = useCreateConnection();
   const updateConnection = useUpdateConnection();
+  const getOrCreateConversation = useGetOrCreateConversation();
 
   // Calculate stats
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
@@ -246,13 +250,30 @@ const SimpleNetworkingDashboard = () => {
                                   <p className="text-sm text-muted-foreground">
                                     Conectado desde {new Date(connection.created_at).toLocaleDateString()}
                                   </p>
-                                </div>
                               </div>
-                              <Button variant="outline" size="sm">
-                                <MessageSquare className="h-4 w-4 mr-2" />
-                                Mensaje
-                              </Button>
                             </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={async () => {
+                                const otherUserId = connection.requester_id === user?.id 
+                                  ? connection.requested_id 
+                                  : connection.requester_id;
+                                const conv = await getOrCreateConversation.mutateAsync(otherUserId);
+                                setInitialConversationId(conv.id);
+                                setInitialOtherUser({
+                                  id: otherUserId,
+                                  display_name: otherUser?.display_name,
+                                  avatar_url: otherUser?.avatar_url,
+                                });
+                                setActiveTab("messages");
+                              }}
+                              disabled={getOrCreateConversation.isPending}
+                            >
+                              <MessageSquare className="h-4 w-4 mr-2" />
+                              Mensaje
+                            </Button>
+                          </div>
                           );
                         })}
                       </div>
@@ -325,7 +346,10 @@ const SimpleNetworkingDashboard = () => {
           {/* Messages Tab */}
           <TabsContent value="messages" className="mt-6">
             <div className="h-[600px]">
-              <MessagingInterface />
+              <MessagingInterface 
+                initialConversationId={initialConversationId}
+                initialOtherUser={initialOtherUser}
+              />
             </div>
           </TabsContent>
 
