@@ -4,6 +4,7 @@ import { Menu, X, User, LogOut, ChevronDown, Info, Handshake, Mail, Users } from
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const {
@@ -97,7 +98,9 @@ const Header = () => {
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
-            {user ? <DropdownMenu>
+            {user ? <>
+              <NotificationDropdown />
+              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="flex items-center space-x-2">
                     <User className="h-4 w-4" />
@@ -140,7 +143,8 @@ const Header = () => {
                     Cerrar sesión
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu> : <>
+              </DropdownMenu>
+            </> : <>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
                   Iniciar sesión
                 </Button>

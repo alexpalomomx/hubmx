@@ -41,6 +41,14 @@ export function ManagePendingApprovals({ pendingCommunities, pendingAlliances }:
 
   const handleApproveCommunity = async (id: string) => {
     try {
+      const { data: community, error: fetchError } = await supabase
+        .from("communities")
+        .select("name, contact_email")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       const { error } = await supabase
         .from("communities")
         .update({ status: "active" })
@@ -48,12 +56,34 @@ export function ManagePendingApprovals({ pendingCommunities, pendingAlliances }:
 
       if (error) throw error;
 
+      // Crear notificación para usuarios que tengan ese email en su perfil
+      if (community?.contact_email) {
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("user_id")
+          .ilike("bio", `%${community.contact_email}%`)
+          .single();
+
+        if (userProfile) {
+          await supabase
+            .from("notifications")
+            .insert({
+              user_id: userProfile.user_id,
+              notification_type: "community_approved",
+              title: "¡Comunidad Aprobada!",
+              message: `Tu solicitud para la comunidad "${community.name}" ha sido aprobada y ya es visible en la plataforma.`,
+              data: { community_id: id, community_name: community.name }
+            });
+        }
+      }
+
       toast({
         title: "Comunidad aprobada",
-        description: "La comunidad ha sido aprobada y ahora es visible en la plataforma.",
+        description: "La comunidad ha sido aprobada y se ha enviado notificación al solicitante.",
       });
 
       queryClient.invalidateQueries({ queryKey: ['communities'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-approvals'] });
     } catch (error) {
       console.error("Error al aprobar comunidad:", error);
       toast({
@@ -91,6 +121,14 @@ export function ManagePendingApprovals({ pendingCommunities, pendingAlliances }:
 
   const handleApproveAlliance = async (id: string) => {
     try {
+      const { data: alliance, error: fetchError } = await supabase
+        .from("alliances")
+        .select("name, contact_email, submitted_by")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       const { error } = await supabase
         .from("alliances")
         .update({ status: "active" })
@@ -98,12 +136,26 @@ export function ManagePendingApprovals({ pendingCommunities, pendingAlliances }:
 
       if (error) throw error;
 
+      // Si hay submitted_by, enviar notificación directa
+      if (alliance?.submitted_by) {
+        await supabase
+          .from("notifications")
+          .insert({
+            user_id: alliance.submitted_by,
+            notification_type: "alliance_approved",
+            title: "¡Alianza Aprobada!",
+            message: `Tu solicitud de alianza "${alliance.name}" ha sido aprobada y ya es visible en la plataforma.`,
+            data: { alliance_id: id, alliance_name: alliance.name }
+          });
+      }
+
       toast({
         title: "Alianza aprobada",
-        description: "La alianza ha sido aprobada y ahora es visible en la plataforma.",
+        description: "La alianza ha sido aprobada y se ha enviado notificación al solicitante.",
       });
 
       queryClient.invalidateQueries({ queryKey: ['alliances'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-approvals'] });
     } catch (error) {
       console.error("Error al aprobar alianza:", error);
       toast({

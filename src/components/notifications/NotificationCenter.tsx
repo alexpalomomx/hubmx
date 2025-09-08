@@ -64,6 +64,10 @@ export const NotificationCenter = ({
         return <Heart className="h-4 w-4 text-red-500" />;
       case "event_reminder":
         return <Calendar className="h-4 w-4 text-indigo-500" />;
+      case "community_approved":
+        return <Users className="h-4 w-4 text-green-600" />;
+      case "alliance_approved":
+        return <Heart className="h-4 w-4 text-green-600" />;
       default:
         return <Bell className="h-4 w-4 text-gray-500" />;
     }
