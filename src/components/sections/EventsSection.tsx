@@ -19,8 +19,18 @@ const EventsSection = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const upcomingEvents = events?.filter(event => event.status === "upcoming") || [];
-  const pastEvents = events?.filter(event => event.status === "past") || [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+  
+  const upcomingEvents = events?.filter(event => {
+    const eventDate = new Date(event.event_date);
+    return eventDate >= today;
+  }) || [];
+  
+  const pastEvents = events?.filter(event => {
+    const eventDate = new Date(event.event_date);
+    return eventDate < today;
+  }) || [];
 
   const handleRegister = (event: any) => {
     if (!user) {
