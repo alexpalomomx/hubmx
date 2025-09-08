@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Users, Building, HandHeart, ArrowRight, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const JoinSection = () => {
   const [selectedType, setSelectedType] = useState("community");
@@ -16,6 +17,7 @@ const JoinSection = () => {
     category: "Tecnología"
   });
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const registrationTypes = [
     {
@@ -95,6 +97,15 @@ const JoinSection = () => {
           description: "Tu solicitud ha sido enviada y será revisada por nuestro equipo antes de ser publicada.",
         });
       } else if (selectedType === "alliance") {
+        if (!user) {
+          toast({
+            title: "Autenticación requerida",
+            description: "Debes iniciar sesión para enviar una solicitud de alianza.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const { error } = await supabase
           .from("alliances")
           .insert({
@@ -102,7 +113,9 @@ const JoinSection = () => {
             description: formData.description,
             alliance_type: formData.category,
             contact_email: formData.email,
-            status: "pending"
+            status: "pending",
+            submitted_by: user.id,
+            approval_status: "pending"
           });
 
         if (error) throw error;
