@@ -97,15 +97,6 @@ const JoinSection = () => {
           description: "Tu solicitud ha sido enviada y será revisada por nuestro equipo antes de ser publicada.",
         });
       } else if (selectedType === "alliance") {
-        if (!user) {
-          toast({
-            title: "Autenticación requerida",
-            description: "Debes iniciar sesión para enviar una solicitud de alianza.",
-            variant: "destructive",
-          });
-          return;
-        }
-
         const { error } = await supabase
           .from("alliances")
           .insert({
@@ -114,7 +105,7 @@ const JoinSection = () => {
             alliance_type: formData.category,
             contact_email: formData.email,
             status: "pending",
-            submitted_by: user.id,
+            ...(user && { submitted_by: user.id }),
             approval_status: "pending"
           });
 
