@@ -88,6 +88,7 @@ const JoinSection = () => {
             description: formData.description,
             category: formData.category.toLowerCase(),
             contact_email: formData.email,
+            contact_phone: formData.phone,
             status: "pending"
           });
 
@@ -105,6 +106,7 @@ const JoinSection = () => {
             description: formData.description,
             alliance_type: formData.category,
             contact_email: formData.email,
+            contact_phone: formData.phone,
             status: "pending",
             ...(user && { submitted_by: user.id }),
             approval_status: "pending"

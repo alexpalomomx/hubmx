@@ -22,6 +22,7 @@ export type Database = {
           approved_by: string | null
           benefits: string[] | null
           contact_email: string | null
+          contact_phone: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -41,6 +42,7 @@ export type Database = {
           approved_by?: string | null
           benefits?: string[] | null
           contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -60,6 +62,7 @@ export type Database = {
           approved_by?: string | null
           benefits?: string[] | null
           contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -201,6 +204,7 @@ export type Database = {
         Row: {
           category: string
           contact_email: string | null
+          contact_phone: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -218,6 +222,7 @@ export type Database = {
         Insert: {
           category: string
           contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -235,6 +240,7 @@ export type Database = {
         Update: {
           category?: string
           contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null

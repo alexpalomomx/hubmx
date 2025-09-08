@@ -56,30 +56,34 @@ export function ManagePendingApprovals({ pendingCommunities, pendingAlliances }:
 
       if (error) throw error;
 
-      // Crear notificación para usuarios que tengan ese email en su perfil
+      // Solo enviar notificaciones a usuarios registrados que tengan el mismo email
       if (community?.contact_email) {
-        const { data: userProfile } = await supabase
-          .from("profiles")
-          .select("user_id")
-          .ilike("bio", `%${community.contact_email}%`)
-          .single();
+        try {
+          // Buscar usuario en la tabla de perfiles que tenga el email de contacto
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("user_id")
+            .eq("display_name", community.contact_email);
 
-        if (userProfile) {
-          await supabase
-            .from("notifications")
-            .insert({
-              user_id: userProfile.user_id,
-              notification_type: "community_approved",
-              title: "¡Comunidad Aprobada!",
-              message: `Tu solicitud para la comunidad "${community.name}" ha sido aprobada y ya es visible en la plataforma.`,
-              data: { community_id: id, community_name: community.name }
-            });
+          if (profiles && profiles.length > 0) {
+            await supabase
+              .from("notifications")
+              .insert({
+                user_id: profiles[0].user_id,
+                notification_type: "community_approved",
+                title: "¡Comunidad Aprobada!",
+                message: `Tu solicitud para la comunidad "${community.name}" ha sido aprobada y ya es visible en la plataforma.`,
+                data: { community_id: id, community_name: community.name }
+              });
+          }
+        } catch (notificationError) {
+          console.log("No se pudo enviar notificación:", notificationError);
         }
       }
 
       toast({
         title: "Comunidad aprobada",
-        description: "La comunidad ha sido aprobada y se ha enviado notificación al solicitante.",
+        description: "La comunidad ha sido aprobada exitosamente.",
       });
 
       queryClient.invalidateQueries({ queryKey: ['communities'] });
