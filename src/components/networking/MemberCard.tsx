@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Star, UserPlus } from "lucide-react";
+import { MapPin, Star, UserPlus, Check, Clock, X } from "lucide-react";
+import { useConnectionStatus } from "@/hooks/useNetworkingData";
 
 interface MemberCardProps {
   member: {
@@ -23,6 +24,64 @@ interface MemberCardProps {
 }
 
 export const MemberCard = ({ member, onConnect, isConnecting }: MemberCardProps) => {
+  const { data: connectionStatus } = useConnectionStatus(member.user_id);
+
+  const getConnectionButtonProps = () => {
+    if (!connectionStatus) {
+      return {
+        text: "Conectar",
+        icon: UserPlus,
+        disabled: isConnecting,
+        variant: "default" as const,
+        onClick: () => onConnect(member.user_id)
+      };
+    }
+
+    switch (connectionStatus.status) {
+      case "accepted":
+        return {
+          text: "Conectado",
+          icon: Check,
+          disabled: true,
+          variant: "secondary" as const,
+          onClick: () => {}
+        };
+      case "pending":
+        return {
+          text: "Solicitud enviada",
+          icon: Clock,
+          disabled: true,
+          variant: "outline" as const,
+          onClick: () => {}
+        };
+      case "blocked":
+        return {
+          text: "Bloqueado",
+          icon: X,
+          disabled: true,
+          variant: "destructive" as const,
+          onClick: () => {}
+        };
+      case "cancelled":
+        return {
+          text: "Conectar",
+          icon: UserPlus,
+          disabled: isConnecting,
+          variant: "default" as const,
+          onClick: () => onConnect(member.user_id)
+        };
+      default:
+        return {
+          text: "Conectar",
+          icon: UserPlus,
+          disabled: isConnecting,
+          variant: "default" as const,
+          onClick: () => onConnect(member.user_id)
+        };
+    }
+  };
+
+  const buttonProps = getConnectionButtonProps();
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="p-4">
@@ -72,11 +131,12 @@ export const MemberCard = ({ member, onConnect, isConnecting }: MemberCardProps)
             <Button 
               size="sm" 
               className="w-full mt-3"
-              onClick={() => onConnect(member.user_id)}
-              disabled={isConnecting}
+              variant={buttonProps.variant}
+              onClick={buttonProps.onClick}
+              disabled={buttonProps.disabled}
             >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Conectar
+              <buttonProps.icon className="h-4 w-4 mr-2" />
+              {buttonProps.text}
             </Button>
           </div>
         </div>

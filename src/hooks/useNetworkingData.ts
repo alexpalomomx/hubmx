@@ -257,6 +257,27 @@ export const useCreateConnection = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuario no autenticado");
 
+      // Verificar si ya existe una conexión entre estos usuarios
+      const { data: existingConnection, error: checkError } = await supabase
+        .from("user_connections")
+        .select("*")
+        .or(`and(requester_id.eq.${user.id},requested_id.eq.${requested_id}),and(requester_id.eq.${requested_id},requested_id.eq.${user.id})`)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
+      if (existingConnection) {
+        const statusMessages = {
+          pending: "Ya tienes una solicitud de conexión pendiente con este usuario.",
+          accepted: "Ya estás conectado con este usuario.",
+          blocked: "Esta conexión ha sido bloqueada.",
+          cancelled: "Esta conexión fue cancelada previamente."
+        };
+        throw new Error(statusMessages[existingConnection.status as keyof typeof statusMessages] || "Ya existe una conexión con este usuario.");
+      }
+
       const { data, error } = await supabase
         .from("user_connections")
         .insert({
@@ -551,5 +572,32 @@ export const useUpdateMentorship = () => {
         variant: "destructive",
       });
     },
+  });
+};
+
+// Hook para verificar el estado de conexión entre dos usuarios específicos
+export const useConnectionStatus = (targetUserId?: string) => {
+  return useQuery({
+    queryKey: ["connection-status", targetUserId],
+    queryFn: async () => {
+      if (!targetUserId) return null;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      // Buscar conexión existente entre los dos usuarios
+      const { data: connection, error } = await supabase
+        .from("user_connections")
+        .select("*")
+        .or(`and(requester_id.eq.${user.id},requested_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},requested_id.eq.${user.id})`)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      return connection;
+    },
+    enabled: !!targetUserId,
   });
 };
