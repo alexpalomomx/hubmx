@@ -54,6 +54,7 @@ const AdminDashboard = () => {
   const { data: calls } = useCalls();
   const { data: pendingData } = usePendingApprovals();
   const [selectedSection, setSelectedSection] = useState("communities");
+  const [approvalsTab, setApprovalsTab] = useState<"communities" | "alliances">("communities");
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
@@ -66,6 +67,16 @@ const AdminDashboard = () => {
       navigate("/");
     }
   }, [user, isAdmin, isCoordinator, loading, navigate]);
+
+  useEffect(() => {
+    if (pendingData) {
+      if ((pendingData.alliances?.length || 0) > 0) {
+        setApprovalsTab("alliances");
+      } else if ((pendingData.communities?.length || 0) > 0) {
+        setApprovalsTab("communities");
+      }
+    }
+  }, [pendingData]);
 
   if (loading) {
     return (
@@ -247,7 +258,7 @@ const AdminDashboard = () => {
                 </p>
               </div>
 
-              <Tabs defaultValue="communities" className="space-y-4">
+              <Tabs value={approvalsTab} onValueChange={(v) => setApprovalsTab(v as any)} className="space-y-4">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="communities" className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
