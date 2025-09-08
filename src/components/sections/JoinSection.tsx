@@ -13,6 +13,7 @@ const JoinSection = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     description: "",
     category: "Tecnología"
   });
@@ -117,10 +118,10 @@ const JoinSection = () => {
         });
       }
 
-      // Reset form
       setFormData({
         name: "",
         email: "",
+        phone: "",
         description: "",
         category: selectedType === 'alliance' ? 'Empresa Privada' : 'Tecnología'
       });
@@ -242,6 +243,19 @@ const JoinSection = () => {
                       required
                       className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="contacto@ejemplo.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Teléfono de contacto</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="+52 123 456 7890"
                     />
                   </div>
 
