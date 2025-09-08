@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { 
   Users, 
   Calendar, 
@@ -238,10 +240,51 @@ const AdminDashboard = () => {
 
           {selectedSection === "approvals" && (
             <div className="space-y-6">
-              <ManagePendingApprovals 
-                pendingCommunities={pendingData?.communities || []}
-                pendingAlliances={pendingData?.alliances || []}
-              />
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Gestión de Aprobaciones</h2>
+                <p className="text-muted-foreground">
+                  Revisa y aprueba las solicitudes pendientes organizadas por tipo
+                </p>
+              </div>
+
+              <Tabs defaultValue="communities" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="communities" className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Comunidades
+                    {pendingData && pendingData.communities.length > 0 && (
+                      <Badge variant="destructive" className="ml-2">
+                        {pendingData.communities.length}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="alliances" className="flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    Alianzas
+                    {pendingData && pendingData.alliances.length > 0 && (
+                      <Badge variant="destructive" className="ml-2">
+                        {pendingData.alliances.length}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="communities">
+                  <ManagePendingApprovals 
+                    pendingCommunities={pendingData?.communities || []}
+                    pendingAlliances={[]}
+                    showOnlyType="communities"
+                  />
+                </TabsContent>
+
+                <TabsContent value="alliances">
+                  <ManagePendingApprovals 
+                    pendingCommunities={[]}
+                    pendingAlliances={pendingData?.alliances || []}
+                    showOnlyType="alliances"
+                  />
+                </TabsContent>
+              </Tabs>
             </div>
           )}
 

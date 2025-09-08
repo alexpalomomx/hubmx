@@ -33,9 +33,14 @@ interface PendingAlliance {
 interface ManagePendingApprovalsProps {
   pendingCommunities: PendingCommunity[];
   pendingAlliances: PendingAlliance[];
+  showOnlyType?: 'communities' | 'alliances';
 }
 
-export function ManagePendingApprovals({ pendingCommunities, pendingAlliances }: ManagePendingApprovalsProps) {
+export function ManagePendingApprovals({ 
+  pendingCommunities, 
+  pendingAlliances, 
+  showOnlyType 
+}: ManagePendingApprovalsProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -219,15 +224,26 @@ export function ManagePendingApprovals({ pendingCommunities, pendingAlliances }:
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Aprobaciones Pendientes</h2>
-        <p className="text-muted-foreground">
-          Revisa y aprueba las solicitudes de nuevas comunidades y alianzas
-        </p>
+      {!showOnlyType && (
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Aprobaciones Pendientes</h2>
+          <p className="text-muted-foreground">
+            Revisa y aprueba las solicitudes de nuevas comunidades y alianzas
+          </p>
+        </div>
+      )}
+
+      {/* Debug info */}
+      <div className="p-4 bg-muted/30 rounded-md text-sm">
+        <p>Debug: Comunidades pendientes: {pendingCommunities.length}</p>
+        <p>Debug: Alianzas pendientes: {pendingAlliances.length}</p>
+        {pendingAlliances.length > 0 && (
+          <p>Debug: Primera alianza: {pendingAlliances[0]?.name}</p>
+        )}
       </div>
 
       {/* Pending Communities */}
-      {pendingCommunities.length > 0 && (
+      {(!showOnlyType || showOnlyType === 'communities') && pendingCommunities.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -302,7 +318,7 @@ export function ManagePendingApprovals({ pendingCommunities, pendingAlliances }:
       )}
 
       {/* Pending Alliances */}
-      {pendingAlliances.length > 0 && (
+      {(!showOnlyType || showOnlyType === 'alliances') && pendingAlliances.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium flex items-center gap-2">
             <Building className="h-5 w-5" />
@@ -363,11 +379,18 @@ export function ManagePendingApprovals({ pendingCommunities, pendingAlliances }:
       )}
 
       {/* No pending items */}
-      {pendingCommunities.length === 0 && pendingAlliances.length === 0 && (
+      {((!showOnlyType && pendingCommunities.length === 0 && pendingAlliances.length === 0) ||
+        (showOnlyType === 'communities' && pendingCommunities.length === 0) ||
+        (showOnlyType === 'alliances' && pendingAlliances.length === 0)) && (
         <Card>
           <CardContent className="flex items-center justify-center h-32">
             <p className="text-muted-foreground">
-              No hay solicitudes pendientes de aprobación
+              {showOnlyType === 'communities' 
+                ? "No hay solicitudes de comunidades pendientes de aprobación"
+                : showOnlyType === 'alliances'
+                ? "No hay solicitudes de alianzas pendientes de aprobación" 
+                : "No hay solicitudes pendientes de aprobación"
+              }
             </p>
           </CardContent>
         </Card>
