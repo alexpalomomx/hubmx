@@ -203,10 +203,10 @@ const AdminDashboard = () => {
                   <SelectItem value="community-data">Info Comunidades</SelectItem>
                   <SelectItem value="approvals" className="relative">
                     <div className="flex items-center justify-between w-full">
-                      <span>Aprobaciones Comunidades</span>
-                      {pendingData && (pendingData.communities.length + pendingData.alliances.length) > 0 && (
+                      <span>Aprobaciones</span>
+                      {(((pendingData?.communities?.length || 0) + (pendingData?.alliances?.length || 0)) > 0) && (
                         <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                          {pendingData.communities.length + pendingData.alliances.length}
+                          {(pendingData?.communities?.length || 0) + (pendingData?.alliances?.length || 0)}
                         </span>
                       )}
                     </div>
@@ -272,24 +272,24 @@ const AdminDashboard = () => {
 
               <Tabs value={approvalsTab} onValueChange={(v) => setApprovalsTab(v as any)} className="space-y-4">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="communities" className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Comunidades
-                    {pendingData && pendingData.communities.length > 0 && (
-                      <Badge variant="destructive" className="ml-2">
-                        {pendingData.communities.length}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="alliances" className="flex items-center gap-2">
-                    <Building className="h-4 w-4" />
-                    Alianzas
-                    {pendingData && pendingData.alliances.length > 0 && (
-                      <Badge variant="destructive" className="ml-2">
-                        {pendingData.alliances.length}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
+                    <TabsTrigger value="communities" className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Comunidades
+                      {((pendingData?.communities?.length || 0) > 0) && (
+                        <Badge variant="destructive" className="ml-2">
+                          {pendingData?.communities?.length || 0}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                    <TabsTrigger value="alliances" className="flex items-center gap-2">
+                      <Building className="h-4 w-4" />
+                      Alianzas
+                      {((pendingData?.alliances?.length || 0) > 0) && (
+                        <Badge variant="destructive" className="ml-2">
+                          {pendingData?.alliances?.length || 0}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="communities">
