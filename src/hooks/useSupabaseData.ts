@@ -192,7 +192,7 @@ export const usePendingApprovals = () => {
           .order('created_at', { ascending: false }),
         supabase
           .from('blog_posts')
-          .select('*, author:author_id(display_name)')
+          .select('*')
           .eq('approval_status', 'pending')
           .order('created_at', { ascending: false })
       ]);
