@@ -23,7 +23,7 @@ const CommunitiesSection = () => {
         title: "Registro requerido",
         description: "Para unirte a una comunidad, primero debes crear una cuenta para que tu información se guarde automáticamente.",
         action: (
-          <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/auth?tab=signup")}>
             Crear cuenta
           </Button>
         ),

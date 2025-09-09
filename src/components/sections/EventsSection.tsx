@@ -38,7 +38,7 @@ const EventsSection = () => {
         title: "Inicia sesión requerido",
         description: "Para registrarte a un evento, primero debes crear una cuenta o iniciar sesión para que tu información se guarde automáticamente.",
         action: (
-          <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/auth?tab=signup")}>
             Ir a registro
           </Button>
         ),
