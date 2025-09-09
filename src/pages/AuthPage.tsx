@@ -17,6 +17,12 @@ const AuthPage = () => {
   const [inviteMode, setInviteMode] = useState(false);
   const [newPassword, setNewPassword] = useState("");
 
+  // Get default tab from URL params
+  const defaultTab = useMemo(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('tab') === 'signup' ? 'signup' : 'signin';
+  }, []);
+
   useEffect(() => {
     const url = new URL(window.location.href);
     const code = url.searchParams.get("code");
@@ -139,7 +145,7 @@ const AuthPage = () => {
                 </Button>
               </form>
             ) : (
-              <Tabs defaultValue="signin" className="w-full">
+              <Tabs defaultValue={defaultTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="signin">Iniciar Sesión</TabsTrigger>
                   <TabsTrigger value="signup">Registrarse</TabsTrigger>

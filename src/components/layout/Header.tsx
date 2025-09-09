@@ -148,7 +148,7 @@ const Header = () => {
                 <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
                   Iniciar sesión
                 </Button>
-                <Button variant="hero" size="sm" onClick={() => navigate("/auth")}>
+                <Button variant="hero" size="sm" onClick={() => navigate("/auth?tab=signup")}>
                   Registrarse
                 </Button>
               </>}
@@ -223,7 +223,7 @@ const Header = () => {
                     Iniciar sesión
                   </Button>
                   <Button variant="hero" className="w-full" onClick={() => {
-              navigate("/auth");
+              navigate("/auth?tab=signup");
               setIsMenuOpen(false);
             }}>
                     Registrarse
