@@ -70,6 +70,18 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (pendingData) {
+      const totalPending = (pendingData.communities?.length || 0) +
+        (pendingData.alliances?.length || 0) +
+        (pendingData.events?.length || 0) +
+        (pendingData.calls?.length || 0) +
+        (pendingData.blogPosts?.length || 0);
+
+      // Si hay pendientes, mostrar automáticamente la sección de Aprobaciones
+      if (totalPending > 0) {
+        setSelectedSection("approvals");
+      }
+
+      // Dentro de Aprobaciones, priorizar Alianzas si hay
       if ((pendingData.alliances?.length || 0) > 0) {
         setApprovalsTab("alliances");
       } else if ((pendingData.communities?.length || 0) > 0) {

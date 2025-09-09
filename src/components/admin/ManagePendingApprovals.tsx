@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, X, Mail, MapPin, Users, Building } from "lucide-react";
 import { format } from "date-fns";
@@ -43,6 +44,7 @@ export function ManagePendingApprovals({
 }: ManagePendingApprovalsProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const handleApproveCommunity = async (id: string) => {
     try {
@@ -140,7 +142,12 @@ export function ManagePendingApprovals({
 
       const { error } = await supabase
         .from("alliances")
-        .update({ status: "active" })
+        .update({ 
+          status: "active",
+          approval_status: "approved",
+          approved_at: new Date().toISOString(),
+          approved_by: user?.id || null
+        })
         .eq("id", id);
 
       if (error) throw error;
@@ -179,7 +186,7 @@ export function ManagePendingApprovals({
     try {
       const { error } = await supabase
         .from("alliances")
-        .update({ status: "rejected" })
+        .update({ status: "rejected", approval_status: "rejected" })
         .eq("id", id);
 
       if (error) throw error;
