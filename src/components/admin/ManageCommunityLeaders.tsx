@@ -49,15 +49,41 @@ const ManageCommunityLeaders = () => {
     try {
       const { data, error } = await supabase
         .from('community_leaders')
-        .select(`
-          *,
-          community:communities(name),
-          profile:profiles!community_leaders_user_id_fkey(display_name)
-        `)
+        .select('*')
         .eq('status', 'active');
 
       if (error) throw error;
-      setLeaders(data || []);
+
+      const leadersRaw = data || [];
+      const userIds = leadersRaw.map(l => l.user_id).filter(Boolean);
+      const communityIds = leadersRaw.map(l => l.community_id).filter(Boolean);
+
+      let profilesMap = new Map<string, string>();
+      let communitiesMap = new Map<string, string>();
+
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, display_name')
+          .in('user_id', userIds);
+        profilesMap = new Map((profilesData || []).map(p => [p.user_id as string, p.display_name as string]));
+      }
+
+      if (communityIds.length > 0) {
+        const { data: communitiesData } = await supabase
+          .from('communities')
+          .select('id, name')
+          .in('id', communityIds);
+        communitiesMap = new Map((communitiesData || []).map(c => [c.id as string, c.name as string]));
+      }
+
+      const enriched = leadersRaw.map(l => ({
+        ...l,
+        profileDisplayName: profilesMap.get(l.user_id) || 'Usuario',
+        communityName: communitiesMap.get(l.community_id) || 'Comunidad'
+      }));
+
+      setLeaders(enriched);
     } catch (error) {
       console.error('Error fetching leaders:', error);
     }
@@ -75,17 +101,26 @@ const ManageCommunityLeaders = () => {
 
     setLoading(true);
     try {
-      // First, find the user by email from profiles table
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('user_id, display_name')
-        .ilike('display_name', `%${formData.email}%`)
-        .single();
+      let userId: string | null = null;
 
-      if (profileError || !profileData) {
+      if (formData.email.includes('@')) {
+        const { data: uid, error: rpcError } = await supabase.rpc('get_user_id_by_email', { _email: formData.email });
+        if (rpcError) throw rpcError;
+        userId = uid as unknown as string | null;
+      } else {
+        const { data: profileByName, error: nameError } = await supabase
+          .from('profiles')
+          .select('user_id, display_name')
+          .ilike('display_name', `%${formData.email}%`)
+          .maybeSingle();
+        if (nameError) throw nameError;
+        userId = profileByName?.user_id || null;
+      }
+
+      if (!userId) {
         toast({
-          title: "Error",
-          description: "Usuario no encontrado. Verifica el email o nombre.",
+          title: "Usuario no encontrado",
+          description: "Verifica el correo o nombre e inténtalo de nuevo",
           variant: "destructive",
         });
         return;
@@ -95,19 +130,15 @@ const ManageCommunityLeaders = () => {
       const { data: existingRole } = await supabase
         .from('user_roles')
         .select('id')
-        .eq('user_id', profileData.user_id)
+        .eq('user_id', userId)
         .eq('role', 'community_leader')
-        .single();
+        .maybeSingle();
 
       // Assign community leader role if not exists
       if (!existingRole) {
         const { error: roleError } = await supabase
           .from('user_roles')
-          .insert({
-            user_id: profileData.user_id,
-            role: 'community_leader'
-          });
-
+          .insert({ user_id: userId, role: 'community_leader' });
         if (roleError) throw roleError;
       }
 
@@ -115,14 +146,14 @@ const ManageCommunityLeaders = () => {
       const { data: existingLeader } = await supabase
         .from('community_leaders')
         .select('id')
-        .eq('user_id', profileData.user_id)
+        .eq('user_id', userId)
         .eq('community_id', formData.communityId)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
       if (existingLeader) {
         toast({
-          title: "Error",
+          title: "Ya es líder",
           description: "Este usuario ya es líder de esta comunidad",
           variant: "destructive",
         });
@@ -133,7 +164,7 @@ const ManageCommunityLeaders = () => {
       const { error: leaderError } = await supabase
         .from('community_leaders')
         .insert({
-          user_id: profileData.user_id,
+          user_id: userId,
           community_id: formData.communityId,
           assigned_by: (await supabase.auth.getUser()).data.user?.id,
           status: 'active'
@@ -235,10 +266,10 @@ const ManageCommunityLeaders = () => {
                   </div>
                   <div>
                     <h3 className="font-medium">
-                      {leader.profile?.display_name || 'Usuario sin nombre'}
+                      {leader.profileDisplayName || 'Usuario sin nombre'}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Comunidad: {leader.community?.name || 'Comunidad no encontrada'}
+                      Comunidad: {leader.communityName || 'Comunidad no encontrada'}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Asignado el {new Date(leader.assigned_at).toLocaleDateString()}

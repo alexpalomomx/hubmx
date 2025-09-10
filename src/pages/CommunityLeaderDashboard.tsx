@@ -37,22 +37,27 @@ const CommunityLeaderDashboard = () => {
       if (!user) return;
 
       try {
-        const { data, error } = await supabase
+        const { data: leader, error } = await supabase
           .from('community_leaders')
-          .select(`
-            *,
-            community:communities(*)
-          `)
+          .select('community_id')
           .eq('user_id', user.id)
           .eq('status', 'active')
-          .single();
+          .maybeSingle();
 
         if (error) {
-          console.error('Error fetching community:', error);
+          console.error('Error fetching community leader record:', error);
           return;
         }
 
-        setMyCommunity(data?.community || null);
+        if (leader?.community_id) {
+          const { data: community, error: commError } = await supabase
+            .from('communities')
+            .select('*')
+            .eq('id', leader.community_id)
+            .maybeSingle();
+          if (!commError) setMyCommunity(community);
+        }
+
       } catch (error) {
         console.error('Error:', error);
       } finally {
