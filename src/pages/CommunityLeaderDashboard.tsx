@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,9 +25,45 @@ const CommunityLeaderDashboard = () => {
   const { data: events } = useEvents();
   const { data: registrations } = useEventRegistrations();
   const [selectedSection, setSelectedSection] = useState("events");
+  const [myCommunity, setMyCommunity] = useState<any>(null);
+  const [loadingCommunity, setLoadingCommunity] = useState(true);
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
+
+  // Fetch community data for this leader
+  useEffect(() => {
+    const fetchMyCommunity = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('community_leaders')
+          .select(`
+            *,
+            community:communities(*)
+          `)
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+
+        if (error) {
+          console.error('Error fetching community:', error);
+          return;
+        }
+
+        setMyCommunity(data?.community || null);
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoadingCommunity(false);
+      }
+    };
+
+    if (user && isCommunityLeader) {
+      fetchMyCommunity();
+    }
+  }, [user, isCommunityLeader]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -37,7 +74,7 @@ const CommunityLeaderDashboard = () => {
     }
   }, [user, isCommunityLeader, loading, navigate]);
 
-  if (loading) {
+  if (loading || loadingCommunity) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -52,9 +89,9 @@ const CommunityLeaderDashboard = () => {
     return null;
   }
 
-  // Filter events for this community leader (placeholder logic - should be filtered by community)
+  // Filter events for this community leader's community
   const myEvents = events?.filter(event => 
-    event.created_by === user.id || event.submitted_by === user.id
+    myCommunity && (event.organizer_id === myCommunity.id || event.submitted_by === user.id)
   ) || [];
 
   const myRegistrations = registrations?.filter(reg => 
@@ -63,17 +100,24 @@ const CommunityLeaderDashboard = () => {
 
   const statsCards = [
     {
-      title: "Mis Eventos",
+      title: "Mi Comunidad",
+      value: myCommunity?.name || "No asignada",
+      icon: Users,
+      description: `${myCommunity?.members_count || 0} miembros`,
+      color: "text-purple-600"
+    },
+    {
+      title: "Eventos de la Comunidad",
       value: myEvents.length,
       icon: Calendar,
-      description: "Eventos creados",
+      description: "Eventos gestionados",
       color: "text-blue-600"
     },
     {
-      title: "Registros",
+      title: "Registros Totales",
       value: myRegistrations.length,
       icon: Users,
-      description: "Total de registros",
+      description: "Participantes en eventos",
       color: "text-green-600"
     }
   ];
@@ -95,7 +139,7 @@ const CommunityLeaderDashboard = () => {
               </Button>
               <div className="h-6 w-px bg-border"></div>
               <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-                Dashboard de Líder
+                Dashboard de Líder - {myCommunity?.name || 'Comunidad'}
               </h1>
             </div>
             <div className="flex items-center space-x-2">

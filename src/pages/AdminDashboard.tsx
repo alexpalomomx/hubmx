@@ -42,6 +42,7 @@ import { CommunitySync } from "@/components/admin/CommunitySync";
 import { ApiCredentials } from "@/components/admin/ApiCredentials";
 import { GamificationManager } from "@/components/admin/GamificationManager";
 import { ManageCommunityMembers } from "@/components/admin/ManageCommunityMembers";
+import ManageCommunityLeaders from "@/components/admin/ManageCommunityLeaders";
 import ManageNetworking from "@/components/admin/ManageNetworking";
 
 const AdminDashboard = () => {
@@ -224,6 +225,7 @@ const AdminDashboard = () => {
                   <SelectItem value="events">Eventos</SelectItem>
                   <SelectItem value="registrations">Registros</SelectItem>
                   <SelectItem value="members">Miembros</SelectItem>
+                  <SelectItem value="leaders">Líderes</SelectItem>
                   <SelectItem value="users">Usuarios</SelectItem>
                   <SelectItem value="alliances">Alianzas</SelectItem>
                   <SelectItem value="calls">Convocatorias</SelectItem>
@@ -346,6 +348,12 @@ const AdminDashboard = () => {
           {selectedSection === "members" && (
             <div className="space-y-6">
               <ManageCommunityMembers />
+            </div>
+          )}
+
+          {selectedSection === "leaders" && (
+            <div className="space-y-6">
+              <ManageCommunityLeaders />
             </div>
           )}
 
