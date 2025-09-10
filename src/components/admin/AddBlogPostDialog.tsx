@@ -77,6 +77,8 @@ const AddBlogPostDialog = ({ children }: AddBlogPostDialogProps) => {
         ...formData,
         tags,
         author_id: user.id,
+        submitted_by: user.id,
+        approval_status: 'pending',
       };
 
       if (formData.status === 'published') {
