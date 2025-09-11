@@ -167,7 +167,7 @@ const UserDashboard = () => {
         </div>
 
         <Tabs defaultValue="communities" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="communities">Comunidades</TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
             <TabsTrigger value="networking">Networking</TabsTrigger>
@@ -176,197 +176,100 @@ const UserDashboard = () => {
           </TabsList>
 
           <TabsContent value="communities" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Mis Comunidades */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 flex items-center">
-              <Users className="mr-2 h-6 w-6" />
-              Mis Comunidades
-            </h2>
-            
-            {communitiesLoading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i}>
-                    <CardHeader>
-                      <Skeleton className="h-6 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </CardHeader>
-                    <CardContent>
-                      <Skeleton className="h-4 w-full mb-2" />
-                      <Skeleton className="h-4 w-2/3" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : userCommunities && userCommunities.length > 0 ? (
-              <div className="space-y-4">
-                {userCommunities.map((membership: any) => {
-                  const community = membership.communities;
-                  return (
-                    <Card key={community.id} className="hover:shadow-lg transition-shadow">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl font-semibold mb-4 flex items-center">
+                <Users className="mr-2 h-6 w-6" />
+                Mis Comunidades
+              </h2>
+              
+              {communitiesLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Card key={i}>
                       <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-3">
-                            {community.logo_url ? (
-                              <img
-                                src={community.logo_url}
-                                alt={community.name}
-                                className="w-12 h-12 rounded-lg object-cover"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center text-2xl">
-                                {getCommunityIcon(community.category)}
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </CardHeader>
+                      <CardContent>
+                        <Skeleton className="h-4 w-full mb-2" />
+                        <Skeleton className="h-4 w-2/3" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : userCommunities && userCommunities.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {userCommunities.map((membership: any) => {
+                    const community = membership.communities;
+                    return (
+                      <Card key={community.id} className="hover:shadow-lg transition-shadow">
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center space-x-3">
+                              {community.logo_url ? (
+                                <img
+                                  src={community.logo_url}
+                                  alt={community.name}
+                                  className="w-12 h-12 rounded-lg object-cover"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center text-2xl">
+                                  {getCommunityIcon(community.category)}
+                                </div>
+                              )}
+                              <div>
+                                <CardTitle className="text-lg">{community.name}</CardTitle>
+                                <Badge className={getCommunityColor(community.category)}>
+                                  {community.category}
+                                </Badge>
                               </div>
+                            </div>
+                            {community.website_url && (
+                              <Button variant="ghost" size="sm" asChild>
+                                <a href={community.website_url} target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="h-4 w-4" />
+                                </a>
+                              </Button>
                             )}
-                            <div>
-                              <CardTitle className="text-lg">{community.name}</CardTitle>
-                              <Badge className={getCommunityColor(community.category)}>
-                                {community.category}
-                              </Badge>
-                            </div>
                           </div>
-                          {community.website_url && (
-                            <Button variant="ghost" size="sm" asChild>
-                              <a href={community.website_url} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
-                            </Button>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground mb-3">{community.description}</p>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground">
-                          <span className="flex items-center">
-                            <Users className="mr-1 h-4 w-4" />
-                            {community.members_count} miembros
-                          </span>
-                          <span>
-                            Unido el {format(new Date(membership.joined_at), "dd 'de' MMMM, yyyy", { locale: es })}
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No te has unido a ninguna comunidad aún.</p>
-              <div className="flex gap-4">
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  onClick={() => navigate("/networking")}
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Explorar Networking
-                </Button>
-              </div>
-              <Button variant="outline" className="mt-4" onClick={() => navigate("/#comunidades")}>
-                Explorar Comunidades
-              </Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Mis Eventos */}
-          <div>
-            <h2 className="text-2xl font-semibold mb-4 flex items-center">
-              <Calendar className="mr-2 h-6 w-6" />
-              Mis Eventos
-            </h2>
-            
-            {eventsLoading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i}>
-                    <CardHeader>
-                      <Skeleton className="h-6 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </CardHeader>
-                    <CardContent>
-                      <Skeleton className="h-4 w-full mb-2" />
-                      <Skeleton className="h-4 w-2/3" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : userEvents && userEvents.length > 0 ? (
-              <div className="space-y-4">
-                {userEvents.map((registration: any) => {
-                  const event = registration.events;
-                  const isUpcoming = new Date(event.event_date) > new Date();
-                  
-                  return (
-                    <Card key={event.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="text-lg">{event.title}</CardTitle>
-                            <div className="flex items-center space-x-2 mt-2">
-                              <Badge className={getEventTypeColor(event.event_type)}>
-                                {event.event_type}
-                              </Badge>
-                              <Badge variant={isUpcoming ? "default" : "secondary"}>
-                                {isUpcoming ? "Próximo" : "Finalizado"}
-                              </Badge>
-                            </div>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-muted-foreground mb-3">{community.description}</p>
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span className="flex items-center">
+                              <Users className="mr-1 h-4 w-4" />
+                              {community.members_count} miembros
+                            </span>
+                            <span>
+                              Unido el {format(new Date(membership.joined_at), "dd 'de' MMMM, yyyy", { locale: es })}
+                            </span>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground mb-3">{event.description}</p>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center text-muted-foreground">
-                            <Calendar className="mr-2 h-4 w-4" />
-                            {format(new Date(event.event_date), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })}
-                            {event.event_time && ` - ${event.event_time}`}
-                          </div>
-                          {event.location && (
-                            <div className="flex items-center text-muted-foreground">
-                              <MapPin className="mr-2 h-4 w-4" />
-                              {event.location}
-                            </div>
-                          )}
-                          <div className="flex items-center text-muted-foreground">
-                            <Users className="mr-2 h-4 w-4" />
-                            {event.current_attendees} participantes
-                            {event.max_attendees && ` de ${event.max_attendees}`}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">No te has registrado a ningún evento aún.</p>
-              <div className="flex gap-4">
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  onClick={() => navigate("/networking")}
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Explorar Networking
-                </Button>
-              </div>
-              <Button variant="outline" className="mt-4" onClick={() => navigate("/#eventos")}>
-                Explorar Eventos
-              </Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="text-center py-8">
+                    <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No te has unido a ninguna comunidad aún.</p>
+                    <div className="flex gap-4 justify-center mt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => navigate("/networking")}
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Explorar Networking
+                      </Button>
+                      <Button variant="outline" onClick={() => navigate("/#comunidades")}>
+                        Explorar Comunidades
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4">
