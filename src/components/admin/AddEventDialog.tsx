@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,10 +26,41 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCommunity, setSelectedCommunity] = useState<string>("");
+  const [myCommunity, setMyCommunity] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: communities } = useCommunities();
   const { user, isCollaborator, isCommunityLeader, isAdmin, isCoordinator } = useAuth();
+
+  // Fetch leader's community if they are a community leader
+  useEffect(() => {
+    const fetchLeaderCommunity = async () => {
+      if (!user || !isCommunityLeader) return;
+
+      try {
+        const { data: leader, error } = await supabase
+          .from('community_leaders')
+          .select('community_id, communities(*)')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching community leader record:', error);
+          return;
+        }
+
+        if (leader?.communities) {
+          setMyCommunity(leader.communities);
+          setSelectedCommunity(leader.community_id);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchLeaderCommunity();
+  }, [user, isCommunityLeader]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -124,17 +155,33 @@ export default function AddEventDialog({ children }: AddEventDialogProps) {
 
           <div className="space-y-2">
             <Label htmlFor="organizer_community">Comunidad Organizadora</Label>
-            <Select value={selectedCommunity} onValueChange={setSelectedCommunity}>
+            <Select 
+              value={selectedCommunity} 
+              onValueChange={setSelectedCommunity}
+              disabled={isCommunityLeader}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona una comunidad" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Sin comunidad específica</SelectItem>
-                {communities?.map((community) => (
-                  <SelectItem key={community.id} value={community.id}>
-                    {community.name}
-                  </SelectItem>
-                ))}
+                {(isAdmin || isCoordinator) && (
+                  <SelectItem value="none">Sin comunidad específica</SelectItem>
+                )}
+                {isCommunityLeader ? (
+                  // For community leaders, only show their assigned community
+                  myCommunity && (
+                    <SelectItem value={myCommunity.id}>
+                      {myCommunity.name}
+                    </SelectItem>
+                  )
+                ) : (
+                  // For admins and coordinators, show all communities
+                  communities?.map((community) => (
+                    <SelectItem key={community.id} value={community.id}>
+                      {community.name}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
