@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen, ArrowLeft, Network, MessageSquare, UserPlus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen, ArrowLeft, Network, MessageSquare, UserPlus, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -15,10 +15,12 @@ import { MessagingInterface } from "@/components/messaging/MessagingInterface";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
+import { useState } from "react";
 
 const UserDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState("communities");
   const { data: userCommunities, isLoading: communitiesLoading } = useUserCommunities(user?.id);
   const { data: userEvents, isLoading: eventsLoading } = useUserEventRegistrations(user?.email);
   
@@ -166,16 +168,25 @@ const UserDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="communities" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="communities">Comunidades</TabsTrigger>
-            <TabsTrigger value="events">Eventos</TabsTrigger>
-            <TabsTrigger value="networking">Networking</TabsTrigger>
-            <TabsTrigger value="messages">Mensajes</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <Select value={activeSection} onValueChange={setActiveSection}>
+            <SelectTrigger className="w-[200px] bg-background border border-border shadow-sm z-50">
+              <SelectValue placeholder="Seleccionar sección" />
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border border-border shadow-lg z-50">
+              <SelectItem value="communities">Comunidades</SelectItem>
+              <SelectItem value="events">Eventos</SelectItem>
+              <SelectItem value="networking">Networking</SelectItem>
+              <SelectItem value="messages">Mensajes</SelectItem>
+              <SelectItem value="analytics">Analytics</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-          <TabsContent value="communities" className="space-y-4">
+        <div className="space-y-6">
+          {activeSection === "communities" && (
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl font-semibold mb-4 flex items-center">
                 <Users className="mr-2 h-6 w-6" />
@@ -270,108 +281,119 @@ const UserDashboard = () => {
                 </Card>
               )}
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="events" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div>
-                <h2 className="text-2xl font-semibold mb-4 flex items-center">
-                  <Calendar className="mr-2 h-6 w-6" />
-                  Mis Eventos
-                </h2>
-                
-                {eventsLoading ? (
-                  <div className="space-y-4">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <Card key={i}>
+          {activeSection === "events" && (
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl font-semibold mb-4 flex items-center">
+                <Calendar className="mr-2 h-6 w-6" />
+                Mis Eventos
+              </h2>
+              
+              {eventsLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Card key={i}>
+                      <CardHeader>
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </CardHeader>
+                      <CardContent>
+                        <Skeleton className="h-4 w-full mb-2" />
+                        <Skeleton className="h-4 w-2/3" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : userEvents && userEvents.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {userEvents.map((registration: any) => {
+                    const event = registration.events;
+                    const isUpcoming = new Date(event.event_date) > new Date();
+                    
+                    return (
+                      <Card key={event.id} className="hover:shadow-lg transition-shadow">
                         <CardHeader>
-                          <Skeleton className="h-6 w-3/4" />
-                          <Skeleton className="h-4 w-1/2" />
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <CardTitle className="text-lg">{event.title}</CardTitle>
+                              <div className="flex items-center space-x-2 mt-2">
+                                <Badge className={getEventTypeColor(event.event_type)}>
+                                  {event.event_type}
+                                </Badge>
+                                <Badge variant={isUpcoming ? "default" : "secondary"}>
+                                  {isUpcoming ? "Próximo" : "Finalizado"}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
                         </CardHeader>
                         <CardContent>
-                          <Skeleton className="h-4 w-full mb-2" />
-                          <Skeleton className="h-4 w-2/3" />
+                          <p className="text-muted-foreground mb-3">{event.description}</p>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center text-muted-foreground">
+                              <Calendar className="mr-2 h-4 w-4" />
+                              {format(new Date(event.event_date), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })}
+                              {event.event_time && ` - ${event.event_time}`}
+                            </div>
+                            {event.location && (
+                              <div className="flex items-center text-muted-foreground">
+                                <MapPin className="mr-2 h-4 w-4" />
+                                {event.location}
+                              </div>
+                            )}
+                            <div className="flex items-center text-muted-foreground">
+                              <Users className="mr-2 h-4 w-4" />
+                              {event.current_attendees} participantes
+                              {event.max_attendees && ` de ${event.max_attendees}`}
+                            </div>
+                          </div>
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
-                ) : userEvents && userEvents.length > 0 ? (
-                  <div className="space-y-4">
-                    {userEvents.map((registration: any) => {
-                      const event = registration.events;
-                      const isUpcoming = new Date(event.event_date) > new Date();
-                      
-                      return (
-                        <Card key={event.id} className="hover:shadow-lg transition-shadow">
-                          <CardHeader>
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <CardTitle className="text-lg">{event.title}</CardTitle>
-                                <div className="flex items-center space-x-2 mt-2">
-                                  <Badge className={getEventTypeColor(event.event_type)}>
-                                    {event.event_type}
-                                  </Badge>
-                                  <Badge variant={isUpcoming ? "default" : "secondary"}>
-                                    {isUpcoming ? "Próximo" : "Finalizado"}
-                                  </Badge>
-                                </div>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground mb-3">{event.description}</p>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex items-center text-muted-foreground">
-                                <Calendar className="mr-2 h-4 w-4" />
-                                {format(new Date(event.event_date), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: es })}
-                                {event.event_time && ` - ${event.event_time}`}
-                              </div>
-                              {event.location && (
-                                <div className="flex items-center text-muted-foreground">
-                                  <MapPin className="mr-2 h-4 w-4" />
-                                  {event.location}
-                                </div>
-                              )}
-                              <div className="flex items-center text-muted-foreground">
-                                <Users className="mr-2 h-4 w-4" />
-                                {event.current_attendees} participantes
-                                {event.max_attendees && ` de ${event.max_attendees}`}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <Card>
-                    <CardContent className="text-center py-8">
-                      <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground">No te has registrado a ningún evento aún.</p>
-                      <Button variant="outline" className="mt-4" onClick={() => navigate("/#eventos")}>
+                    );
+                  })}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="text-center py-8">
+                    <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No te has registrado a ningún evento aún.</p>
+                    <div className="flex gap-4 justify-center mt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => navigate("/networking")}
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Explorar Networking
+                      </Button>
+                      <Button variant="outline" onClick={() => navigate("/#eventos")}>
                         Explorar Eventos
                       </Button>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="networking" className="space-y-4">
-            <NetworkingSuggestions />
-          </TabsContent>
+          {activeSection === "networking" && (
+            <div>
+              <NetworkingSuggestions />
+            </div>
+          )}
 
-          <TabsContent value="messages" className="space-y-4">
-            <div className="h-[600px]">
+          {activeSection === "messages" && (
+            <div>
               <MessagingInterface />
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="analytics" className="space-y-4">
-            <NetworkingAnalyticsDashboard userId={user?.id} />
-          </TabsContent>
-        </Tabs>
+          {activeSection === "analytics" && (
+            <div>
+              <NetworkingAnalyticsDashboard userId={user?.id} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
