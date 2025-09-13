@@ -173,7 +173,6 @@ const UserDashboard = () => {
           <Select value={activeSection} onValueChange={setActiveSection}>
             <SelectTrigger className="w-[200px] bg-background border border-border shadow-sm z-50">
               <SelectValue placeholder="Seleccionar sección" />
-              <ChevronDown className="h-4 w-4 opacity-50" />
             </SelectTrigger>
             <SelectContent className="bg-background border border-border shadow-lg z-50">
               <SelectItem value="communities">Comunidades</SelectItem>
