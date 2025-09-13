@@ -21,16 +21,16 @@ const Footer = () => {
     }],
     legal: [{
       name: "Términos y Condiciones",
-      href: "#"
+      href: "/terms"
     }, {
       name: "Política de Privacidad",
-      href: "#"
+      href: "/privacy"
     }, {
       name: "Código de Conducta",
-      href: "#"
+      href: "/code-of-conduct"
     }, {
       name: "FAQ",
-      href: "#"
+      href: "/faq"
     }],
     social: [{
       name: "Facebook",
