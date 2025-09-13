@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Users, 
   UserPlus, 
@@ -18,7 +18,8 @@ import {
   MapPin,
   ArrowLeft,
   Sparkles,
-  BarChart3
+  BarChart3,
+  ChevronDown
 } from "lucide-react";
 import { 
   useUserConnections, 
@@ -192,27 +193,26 @@ const NetworkingDashboard = () => {
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="directory">Directorio</TabsTrigger>
-            <TabsTrigger value="connections">Conexiones</TabsTrigger>
-            <TabsTrigger value="requests">Solicitudes</TabsTrigger>
-            <TabsTrigger value="messages">Mensajes</TabsTrigger>
-            <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
-            <TabsTrigger value="mentorship">Mentorías</TabsTrigger>
-            <TabsTrigger value="profile">Mi Perfil</TabsTrigger>
-          </TabsList>
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="directory">Directorio</TabsTrigger>
-            <TabsTrigger value="connections">Conexiones</TabsTrigger>
-            <TabsTrigger value="requests">Solicitudes</TabsTrigger>
-            <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
-            <TabsTrigger value="mentorship">Mentorías</TabsTrigger>
-            <TabsTrigger value="profile">Mi Perfil</TabsTrigger>
-          </TabsList>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">Networking</h2>
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-[200px] bg-background border border-border shadow-sm z-50">
+              <SelectValue placeholder="Seleccionar sección" />
+            </SelectTrigger>
+            <SelectContent className="bg-background border border-border shadow-lg z-50">
+              <SelectItem value="directory">Directorio</SelectItem>
+              <SelectItem value="connections">Conexiones</SelectItem>
+              <SelectItem value="requests">Solicitudes</SelectItem>
+              <SelectItem value="messages">Mensajes</SelectItem>
+              <SelectItem value="suggestions">Sugerencias</SelectItem>
+              <SelectItem value="mentorship">Mentorías</SelectItem>
+              <SelectItem value="profile">Mi Perfil</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-          {/* Member Directory Tab */}
-          <TabsContent value="directory" className="mt-6">
+        <div className="space-y-6">
+          {activeTab === "directory" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -290,10 +290,9 @@ const NetworkingDashboard = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          {/* My Connections Tab */}
-          <TabsContent value="connections" className="mt-6">
+          {activeTab === "connections" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -351,10 +350,9 @@ const NetworkingDashboard = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          {/* Requests Tab */}
-          <TabsContent value="requests" className="mt-6">
+          {activeTab === "requests" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -424,10 +422,9 @@ const NetworkingDashboard = () => {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          {/* Messages Tab */}
-          <TabsContent value="messages" className="mt-6">
+          {activeTab === "messages" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -444,23 +441,20 @@ const NetworkingDashboard = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          )}
 
-          {/* Suggestions Tab */}
-          <TabsContent value="suggestions" className="mt-6">
+          {activeTab === "suggestions" && (
             <NetworkingSuggestions />
-          </TabsContent>
+          )}
 
-          {/* Mentorship Tab */}
-          <TabsContent value="mentorship" className="mt-6">
+          {activeTab === "mentorship" && (
             <MentorshipCenter />
-          </TabsContent>
+          )}
 
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="mt-6">
+          {activeTab === "profile" && (
             <NetworkingProfileForm />
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </div>
     </div>
   );
