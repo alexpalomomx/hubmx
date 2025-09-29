@@ -194,9 +194,10 @@ const AdminDashboard = () => {
         <div className="space-y-6">
           {/* Section Selector */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="w-full sm:w-auto">
+            {/* Mobile Menu - Select dropdown */}
+            <div className="w-full sm:hidden">
               <Select value={selectedSection} onValueChange={setSelectedSection}>
-                <SelectTrigger className="w-full sm:w-[280px] bg-background">
+                <SelectTrigger className="w-full bg-background">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border shadow-lg z-50">
@@ -234,6 +235,143 @@ const AdminDashboard = () => {
                   <SelectItem value="gamification">Gamificación</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Desktop Menu - Tabs */}
+            <div className="hidden sm:block w-full">
+              <Tabs value={selectedSection} onValueChange={setSelectedSection}>
+                <TabsList className="grid grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 w-full h-auto p-1 gap-1">
+                  <TabsTrigger value="communities" className="flex items-center gap-1 text-xs px-2 py-2">
+                    <Users className="h-3 w-3" />
+                    <span className="hidden lg:inline">Comunidades</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="events" className="flex items-center gap-1 text-xs px-2 py-2">
+                    <Calendar className="h-3 w-3" />
+                    <span className="hidden lg:inline">Eventos</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="alliances" className="flex items-center gap-1 text-xs px-2 py-2">
+                    <Building className="h-3 w-3" />
+                    <span className="hidden lg:inline">Alianzas</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="approvals" className="flex items-center gap-1 text-xs px-2 py-2 relative">
+                    <Settings className="h-3 w-3" />
+                    <span className="hidden lg:inline">Aprobaciones</span>
+                    {(((pendingData?.communities?.length || 0) + (pendingData?.alliances?.length || 0)) > 0) && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                        {(pendingData?.communities?.length || 0) + (pendingData?.alliances?.length || 0)}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="content-approvals" className="flex items-center gap-1 text-xs px-2 py-2 relative">
+                    <FileText className="h-3 w-3" />
+                    <span className="hidden lg:inline">Contenido</span>
+                    {pendingData && (pendingData.events?.length + pendingData.calls?.length + pendingData.blogPosts?.length + pendingData.alliances?.length) > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                        {(pendingData.events?.length || 0) + (pendingData.calls?.length || 0) + (pendingData.blogPosts?.length || 0) + (pendingData.alliances?.length || 0)}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                  <TabsTrigger value="users" className="flex items-center gap-1 text-xs px-2 py-2 hidden xl:flex">
+                    <Users className="h-3 w-3" />
+                    <span className="hidden lg:inline">Usuarios</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="networking" className="flex items-center gap-1 text-xs px-2 py-2 hidden xl:flex">
+                    <Briefcase className="h-3 w-3" />
+                    <span className="hidden lg:inline">Networking</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="gamification" className="flex items-center gap-1 text-xs px-2 py-2 hidden xl:flex">
+                    <Trophy className="h-3 w-3" />
+                    <span className="hidden lg:inline">Gamificación</span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              
+              {/* Secondary navigation for less common sections */}
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Button
+                  variant={selectedSection === "community-data" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("community-data")}
+                  className="h-8 text-xs"
+                >
+                  <BarChart3 className="h-3 w-3 mr-1" />
+                  Info Comunidades
+                </Button>
+                <Button
+                  variant={selectedSection === "registrations" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("registrations")}
+                  className="h-8 text-xs"
+                >
+                  <FileText className="h-3 w-3 mr-1" />
+                  Registros
+                </Button>
+                <Button
+                  variant={selectedSection === "members" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("members")}
+                  className="h-8 text-xs"
+                >
+                  <Users className="h-3 w-3 mr-1" />
+                  Miembros
+                </Button>
+                <Button
+                  variant={selectedSection === "leaders" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("leaders")}
+                  className="h-8 text-xs"
+                >
+                  <Award className="h-3 w-3 mr-1" />
+                  Líderes
+                </Button>
+                <Button
+                  variant={selectedSection === "calls" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("calls")}
+                  className="h-8 text-xs"
+                >
+                  <Megaphone className="h-3 w-3 mr-1" />
+                  Convocatorias
+                </Button>
+                <Button
+                  variant={selectedSection === "blog" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("blog")}
+                  className="h-8 text-xs"
+                >
+                  <FileText className="h-3 w-3 mr-1" />
+                  Blog
+                </Button>
+                <div className="xl:hidden flex gap-2">
+                  <Button
+                    variant={selectedSection === "users" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedSection("users")}
+                    className="h-8 text-xs"
+                  >
+                    <Users className="h-3 w-3 mr-1" />
+                    Usuarios
+                  </Button>
+                  <Button
+                    variant={selectedSection === "networking" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedSection("networking")}
+                    className="h-8 text-xs"
+                  >
+                    <Briefcase className="h-3 w-3 mr-1" />
+                    Networking
+                  </Button>
+                  <Button
+                    variant={selectedSection === "gamification" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedSection("gamification")}
+                    className="h-8 text-xs"
+                  >
+                    <Trophy className="h-3 w-3 mr-1" />
+                    Gamificación
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
