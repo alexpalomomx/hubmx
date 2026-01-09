@@ -63,3 +63,6 @@ verify_jwt = true
 
 [functions.admin-get-users]
 verify_jwt = true
+
+[functions.import-external-events]
+verify_jwt = false
