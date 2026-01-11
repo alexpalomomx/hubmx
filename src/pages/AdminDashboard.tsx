@@ -44,6 +44,7 @@ import { GamificationManager } from "@/components/admin/GamificationManager";
 import { ManageCommunityMembers } from "@/components/admin/ManageCommunityMembers";
 import ManageCommunityLeaders from "@/components/admin/ManageCommunityLeaders";
 import ManageNetworking from "@/components/admin/ManageNetworking";
+import ManageEventSources from "@/components/admin/ManageEventSources";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -231,6 +232,8 @@ const AdminDashboard = () => {
                   <SelectItem value="alliances">Alianzas</SelectItem>
                   <SelectItem value="calls">Convocatorias</SelectItem>
                   <SelectItem value="blog">Blog</SelectItem>
+                  <SelectItem value="blog">Blog</SelectItem>
+                  <SelectItem value="event-sources">Fuentes Externas</SelectItem>
                   <SelectItem value="networking">Networking</SelectItem>
                   <SelectItem value="gamification">Gamificación</SelectItem>
                 </SelectContent>
@@ -341,6 +344,15 @@ const AdminDashboard = () => {
                 >
                   <FileText className="h-3 w-3 mr-1" />
                   Blog
+                </Button>
+                <Button
+                  variant={selectedSection === "event-sources" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("event-sources")}
+                  className="h-8 text-xs"
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Fuentes Externas
                 </Button>
                 <div className="xl:hidden flex gap-2">
                   <Button
@@ -555,6 +567,12 @@ const AdminDashboard = () => {
                 </AddBlogPostDialog>
               </div>
               <ManageBlogPosts />
+            </div>
+          )}
+
+          {selectedSection === "event-sources" && (
+            <div className="space-y-6">
+              <ManageEventSources />
             </div>
           )}
 
