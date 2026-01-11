@@ -407,6 +407,48 @@ export type Database = {
           },
         ]
       }
+      event_sources: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          events_imported: number
+          id: string
+          is_active: boolean
+          last_synced_at: string | null
+          name: string
+          source_type: string
+          sync_error: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          events_imported?: number
+          id?: string
+          is_active?: boolean
+          last_synced_at?: string | null
+          name: string
+          source_type: string
+          sync_error?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          events_imported?: number
+          id?: string
+          is_active?: boolean
+          last_synced_at?: string | null
+          name?: string
+          source_type?: string
+          sync_error?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           approval_status: string | null
