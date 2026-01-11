@@ -16,6 +16,7 @@ import SimpleNetworkingDashboard from "./pages/SimpleNetworkingDashboard";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import CodeOfConduct from "./pages/CodeOfConduct";
+import PublicCalendar from "./pages/PublicCalendar";
 import FAQ from "./pages/FAQ";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/code-of-conduct" element={<CodeOfConduct />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/calendario" element={<PublicCalendar />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

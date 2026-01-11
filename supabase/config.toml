@@ -66,3 +66,6 @@ verify_jwt = true
 
 [functions.import-external-events]
 verify_jwt = false
+
+[functions.calendar-feed]
+verify_jwt = false
