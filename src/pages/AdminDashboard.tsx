@@ -232,7 +232,6 @@ const AdminDashboard = () => {
                   <SelectItem value="alliances">Alianzas</SelectItem>
                   <SelectItem value="calls">Convocatorias</SelectItem>
                   <SelectItem value="blog">Blog</SelectItem>
-                  <SelectItem value="blog">Blog</SelectItem>
                   <SelectItem value="event-sources">Fuentes Externas</SelectItem>
                   <SelectItem value="networking">Networking</SelectItem>
                   <SelectItem value="gamification">Gamificación</SelectItem>
