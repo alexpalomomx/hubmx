@@ -3,6 +3,7 @@ import HeroSection from "@/components/sections/HeroSection";
 import AboutSection from "@/components/sections/AboutSection";
 import CommunitiesSection from "@/components/sections/CommunitiesSection";
 import EventsSection from "@/components/sections/EventsSection";
+import CalendarSection from "@/components/sections/CalendarSection";
 import CallsSection from "@/components/sections/CallsSection";
 import AlliancesSection from "@/components/sections/AlliancesSection";
 import BlogSection from "@/components/sections/BlogSection";
@@ -29,6 +30,9 @@ const Index = () => {
         </div>
         <div id="eventos">
           <EventsSection />
+        </div>
+        <div id="calendario">
+          <CalendarSection />
         </div>
         <CallsSection />
         <div id="alianzas">
