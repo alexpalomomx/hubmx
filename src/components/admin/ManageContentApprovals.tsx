@@ -44,8 +44,9 @@ const ManageContentApprovals = ({
 
     setIsApproving(true);
     try {
+      const approvalStatus = action === 'approve' ? 'approved' : 'rejected';
       const updateData: any = {
-        approval_status: action,
+        approval_status: approvalStatus,
         approved_by: (await supabase.auth.getUser()).data.user?.id,
         approved_at: new Date().toISOString()
       };
