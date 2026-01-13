@@ -11,22 +11,25 @@ import {
   ArrowLeft,
   Plus,
   BarChart3,
-  Network
+  Network,
+  Link2
 } from "lucide-react";
-import { useEvents, useEventRegistrations } from "@/hooks/useSupabaseData";
+import { useMyEvents, useEventRegistrations } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import AddEventDialog from "@/components/admin/AddEventDialog";
-import ManageEvents from "@/components/admin/ManageEvents";
+import ManageMyEvents from "@/components/admin/ManageMyEvents";
+import ManageMyEventSources from "@/components/admin/ManageMyEventSources";
 import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistrations";
 
 const CommunityLeaderDashboard = () => {
   const { user, isCommunityLeader, loading } = useAuth();
   const navigate = useNavigate();
-  const { data: events } = useEvents();
-  const { data: registrations } = useEventRegistrations();
   const [selectedSection, setSelectedSection] = useState("events");
   const [myCommunity, setMyCommunity] = useState<any>(null);
   const [loadingCommunity, setLoadingCommunity] = useState(true);
+  
+  const { data: myEvents } = useMyEvents(user?.id, myCommunity?.id);
+  const { data: registrations } = useEventRegistrations();
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
@@ -94,13 +97,8 @@ const CommunityLeaderDashboard = () => {
     return null;
   }
 
-  // Filter events for this community leader's community
-  const myEvents = events?.filter(event => 
-    myCommunity && (event.organizer_id === myCommunity.id || event.submitted_by === user.id)
-  ) || [];
-
   const myRegistrations = registrations?.filter(reg => 
-    myEvents.some(event => event.id === reg.event_id)
+    myEvents?.some(event => event.id === reg.event_id)
   ) || [];
 
   const statsCards = [
@@ -113,7 +111,7 @@ const CommunityLeaderDashboard = () => {
     },
     {
       title: "Eventos de la Comunidad",
-      value: myEvents.length,
+      value: myEvents?.length || 0,
       icon: Calendar,
       description: "Eventos gestionados",
       color: "text-blue-600"
@@ -191,6 +189,7 @@ const CommunityLeaderDashboard = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border shadow-lg z-50">
                   <SelectItem value="events">Mis Eventos</SelectItem>
+                  <SelectItem value="sources">Fuentes Externas</SelectItem>
                   <SelectItem value="registrations">Registros</SelectItem>
                   <SelectItem value="networking">Networking</SelectItem>
                 </SelectContent>
@@ -210,7 +209,19 @@ const CommunityLeaderDashboard = () => {
                   </Button>
                 </AddEventDialog>
               </div>
-              <ManageEvents />
+              <ManageMyEvents communityId={myCommunity?.id} />
+            </div>
+          )}
+
+          {selectedSection === "sources" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Link2 className="h-6 w-6" />
+                  Fuentes de Eventos Externos
+                </h2>
+              </div>
+              <ManageMyEventSources />
             </div>
           )}
 
