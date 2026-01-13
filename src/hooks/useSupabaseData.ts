@@ -47,6 +47,56 @@ export const useEvents = (status?: string) => {
   });
 };
 
+// Hook para obtener eventos del usuario actual (para líderes de comunidad)
+export const useMyEvents = (userId?: string, communityId?: string) => {
+  return useQuery({
+    queryKey: ["my-events", userId, communityId],
+    queryFn: async () => {
+      if (!userId) return [];
+      
+      let query = supabase
+        .from("events")
+        .select(`
+          *,
+          organizer:organizer_id(name)
+        `)
+        .order("event_date", { ascending: true });
+
+      // Filtrar eventos creados por el usuario O de su comunidad
+      if (communityId) {
+        query = query.or(`submitted_by.eq.${userId},created_by.eq.${userId},organizer_id.eq.${communityId}`);
+      } else {
+        query = query.or(`submitted_by.eq.${userId},created_by.eq.${userId}`);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
+  });
+};
+
+// Hook para obtener fuentes de eventos del usuario actual
+export const useMyEventSources = (userId?: string) => {
+  return useQuery({
+    queryKey: ["my-event-sources", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      
+      const { data, error } = await supabase
+        .from("event_sources")
+        .select("*")
+        .eq("created_by", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
+  });
+};
+
 // Hook para obtener alianzas
 export const useAlliances = () => {
   return useQuery({
