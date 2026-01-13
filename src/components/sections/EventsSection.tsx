@@ -160,9 +160,16 @@ const EventsSection = () => {
                        <Badge className={getTypeColor(event.event_type)}>
                          {event.event_type}
                        </Badge>
-                      <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
+                      {event.registration_url && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                          onClick={() => window.open(event.registration_url, "_blank")}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                     <CardTitle className="text-lg group-hover:text-primary transition-colors duration-200">
                       {event.title}
