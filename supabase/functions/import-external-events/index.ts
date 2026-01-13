@@ -219,14 +219,20 @@ async function fetchLumaEvents(url: string): Promise<ParsedEvent[]> {
   try {
     console.log(`Fetching Luma page: ${url}`)
     
-    // Normalize URL to get the calendar/host page
+    // Normalize URL to get the calendar/host page - handle both lu.ma and luma.com
     let apiUrl = url
+    let slug = ''
+    
     if (url.includes('lu.ma/')) {
-      const slug = url.split('lu.ma/')[1]?.split('/')[0]?.split('?')[0]
-      if (slug) {
-        // Try to get events from the calendar API
-        apiUrl = `https://api.lu.ma/calendar/get-items?calendar_api_id=${slug}&period=future`
-      }
+      slug = url.split('lu.ma/')[1]?.split('/')[0]?.split('?')[0]
+    } else if (url.includes('luma.com/')) {
+      slug = url.split('luma.com/')[1]?.split('/')[0]?.split('?')[0]
+    }
+    
+    if (slug) {
+      // Try to get events from the calendar API
+      apiUrl = `https://api.lu.ma/calendar/get-items?calendar_api_id=${slug}&period=future`
+      console.log(`Trying Luma API: ${apiUrl}`)
     }
     
     // First try the API approach
@@ -363,10 +369,11 @@ async function fetchEventsByType(source: EventSource): Promise<ParsedEvent[]> {
 }
 
 function detectSourceType(url: string): EventSource['type'] {
-  if (url.includes('.ics') || url.includes('ical')) return 'ics'
-  if (url.includes('meetup.com')) return 'meetup'
-  if (url.includes('lu.ma')) return 'luma'
-  if (url.includes('eventbrite.com')) return 'eventbrite'
+  const lowerUrl = url.toLowerCase()
+  if (lowerUrl.includes('meetup.com')) return 'meetup'
+  if (lowerUrl.includes('lu.ma') || lowerUrl.includes('luma.com')) return 'luma'
+  if (lowerUrl.includes('eventbrite.com')) return 'eventbrite'
+  if (lowerUrl.includes('.ics') || lowerUrl.includes('ical')) return 'ics'
   return 'ics' // default
 }
 
