@@ -125,12 +125,23 @@ const ManageMyEventSources = () => {
         throw new Error(result.error || "Error al sincronizar");
       }
 
+      const inserted =
+        result.inserted ??
+        result.summary?.total_imported ??
+        result.results?.[0]?.imported ??
+        0;
+      const skipped =
+        result.skipped ??
+        result.summary?.total_skipped ??
+        result.results?.[0]?.skipped ??
+        0;
+
       // Update the source with sync results
       await supabase
         .from("event_sources")
         .update({
           last_synced_at: new Date().toISOString(),
-          events_imported: (source.events_imported || 0) + (result.inserted || 0),
+          events_imported: (source.events_imported || 0) + inserted,
           sync_error: null,
         })
         .eq("id", source.id);
@@ -140,7 +151,7 @@ const ManageMyEventSources = () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
 
       toast.success(
-        `Sincronización completada: ${result.inserted || 0} eventos importados, ${result.skipped || 0} omitidos`
+        `Sincronización completada: ${inserted} eventos importados, ${skipped} omitidos`
       );
     } catch (error: any) {
       await supabase

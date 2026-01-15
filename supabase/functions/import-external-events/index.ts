@@ -212,13 +212,46 @@ function findEventsInObject(obj: any, events: ParsedEvent[] = []): ParsedEvent[]
   return events
 }
 
+function findLumaCalendarApiId(obj: any, maxDepth = 12): string | null {
+  const seen = new Set<any>()
+
+  function walk(node: any, depth: number): string | null {
+    if (!node || depth > maxDepth) return null
+    if (typeof node !== 'object') return null
+    if (seen.has(node)) return null
+    seen.add(node)
+
+    // Common key patterns
+    if (typeof (node as any).calendar_api_id === 'string') return (node as any).calendar_api_id
+
+    if (typeof (node as any).api_id === 'string' && (node as any).api_id.startsWith('cal_')) {
+      return (node as any).api_id
+    }
+
+    for (const key of Object.keys(node)) {
+      const val = (node as any)[key]
+      if (typeof val === 'string' && val.startsWith('cal_')) {
+        return val
+      }
+      if (typeof val === 'object') {
+        const found = walk(val, depth + 1)
+        if (found) return found
+      }
+    }
+
+    return null
+  }
+
+  return walk(obj, 0)
+}
+
 // ==================== Luma Parser ====================
 async function fetchLumaEvents(url: string): Promise<ParsedEvent[]> {
-  let events: ParsedEvent[] = []
-  
+  const events: ParsedEvent[] = []
+
   try {
     console.log(`Fetching Luma events from: ${url}`)
-    
+
     // Extract slug from URL - handle both lu.ma and luma.com
     let slug = ''
     if (url.includes('lu.ma/')) {
@@ -226,70 +259,127 @@ async function fetchLumaEvents(url: string): Promise<ParsedEvent[]> {
     } else if (url.includes('luma.com/')) {
       slug = url.split('luma.com/')[1]?.split('/')[0]?.split('?')[0]
     }
-    
+
     if (!slug) {
       console.log('Could not extract Luma slug from URL')
       return events
     }
-    
+
     console.log(`Luma slug: ${slug}`)
-    
-    // Method 1: Try ICS feed first (most reliable for public calendars)
-    const icsUrl = `https://api.lu.ma/ics/get?entity=${slug}`
-    console.log(`Trying Luma ICS feed: ${icsUrl}`)
-    
+
+    // Fetch HTML once (used to resolve the real calendar_api_id and for fallback parsing)
+    let html: string | null = null
+    let pageProps: any = null
+    const htmlUrl = url.startsWith('https://') ? url : `https://lu.ma/${slug}`
+
     try {
-      const icsResponse = await fetch(icsUrl, {
-        headers: { 
-          'User-Agent': 'Mozilla/5.0 (compatible; EventSyncBot/1.0)',
-          'Accept': 'text/calendar, */*'
+      const htmlRes = await fetch(htmlUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9,es;q=0.8',
         }
       })
-      
-      console.log(`Luma ICS response status: ${icsResponse.status}`)
-      
-      if (icsResponse.ok) {
-        const icsText = await icsResponse.text()
-        if (icsText.includes('BEGIN:VCALENDAR')) {
-          console.log('Luma ICS feed detected, parsing...')
-          events = await parseICS(icsText, url)
-          console.log(`Parsed ${events.length} events from Luma ICS feed`)
-          if (events.length > 0) {
-            return events
+
+      if (htmlRes.ok) {
+        html = await htmlRes.text()
+        console.log(`Luma HTML length: ${html.length} chars`)
+
+        const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i)
+        if (nextDataMatch) {
+          console.log('Found __NEXT_DATA__ in Luma HTML')
+          try {
+            const nextData = JSON.parse(nextDataMatch[1])
+            pageProps = nextData?.props?.pageProps || null
+            console.log(`pageProps keys: ${pageProps ? Object.keys(pageProps).join(', ') : 'null'}`)
+
+            if (pageProps?.initialData) {
+              console.log(`initialData keys: ${Object.keys(pageProps.initialData).join(', ')}`)
+            }
+          } catch (e) {
+            console.log(`Luma __NEXT_DATA__ parse error: ${e.message}`)
           }
         }
+      } else {
+        console.log(`Luma HTML fetch failed: ${htmlRes.status}`)
       }
-    } catch (icsError) {
-      console.log(`Luma ICS fetch failed: ${icsError.message}`)
+    } catch (e) {
+      console.log(`Luma HTML fetch error: ${e.message}`)
     }
-    
-    // Method 2: Try public API with calendar slug
-    const apiUrl = `https://api.lu.ma/calendar/get-items?calendar_api_id=${slug}&period=future`
+
+    // IMPORTANT: the vanity slug in the URL is often NOT the calendar_api_id that Luma endpoints need.
+    const calendarApiId = findLumaCalendarApiId(pageProps?.initialData || pageProps)
+    const idForApi = calendarApiId || slug
+    console.log(`Luma calendar_api_id resolved: ${calendarApiId || '(not found; using slug)'}`)
+
+    // Method 1: Try ICS feeds
+    const icsCandidates = calendarApiId
+      ? [
+          `https://api.lu.ma/ics/get?entity=${calendarApiId}`,
+          `https://lu.ma/${slug}.ics`,
+        ]
+      : [
+          `https://lu.ma/${slug}.ics`,
+          `https://api.lu.ma/ics/get?entity=${slug}`,
+        ]
+
+    for (const icsUrl of icsCandidates) {
+      console.log(`Trying Luma ICS feed: ${icsUrl}`)
+
+      try {
+        const icsResponse = await fetch(icsUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; EventSyncBot/1.0)',
+            'Accept': 'text/calendar, */*',
+          }
+        })
+
+        console.log(`Luma ICS response status: ${icsResponse.status}`)
+
+        if (icsResponse.ok) {
+          const icsText = await icsResponse.text()
+          if (icsText.includes('BEGIN:VCALENDAR')) {
+            const parsed = parseICS(icsText)
+            const normalized = parsed.map((e) => ({
+              ...e,
+              url: e.url || `https://lu.ma/${slug}`,
+            }))
+
+            events.push(...normalized)
+            console.log(`Parsed ${events.length} events from Luma ICS feed`)
+
+            if (events.length > 0) return events
+          }
+        }
+      } catch (icsError) {
+        console.log(`Luma ICS fetch failed: ${icsError.message}`)
+      }
+    }
+
+    // Method 2: Try API with resolved calendar_api_id
+    const apiUrl = `https://api.lu.ma/calendar/get-items?calendar_api_id=${idForApi}&period=future`
     console.log(`Trying Luma API: ${apiUrl}`)
-    
+
     try {
       const apiResponse = await fetch(apiUrl, {
-        headers: { 
+        headers: {
           'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (compatible; EventSyncBot/1.0)'
+          'User-Agent': 'Mozilla/5.0 (compatible; EventSyncBot/1.0)',
         }
       })
-      
+
       console.log(`Luma API response status: ${apiResponse.status}`)
-      
+
       if (apiResponse.ok) {
         const responseText = await apiResponse.text()
         console.log(`Luma API response preview: ${responseText.substring(0, 300)}`)
-        
+
         try {
           const data = JSON.parse(responseText)
-          const keys = Object.keys(data)
-          console.log(`Luma API data keys: ${keys.join(', ')}`)
-          
-          // Handle different response structures
+
           const entries = data.entries || data.events || data.items || data.data || []
           console.log(`Found ${entries.length} entries in Luma API`)
-          
+
           for (const entry of entries) {
             const event = entry.event || entry.calendar_event || entry
             if (event && (event.name || event.title) && (event.start_at || event.startDate)) {
@@ -300,15 +390,13 @@ async function fetchLumaEvents(url: string): Promise<ParsedEvent[]> {
                 start: new Date(event.start_at || event.startDate),
                 end: (event.end_at || event.endDate) ? new Date(event.end_at || event.endDate) : null,
                 location: event.geo_address_info?.full_address || event.location || event.address || '',
-                url: event.url ? `https://lu.ma/${event.url}` : url,
+                url: event.url ? `https://lu.ma/${event.url}` : `https://lu.ma/${slug}`,
               })
             }
           }
-          
-          if (events.length > 0) {
-            console.log(`Found ${events.length} events from Luma API`)
-            return events
-          }
+
+          console.log(`Found ${events.length} events from Luma API`)
+          if (events.length > 0) return events
         } catch (parseError) {
           console.log(`Luma API JSON parse error: ${parseError.message}`)
         }
@@ -316,121 +404,52 @@ async function fetchLumaEvents(url: string): Promise<ParsedEvent[]> {
     } catch (apiError) {
       console.log(`Luma API error: ${apiError.message}`)
     }
-    
-    // Method 3: Fallback to HTML scraping
-    console.log(`Trying HTML scraping for Luma: ${url}`)
-    
-    const htmlUrl = url.startsWith('https://') ? url : `https://lu.ma/${slug}`
-    const response = await fetch(htmlUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9,es;q=0.8',
-      }
-    })
-    
-    if (!response.ok) {
-      console.log(`Luma HTML fetch failed: ${response.status}`)
-      return events
-    }
-    
-    const html = await response.text()
-    console.log(`Luma HTML length: ${html.length} chars`)
-    
-    // Try __NEXT_DATA__ extraction
-    const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i)
-    if (nextDataMatch) {
-      console.log('Found __NEXT_DATA__ in Luma HTML')
-      try {
-        const nextData = JSON.parse(nextDataMatch[1])
-        const pageProps = nextData?.props?.pageProps
-        
-        // Log the structure to understand what's available
-        console.log(`pageProps keys: ${pageProps ? Object.keys(pageProps).join(', ') : 'null'}`)
-        
-        // Try different paths for events
-        const possibleEventPaths = [
-          pageProps?.initialData?.events,
-          pageProps?.initialData?.featured_items,
-          pageProps?.calendar?.events,
-          pageProps?.events,
-          pageProps?.featuredItems,
-        ]
-        
-        for (const eventList of possibleEventPaths) {
-          if (eventList && Array.isArray(eventList) && eventList.length > 0) {
-            console.log(`Found ${eventList.length} events in pageProps`)
-            for (const item of eventList) {
-              const event = item.event || item.calendar_event || item
-              if (event && (event.name || event.title) && (event.start_at || event.startDate)) {
-                events.push({
-                  uid: event.api_id || event.id || crypto.randomUUID(),
-                  title: event.name || event.title,
-                  description: event.description || '',
-                  start: new Date(event.start_at || event.startDate),
-                  end: (event.end_at || event.endDate) ? new Date(event.end_at || event.endDate) : null,
-                  location: event.geo_address_info?.full_address || event.location || '',
-                  url: event.url ? `https://lu.ma/${event.url}` : url,
-                })
-              }
-            }
-            break
-          }
-        }
-        
-        // Single event page
-        if (events.length === 0 && pageProps?.event) {
-          const event = pageProps.event
-          events.push({
-            uid: event.api_id || crypto.randomUUID(),
-            title: event.name,
-            description: event.description || '',
-            start: new Date(event.start_at),
-            end: event.end_at ? new Date(event.end_at) : null,
-            location: event.geo_address_info?.full_address || '',
-            url: url,
+
+    // Method 3: Best-effort fallback (extract events from pageProps)
+    function collectLumaEventsFromObject(obj: any, out: ParsedEvent[] = [], max = 50): ParsedEvent[] {
+      if (!obj || typeof obj !== 'object') return out
+      if (out.length >= max) return out
+
+      if ((obj.name || obj.title) && (obj.start_at || obj.startDate)) {
+        const start = new Date(obj.start_at || obj.startDate)
+        if (!isNaN(start.getTime())) {
+          out.push({
+            uid: obj.api_id || obj.id || obj.url || crypto.randomUUID(),
+            title: obj.name || obj.title,
+            description: obj.description || obj.summary || '',
+            start,
+            end: (obj.end_at || obj.endDate) ? new Date(obj.end_at || obj.endDate) : null,
+            location: obj.geo_address_info?.full_address || obj.location || '',
+            url: obj.url ? (obj.url.startsWith('http') ? obj.url : `https://lu.ma/${obj.url}`) : `https://lu.ma/${slug}`,
           })
         }
-      } catch (e) {
-        console.log(`Luma __NEXT_DATA__ parse error: ${e.message}`)
       }
-    }
-    
-    // Try JSON-LD extraction
-    if (events.length === 0) {
-      const jsonLdMatches = html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)
-      if (jsonLdMatches) {
-        for (const match of jsonLdMatches) {
-          try {
-            const jsonContent = match.replace(/<script[^>]*>|<\/script>/gi, '').trim()
-            const data = JSON.parse(jsonContent)
-            
-            if (data['@type'] === 'Event' && data.startDate) {
-              events.push({
-                uid: data.url || crypto.randomUUID(),
-                title: data.name || 'Evento Luma',
-                description: data.description || '',
-                start: new Date(data.startDate),
-                end: data.endDate ? new Date(data.endDate) : null,
-                location: extractLocation(data.location),
-                url: data.url || url,
-              })
-            }
-          } catch (e) {
-            console.log(`Luma JSON-LD parse error: ${e.message}`)
-          }
+
+      for (const key of Object.keys(obj)) {
+        const val = obj[key]
+        if (Array.isArray(val)) {
+          for (const item of val) collectLumaEventsFromObject(item, out, max)
+        } else if (typeof val === 'object') {
+          collectLumaEventsFromObject(val, out, max)
         }
+        if (out.length >= max) break
       }
+
+      return out
     }
-    
+
+    if (events.length === 0 && pageProps) {
+      collectLumaEventsFromObject(pageProps.initialData || pageProps, events)
+    }
+
     console.log(`Total Luma events found: ${events.length}`)
+    return events
   } catch (error) {
     console.error('Luma parsing error:', error)
     throw error
   }
-  
-  return events
 }
+
 
 // ==================== Main Handler ====================
 async function fetchEventsByType(source: EventSource): Promise<ParsedEvent[]> {
