@@ -536,13 +536,18 @@ Deno.serve(async (req) => {
           
           console.log(`Event: ${event.title} - Original UTC: ${event.start.toISOString()} -> Mexico City: ${eventDate} ${eventTime}`)
           
-          // Check for existing event by registration_url (unique identifier)
-          const { data: existing } = await supabase
+          // Check for existing event(s) by registration_url (identifier)
+          const { data: existingRows, error: existingError } = await supabase
             .from('events')
             .select('id')
             .eq('registration_url', event.url)
-            .maybeSingle()
-          
+
+          if (existingError) {
+            console.error('Existing lookup error:', existingError)
+            errorCount++
+            continue
+          }
+
           const eventData = {
             title: event.title,
             description: event.description.substring(0, 5000),
@@ -554,20 +559,21 @@ Deno.serve(async (req) => {
             status: 'upcoming',
             updated_at: new Date().toISOString(),
           }
-          
-          if (existing) {
-            // Update existing event
+
+          if (existingRows && existingRows.length > 0) {
+            // Update ALL matching rows (fixes duplicates with wrong time, including approved rows)
+            const ids = existingRows.map((r) => r.id)
             const { error } = await supabase
               .from('events')
               .update(eventData)
-              .eq('id', existing.id)
-            
+              .in('id', ids)
+
             if (error) {
               console.error('Update error:', error)
               errorCount++
             } else {
-              updatedCount++
-              console.log(`Updated event: ${event.title}`)
+              updatedCount += ids.length
+              console.log(`Updated ${ids.length} row(s) for event: ${event.title}`)
             }
           } else {
             // Insert new event
@@ -609,12 +615,17 @@ Deno.serve(async (req) => {
             
             console.log(`Event: ${event.title} - Original UTC: ${event.start.toISOString()} -> Mexico City: ${eventDate} ${eventTime}`)
             
-            // Check for existing event by registration_url (unique identifier)
-            const { data: existing } = await supabase
+            // Check for existing event(s) by registration_url (identifier)
+            const { data: existingRows, error: existingError } = await supabase
               .from('events')
               .select('id')
               .eq('registration_url', event.url)
-              .maybeSingle()
+
+            if (existingError) {
+              console.error('Existing lookup error:', existingError)
+              errorCount++
+              continue
+            }
             
             const eventData = {
               title: event.title,
@@ -629,20 +640,21 @@ Deno.serve(async (req) => {
               updated_at: new Date().toISOString(),
             }
             
-            if (existing) {
-              // Update existing event
+            if (existingRows && existingRows.length > 0) {
+              // Update ALL matching rows (fixes duplicates with wrong time, including approved rows)
+              const ids = existingRows.map((r) => r.id)
               const { error } = await supabase
                 .from('events')
                 .update(eventData)
-                .eq('id', existing.id)
+                .in('id', ids)
               
               if (error) {
                 console.error('Update error:', error)
                 errorCount++
               } else {
-                sourceUpdated++
-                updatedCount++
-                console.log(`Updated event: ${event.title}`)
+                sourceUpdated += ids.length
+                updatedCount += ids.length
+                console.log(`Updated ${ids.length} row(s) for event: ${event.title}`)
               }
             } else {
               // Insert new event
