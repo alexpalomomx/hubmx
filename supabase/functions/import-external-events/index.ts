@@ -5,6 +5,31 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Mexico City timezone offset helper
+function toMexicoCityTime(date: Date): { dateStr: string; timeStr: string } {
+  // Format date in Mexico City timezone
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }
+  
+  const formatter = new Intl.DateTimeFormat('en-CA', options)
+  const parts = formatter.formatToParts(date)
+  
+  const get = (type: string) => parts.find(p => p.type === type)?.value || '00'
+  
+  const dateStr = `${get('year')}-${get('month')}-${get('day')}`
+  const timeStr = `${get('hour')}:${get('minute')}:${get('second')}`
+  
+  return { dateStr, timeStr }
+}
+
 interface ParsedEvent {
   uid: string
   title: string
@@ -506,7 +531,10 @@ Deno.serve(async (req) => {
         console.log(`Found ${events.length} events`)
         
         for (const event of events) {
-          const eventDate = event.start.toISOString().split('T')[0]
+          // Convert to Mexico City timezone
+          const { dateStr: eventDate, timeStr: eventTime } = toMexicoCityTime(event.start)
+          
+          console.log(`Event: ${event.title} - Original UTC: ${event.start.toISOString()} -> Mexico City: ${eventDate} ${eventTime}`)
           
           // Check for duplicates
           const { data: existing } = await supabase
@@ -525,7 +553,7 @@ Deno.serve(async (req) => {
             title: event.title,
             description: event.description.substring(0, 5000),
             event_date: eventDate,
-            event_time: event.start.toTimeString().substring(0, 8),
+            event_time: eventTime,
             location: event.location,
             registration_url: event.url,
             event_type: event.location ? 'presencial' : 'virtual',
@@ -559,7 +587,10 @@ Deno.serve(async (req) => {
           const events = await fetchEventsByType(source)
           
           for (const event of events) {
-            const eventDate = event.start.toISOString().split('T')[0]
+            // Convert to Mexico City timezone
+            const { dateStr: eventDate, timeStr: eventTime } = toMexicoCityTime(event.start)
+            
+            console.log(`Event: ${event.title} - Original UTC: ${event.start.toISOString()} -> Mexico City: ${eventDate} ${eventTime}`)
             
             const { data: existing } = await supabase
               .from('events')
@@ -578,7 +609,7 @@ Deno.serve(async (req) => {
               title: event.title,
               description: event.description.substring(0, 5000),
               event_date: eventDate,
-              event_time: event.start.toTimeString().substring(0, 8),
+              event_time: eventTime,
               location: event.location,
               registration_url: event.url,
               event_type: event.location ? 'presencial' : 'virtual',
