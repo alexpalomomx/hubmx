@@ -517,9 +517,9 @@ Deno.serve(async (req) => {
     const { sources, single_url } = body as { sources?: EventSource[], single_url?: string }
     
     let importedCount = 0
-    let skippedCount = 0
+    let updatedCount = 0
     let errorCount = 0
-    const results: { source: string, imported: number, skipped: number, error?: string }[] = []
+    const results: { source: string, imported: number, updated: number, error?: string }[] = []
     
     // Process single URL
     if (single_url) {
@@ -536,20 +536,14 @@ Deno.serve(async (req) => {
           
           console.log(`Event: ${event.title} - Original UTC: ${event.start.toISOString()} -> Mexico City: ${eventDate} ${eventTime}`)
           
-          // Check for duplicates
+          // Check for existing event by registration_url (unique identifier)
           const { data: existing } = await supabase
             .from('events')
             .select('id')
-            .eq('title', event.title)
-            .eq('event_date', eventDate)
+            .eq('registration_url', event.url)
             .maybeSingle()
           
-          if (existing) {
-            skippedCount++
-            continue
-          }
-          
-          const { error } = await supabase.from('events').insert({
+          const eventData = {
             title: event.title,
             description: event.description.substring(0, 5000),
             event_date: eventDate,
@@ -558,21 +552,44 @@ Deno.serve(async (req) => {
             registration_url: event.url,
             event_type: event.location ? 'presencial' : 'virtual',
             status: 'upcoming',
-            approval_status: 'pending',
-          })
+            updated_at: new Date().toISOString(),
+          }
           
-          if (error) {
-            console.error('Insert error:', error)
-            errorCount++
+          if (existing) {
+            // Update existing event
+            const { error } = await supabase
+              .from('events')
+              .update(eventData)
+              .eq('id', existing.id)
+            
+            if (error) {
+              console.error('Update error:', error)
+              errorCount++
+            } else {
+              updatedCount++
+              console.log(`Updated event: ${event.title}`)
+            }
           } else {
-            importedCount++
+            // Insert new event
+            const { error } = await supabase.from('events').insert({
+              ...eventData,
+              approval_status: 'pending',
+            })
+            
+            if (error) {
+              console.error('Insert error:', error)
+              errorCount++
+            } else {
+              importedCount++
+              console.log(`Inserted new event: ${event.title}`)
+            }
           }
         }
         
-        results.push({ source: single_url, imported: importedCount, skipped: skippedCount })
+        results.push({ source: single_url, imported: importedCount, updated: updatedCount })
       } catch (error) {
         console.error(`Error processing ${single_url}:`, error)
-        results.push({ source: single_url, imported: 0, skipped: 0, error: error.message })
+        results.push({ source: single_url, imported: 0, updated: 0, error: error.message })
       }
     }
     
@@ -580,7 +597,7 @@ Deno.serve(async (req) => {
     if (sources && sources.length > 0) {
       for (const source of sources) {
         let sourceImported = 0
-        let sourceSkipped = 0
+        let sourceUpdated = 0
         
         try {
           console.log(`Processing: ${source.name} (${source.type})`)
@@ -592,20 +609,14 @@ Deno.serve(async (req) => {
             
             console.log(`Event: ${event.title} - Original UTC: ${event.start.toISOString()} -> Mexico City: ${eventDate} ${eventTime}`)
             
+            // Check for existing event by registration_url (unique identifier)
             const { data: existing } = await supabase
               .from('events')
               .select('id')
-              .eq('title', event.title)
-              .eq('event_date', eventDate)
+              .eq('registration_url', event.url)
               .maybeSingle()
             
-            if (existing) {
-              sourceSkipped++
-              skippedCount++
-              continue
-            }
-            
-            const { error } = await supabase.from('events').insert({
+            const eventData = {
               title: event.title,
               description: event.description.substring(0, 5000),
               event_date: eventDate,
@@ -614,23 +625,47 @@ Deno.serve(async (req) => {
               registration_url: event.url,
               event_type: event.location ? 'presencial' : 'virtual',
               status: 'upcoming',
-              approval_status: 'pending',
               organizer_id: source.community_id || null,
-            })
+              updated_at: new Date().toISOString(),
+            }
             
-            if (error) {
-              console.error('Insert error:', error)
-              errorCount++
+            if (existing) {
+              // Update existing event
+              const { error } = await supabase
+                .from('events')
+                .update(eventData)
+                .eq('id', existing.id)
+              
+              if (error) {
+                console.error('Update error:', error)
+                errorCount++
+              } else {
+                sourceUpdated++
+                updatedCount++
+                console.log(`Updated event: ${event.title}`)
+              }
             } else {
-              sourceImported++
-              importedCount++
+              // Insert new event
+              const { error } = await supabase.from('events').insert({
+                ...eventData,
+                approval_status: 'pending',
+              })
+              
+              if (error) {
+                console.error('Insert error:', error)
+                errorCount++
+              } else {
+                sourceImported++
+                importedCount++
+                console.log(`Inserted new event: ${event.title}`)
+              }
             }
           }
           
-          results.push({ source: source.name, imported: sourceImported, skipped: sourceSkipped })
+          results.push({ source: source.name, imported: sourceImported, updated: sourceUpdated })
         } catch (error) {
           console.error(`Error processing ${source.name}:`, error)
-          results.push({ source: source.name, imported: 0, skipped: 0, error: error.message })
+          results.push({ source: source.name, imported: 0, updated: 0, error: error.message })
         }
       }
     }
@@ -638,7 +673,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        summary: { total_imported: importedCount, total_skipped: skippedCount, total_errors: errorCount },
+        summary: { total_imported: importedCount, total_updated: updatedCount, total_errors: errorCount },
         results,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
