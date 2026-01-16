@@ -130,10 +130,10 @@ const ManageMyEventSources = () => {
         result.summary?.total_imported ??
         result.results?.[0]?.imported ??
         0;
-      const skipped =
-        result.skipped ??
-        result.summary?.total_skipped ??
-        result.results?.[0]?.skipped ??
+      const updated =
+        result.updated ??
+        result.summary?.total_updated ??
+        result.results?.[0]?.updated ??
         0;
 
       // Update the source with sync results
@@ -150,8 +150,12 @@ const ManageMyEventSources = () => {
       queryClient.invalidateQueries({ queryKey: ["my-events"] });
       queryClient.invalidateQueries({ queryKey: ["events"] });
 
+      const messages = [];
+      if (inserted > 0) messages.push(`${inserted} nuevos`);
+      if (updated > 0) messages.push(`${updated} actualizados`);
+      
       toast.success(
-        `Sincronización completada: ${inserted} eventos importados, ${skipped} omitidos`
+        `Sincronización completada: ${messages.length > 0 ? messages.join(', ') : 'Sin cambios'}`
       );
     } catch (error: any) {
       await supabase
