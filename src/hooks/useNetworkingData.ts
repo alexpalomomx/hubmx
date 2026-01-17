@@ -596,7 +596,14 @@ export const useConnectionStatus = (targetUserId?: string) => {
         throw error;
       }
 
-      return connection;
+      if (!connection) return null;
+
+      // Añadir información sobre la dirección de la solicitud
+      return {
+        ...connection,
+        isRequester: connection.requester_id === user.id,
+        isRequested: connection.requested_id === user.id,
+      };
     },
     enabled: !!targetUserId,
   });
