@@ -269,11 +269,29 @@ export const useCreateConnection = () => {
       }
 
       if (existingConnection) {
+        // Si fue cancelada, permitir reenviar actualizando el registro existente
+        if (existingConnection.status === 'cancelled') {
+          const { data: updatedConnection, error: updateError } = await supabase
+            .from("user_connections")
+            .update({ 
+              status: 'pending', 
+              requester_id: user.id,
+              requested_id: requested_id,
+              message: message || null,
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", existingConnection.id)
+            .select()
+            .single();
+
+          if (updateError) throw updateError;
+          return updatedConnection;
+        }
+
         const statusMessages = {
           pending: "Ya tienes una solicitud de conexión pendiente con este usuario.",
           accepted: "Ya estás conectado con este usuario.",
           blocked: "Esta conexión ha sido bloqueada.",
-          cancelled: "Esta conexión fue cancelada previamente."
         };
         throw new Error(statusMessages[existingConnection.status as keyof typeof statusMessages] || "Ya existe una conexión con este usuario.");
       }
