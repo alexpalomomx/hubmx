@@ -116,7 +116,7 @@ const EventsSection = () => {
           </p>
         </div>
 
-        {/* Subscribe Card */}
+        {/* Subscribe Card - CTA to create account */}
         <Card className="mb-10 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
           <CardContent className="py-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -125,21 +125,29 @@ const EventsSection = () => {
                   <Smartphone className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Sincroniza con tu Calendario</h3>
+                  <h3 className="font-semibold">¿Quieres ver todos los eventos y suscribirte al calendario?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Recibe los eventos automáticamente en iPhone, Android o PC
+                    Crea tu cuenta gratis para acceder al calendario completo, sincronizarlo con tu dispositivo y nunca perderte un evento
                   </p>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button onClick={handleSubscribe} size="sm">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Suscribirse
-                </Button>
-                <Button variant="outline" onClick={handleDownloadICS} size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Descargar .ics
-                </Button>
+                {user ? (
+                  <>
+                    <Button onClick={() => navigate("/calendario")} size="sm">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Ver calendario completo
+                    </Button>
+                    <Button variant="outline" onClick={handleSubscribe} size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Suscribirse
+                    </Button>
+                  </>
+                ) : (
+                  <Button onClick={() => navigate("/auth?tab=signup")} size="sm">
+                    Crear cuenta gratis
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>
@@ -204,14 +212,6 @@ const EventsSection = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button 
-                        variant="hero" 
-                        size="sm" 
-                        className="flex-1"
-                        onClick={() => handleRegister(event)}
-                      >
-                        Registrarse
-                      </Button>
                       <SocialShare 
                         url={window.location.origin}
                         title={`${event.title} - ${formatDate(event.event_date)}`}
