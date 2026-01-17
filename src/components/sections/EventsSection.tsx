@@ -205,10 +205,6 @@ const EventsSection = () => {
                           <span>{event.location}</span>
                         </div>
                       )}
-                      <div className="flex items-center gap-2 text-sm">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span>{event.current_attendees || 0}/{event.max_attendees || '∞'} participantes</span>
-                      </div>
                     </div>
 
                     <div className="flex gap-2">
