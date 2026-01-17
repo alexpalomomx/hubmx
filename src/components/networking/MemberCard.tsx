@@ -47,13 +47,24 @@ export const MemberCard = ({ member, onConnect, isConnecting }: MemberCardProps)
           onClick: () => {}
         };
       case "pending":
-        return {
-          text: "Solicitud enviada",
-          icon: Clock,
-          disabled: true,
-          variant: "outline" as const,
-          onClick: () => {}
-        };
+        // Distinguir si el usuario actual envió o recibió la solicitud
+        if (connectionStatus.isRequester) {
+          return {
+            text: "Solicitud enviada",
+            icon: Clock,
+            disabled: true,
+            variant: "outline" as const,
+            onClick: () => {}
+          };
+        } else {
+          return {
+            text: "Tienes solicitud pendiente",
+            icon: Clock,
+            disabled: true,
+            variant: "default" as const,
+            onClick: () => {}
+          };
+        }
       case "blocked":
         return {
           text: "Bloqueado",
