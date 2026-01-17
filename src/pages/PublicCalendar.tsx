@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Download, Smartphone, Share2, ArrowLeft, MapPin, Clock, Users } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -246,7 +246,7 @@ const PublicCalendar = () => {
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">
-                      {format(new Date(event.event_date), "EEEE, d 'de' MMMM", { locale: es })}
+                      {format(parseISO(event.event_date), "EEEE, d 'de' MMMM", { locale: es })}
                     </span>
                   </div>
                   
