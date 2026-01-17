@@ -295,15 +295,27 @@ const EventsSection = () => {
 
         {/* CTA */}
         <div className="text-center">
-          <Button 
-            variant="community" 
-            size="lg"
-            onClick={() => navigate("/calendario")}
-            className="group"
-          >
-            Ver calendario completo
-            <ExternalLink className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
-          </Button>
+          {user ? (
+            <Button 
+              variant="community" 
+              size="lg"
+              onClick={() => navigate("/calendario")}
+              className="group"
+            >
+              Ver calendario completo
+              <ExternalLink className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+            </Button>
+          ) : (
+            <Button 
+              variant="community" 
+              size="lg"
+              onClick={() => navigate("/auth?tab=signup")}
+              className="group"
+            >
+              Crea tu cuenta para ver el calendario completo
+              <ExternalLink className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+            </Button>
+          )}
         </div>
       </div>
 
