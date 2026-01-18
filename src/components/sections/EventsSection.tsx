@@ -24,16 +24,27 @@ const EventsSection = () => {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
-  const upcomingEvents = events?.filter(event => {
-    const eventDate = new Date(event.event_date);
-    return eventDate >= today;
-  }) || [];
-  
-  const pastEvents = events?.filter(event => {
-    const eventDate = new Date(event.event_date);
-    return eventDate < today;
-  }).slice(0, 3) || [];
+
+  // IMPORTANT: event_date comes as a DATE-only string (YYYY-MM-DD).
+  // new Date("YYYY-MM-DD") is interpreted as UTC and can shift a day depending on timezone.
+  const parseDateOnlyLocal = (dateString: string) => {
+    const [y, m, d] = dateString.split("-").map(Number);
+    return new Date(y, (m || 1) - 1, d || 1);
+  };
+
+  const upcomingEvents =
+    events?.filter((event) => {
+      const eventDate = parseDateOnlyLocal(event.event_date);
+      return eventDate >= today;
+    }) || [];
+
+  const pastEvents =
+    events
+      ?.filter((event) => {
+        const eventDate = parseDateOnlyLocal(event.event_date);
+        return eventDate < today;
+      })
+      .slice(0, 3) || [];
 
   const handleRegister = (event: any) => {
     if (!user) {
@@ -48,7 +59,7 @@ const EventsSection = () => {
       });
       return;
     }
-    
+
     setSelectedEvent(event);
     setIsRegistrationOpen(true);
   };
@@ -64,12 +75,12 @@ const EventsSection = () => {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const date = parseDateOnlyLocal(dateString);
+    return date.toLocaleDateString("es-MX", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 

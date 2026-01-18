@@ -15,17 +15,61 @@ function escapeICS(text: string): string {
     .replace(/\n/g, "\\n");
 }
 
-function formatICSDate(date: string, time?: string): string {
-  const d = new Date(date);
-  if (time) {
-    const [hours, minutes] = time.split(":");
-    d.setHours(parseInt(hours), parseInt(minutes), 0);
-  }
-  return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
 }
 
-function formatICSDateOnly(date: string): string {
-  return date.replace(/-/g, "");
+function formatDateOnlyYYYYMMDD(dateStr: string): string {
+  // dateStr expected YYYY-MM-DD
+  return dateStr.replace(/-/g, "");
+}
+
+function formatLocalDateTimeYYYYMMDDTHHMMSS(dateStr: string, timeStr: string): string {
+  const [hhRaw, mmRaw, ssRaw] = (timeStr || "").split(":");
+  const hh = pad2(parseInt(hhRaw || "0", 10));
+  const mm = pad2(parseInt(mmRaw || "0", 10));
+  const ss = pad2(parseInt(ssRaw || "0", 10));
+  return `${formatDateOnlyYYYYMMDD(dateStr)}T${hh}${mm}${ss}`;
+}
+
+function addDays(dateStr: string, days: number): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const base = new Date(Date.UTC(y, (m || 1) - 1, d || 1));
+  base.setUTCDate(base.getUTCDate() + days);
+  const yy = base.getUTCFullYear();
+  const mm = pad2(base.getUTCMonth() + 1);
+  const dd = pad2(base.getUTCDate());
+  return `${yy}-${mm}-${dd}`;
+}
+
+function addHoursLocal(dateStr: string, timeStr: string, hoursToAdd: number): { date: string; time: string } {
+  const [hhRaw, mmRaw, ssRaw] = (timeStr || "").split(":");
+  const h = parseInt(hhRaw || "0", 10);
+  const m = parseInt(mmRaw || "0", 10);
+  const s = parseInt(ssRaw || "0", 10);
+
+  const total = h * 3600 + m * 60 + s + hoursToAdd * 3600;
+  const dayOffset = Math.floor(total / 86400);
+  const rem = ((total % 86400) + 86400) % 86400;
+
+  const nh = Math.floor(rem / 3600);
+  const nm = Math.floor((rem % 3600) / 60);
+  const ns = rem % 60;
+
+  const newDate = addDays(dateStr, dayOffset);
+  const newTime = `${pad2(nh)}:${pad2(nm)}:${pad2(ns)}`;
+
+  return { date: newDate, time: newTime };
+}
+
+function getTodayInMexicoCityISODate(): string {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return formatter.format(new Date());
 }
 
 Deno.serve(async (req) => {
@@ -48,7 +92,7 @@ Deno.serve(async (req) => {
       .from("events")
       .select("*, organizer:organizer_id(name)")
       .eq("approval_status", "approved")
-      .gte("event_date", new Date().toISOString().split("T")[0])
+      .gte("event_date", getTodayInMexicoCityISODate())
       .order("event_date", { ascending: true });
 
     if (communityId) {
@@ -86,18 +130,16 @@ Deno.serve(async (req) => {
       let dtEnd: string;
       
       if (event.event_time) {
-        dtStart = `DTSTART:${formatICSDate(event.event_date, event.event_time)}`;
+        dtStart = `DTSTART;TZID=America/Mexico_City:${formatLocalDateTimeYYYYMMDDTHHMMSS(event.event_date, event.event_time)}`;
+
         // Assume 2 hour duration if no end time
-        const endDate = new Date(event.event_date);
-        const [hours, minutes] = event.event_time.split(":");
-        endDate.setHours(parseInt(hours) + 2, parseInt(minutes), 0);
-        dtEnd = `DTEND:${endDate.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`;
+        const end = addHoursLocal(event.event_date, event.event_time, 2);
+        dtEnd = `DTEND;TZID=America/Mexico_City:${formatLocalDateTimeYYYYMMDDTHHMMSS(end.date, end.time)}`;
       } else {
         // All-day event
-        dtStart = `DTSTART;VALUE=DATE:${formatICSDateOnly(event.event_date)}`;
-        const nextDay = new Date(event.event_date);
-        nextDay.setDate(nextDay.getDate() + 1);
-        dtEnd = `DTEND;VALUE=DATE:${nextDay.toISOString().split("T")[0].replace(/-/g, "")}`;
+        dtStart = `DTSTART;VALUE=DATE:${formatDateOnlyYYYYMMDD(event.event_date)}`;
+        const nextDay = addDays(event.event_date, 1);
+        dtEnd = `DTEND;VALUE=DATE:${formatDateOnlyYYYYMMDD(nextDay)}`;
       }
 
       const organizer = event.organizer?.name || "Hub de Comunidades";
