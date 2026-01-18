@@ -16,9 +16,12 @@ const CALENDAR_FEED_URL = "https://itlyiyknweernejmpibd.supabase.co/functions/v1
 const PublicCalendar = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedEventType, setSelectedEventType] = useState<string>("all");
+  const [selectedLocation, setSelectedLocation] = useState<string>("all");
+  const [selectedTimeOfDay, setSelectedTimeOfDay] = useState<string>("all");
 
   const { data: events, isLoading } = useQuery({
-    queryKey: ["public-events", selectedCategory],
+    queryKey: ["public-events", selectedCategory, selectedEventType, selectedLocation, selectedTimeOfDay],
     queryFn: async () => {
       let query = supabase
         .from("events")
@@ -31,8 +34,30 @@ const PublicCalendar = () => {
         query = query.eq("category", selectedCategory);
       }
 
+      if (selectedEventType && selectedEventType !== "all") {
+        query = query.eq("event_type", selectedEventType);
+      }
+
+      if (selectedLocation && selectedLocation !== "all") {
+        query = query.ilike("location", `%${selectedLocation}%`);
+      }
+
       const { data, error } = await query;
       if (error) throw error;
+      
+      // Filter by time of day on client side
+      if (selectedTimeOfDay && selectedTimeOfDay !== "all" && data) {
+        return data.filter(event => {
+          if (!event.event_time) return selectedTimeOfDay === "all";
+          const hour = parseInt(event.event_time.split(":")[0], 10);
+          if (selectedTimeOfDay === "morning") return hour >= 6 && hour < 12;
+          if (selectedTimeOfDay === "afternoon") return hour >= 12 && hour < 18;
+          if (selectedTimeOfDay === "evening") return hour >= 18 && hour < 22;
+          if (selectedTimeOfDay === "night") return hour >= 22 || hour < 6;
+          return true;
+        });
+      }
+      
       return data;
     },
   });
@@ -49,6 +74,21 @@ const PublicCalendar = () => {
       if (error) throw error;
       const uniqueCategories = [...new Set(data?.map(e => e.category).filter(Boolean))];
       return uniqueCategories as string[];
+    },
+  });
+
+  const { data: locations } = useQuery({
+    queryKey: ["event-locations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("location")
+        .eq("approval_status", "approved")
+        .not("location", "is", null);
+
+      if (error) throw error;
+      const uniqueLocations = [...new Set(data?.map(e => e.location).filter(Boolean))];
+      return uniqueLocations as string[];
     },
   });
 
@@ -192,10 +232,10 @@ const PublicCalendar = () => {
         </Card>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex flex-wrap gap-4 mb-6">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Todas las categorías" />
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Categoría" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las categorías</SelectItem>
@@ -206,7 +246,47 @@ const PublicCalendar = () => {
               ))}
             </SelectContent>
           </Select>
-          <div className="text-sm text-muted-foreground self-center">
+
+          <Select value={selectedEventType} onValueChange={setSelectedEventType}>
+            <SelectTrigger className="w-full sm:w-[160px]">
+              <SelectValue placeholder="Tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los tipos</SelectItem>
+              <SelectItem value="virtual">Virtual</SelectItem>
+              <SelectItem value="presencial">Presencial</SelectItem>
+              <SelectItem value="hibrido">Híbrido</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Ubicación" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las ubicaciones</SelectItem>
+              {locations?.map((loc) => (
+                <SelectItem key={loc} value={loc}>
+                  {loc}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedTimeOfDay} onValueChange={setSelectedTimeOfDay}>
+            <SelectTrigger className="w-full sm:w-[150px]">
+              <SelectValue placeholder="Horario" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Cualquier horario</SelectItem>
+              <SelectItem value="morning">Mañana (6-12h)</SelectItem>
+              <SelectItem value="afternoon">Tarde (12-18h)</SelectItem>
+              <SelectItem value="evening">Noche (18-22h)</SelectItem>
+              <SelectItem value="night">Madrugada (22-6h)</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="text-sm text-muted-foreground self-center ml-auto">
             {events?.length || 0} eventos próximos
           </div>
         </div>
