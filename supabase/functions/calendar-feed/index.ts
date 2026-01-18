@@ -119,6 +119,17 @@ Deno.serve(async (req) => {
       "METHOD:PUBLISH",
       `X-WR-CALNAME:${escapeICS(calendarName)}`,
       "X-WR-TIMEZONE:America/Mexico_City",
+      // Improve compatibility (Apple/Outlook) by defining the timezone
+      "BEGIN:VTIMEZONE",
+      "TZID:America/Mexico_City",
+      "X-LIC-LOCATION:America/Mexico_City",
+      "BEGIN:STANDARD",
+      "TZOFFSETFROM:-0600",
+      "TZOFFSETTO:-0600",
+      "TZNAME:CST",
+      "DTSTART:19700101T000000",
+      "END:STANDARD",
+      "END:VTIMEZONE",
     ];
 
     for (const event of events || []) {
