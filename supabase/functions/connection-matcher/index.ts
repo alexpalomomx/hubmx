@@ -31,15 +31,10 @@ serve(async (req) => {
 
     console.log('Generating suggestions for user:', user_id);
 
-    // Get user's profile and skills
+    // Get user's profile (separate queries since no FK relationships)
     const { data: userProfile, error: profileError } = await supabase
       .from('profiles')
-      .select(`
-        *,
-        user_skills(*),
-        user_interests(*),
-        user_networking_profile(*)
-      `)
+      .select('*')
       .eq('user_id', user_id)
       .single();
 
@@ -48,21 +43,48 @@ serve(async (req) => {
       throw profileError;
     }
 
-    // Get all other users with their profiles and skills
-    const { data: allUsers, error: usersError } = await supabase
+    // Get user's skills, interests, and networking profile separately
+    const [userSkillsRes, userInterestsRes, userNetworkingRes] = await Promise.all([
+      supabase.from('user_skills').select('*').eq('user_id', user_id),
+      supabase.from('user_interests').select('*').eq('user_id', user_id),
+      supabase.from('user_networking_profile').select('*').eq('user_id', user_id).single()
+    ]);
+
+    const userSkillsData = userSkillsRes.data || [];
+    const userInterestsData = userInterestsRes.data || [];
+    const userNetworkingData = userNetworkingRes.data || null;
+
+    // Get all other users' profiles
+    const { data: allProfiles, error: usersError } = await supabase
       .from('profiles')
-      .select(`
-        *,
-        user_skills(*),
-        user_interests(*),
-        user_networking_profile(*)
-      `)
+      .select('*')
       .neq('user_id', user_id);
 
     if (usersError) {
       console.error('Error fetching all users:', usersError);
       throw usersError;
     }
+
+    // Get all skills, interests, and networking profiles for other users
+    const otherUserIds = allProfiles?.map(p => p.user_id) || [];
+    
+    const [allSkillsRes, allInterestsRes, allNetworkingRes] = await Promise.all([
+      supabase.from('user_skills').select('*').in('user_id', otherUserIds),
+      supabase.from('user_interests').select('*').in('user_id', otherUserIds),
+      supabase.from('user_networking_profile').select('*').in('user_id', otherUserIds)
+    ]);
+
+    const allSkills = allSkillsRes.data || [];
+    const allInterests = allInterestsRes.data || [];
+    const allNetworking = allNetworkingRes.data || [];
+
+    // Combine data for all users
+    const allUsers = allProfiles?.map(profile => ({
+      ...profile,
+      user_skills: allSkills.filter(s => s.user_id === profile.user_id),
+      user_interests: allInterests.filter(i => i.user_id === profile.user_id),
+      user_networking_profile: allNetworking.find(n => n.user_id === profile.user_id) || null
+    })) || [];
 
     // Get existing connections to avoid duplicates
     const { data: existingConnections } = await supabase
@@ -86,9 +108,9 @@ serve(async (req) => {
       existingSuggestions?.map(s => s.suggested_user_id) || []
     );
 
-    const userSkills = userProfile.user_skills?.map(s => s.skill_name.toLowerCase()) || [];
-    const userInterests = userProfile.user_interests?.map(i => i.interest_name.toLowerCase()) || [];
-    const userLocation = userProfile.user_networking_profile?.location?.toLowerCase() || '';
+    const userSkills = userSkillsData.map(s => s.skill_name.toLowerCase());
+    const userInterests = userInterestsData.map(i => i.interest_name.toLowerCase());
+    const userLocation = userNetworkingData?.location?.toLowerCase() || '';
 
     // Calculate match scores and generate suggestions
     const suggestions = allUsers
@@ -126,8 +148,8 @@ serve(async (req) => {
         }
 
         // Mentorship compatibility (10% weight)
-        const userAvailableForMentoring = userProfile.user_networking_profile?.is_available_for_mentoring;
-        const userSeekingMentorship = userProfile.user_networking_profile?.is_seeking_mentorship;
+        const userAvailableForMentoring = userNetworkingData?.is_available_for_mentoring;
+        const userSeekingMentorship = userNetworkingData?.is_seeking_mentorship;
         const matchAvailableForMentoring = potentialMatch.user_networking_profile?.is_available_for_mentoring;
         const matchSeekingMentorship = potentialMatch.user_networking_profile?.is_seeking_mentorship;
 
