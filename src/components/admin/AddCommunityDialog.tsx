@@ -54,6 +54,7 @@ const AddCommunityDialog = ({ children }: AddCommunityDialogProps) => {
       location: formData.get("location") as string,
       contact_email: formData.get("contact_email") as string,
       website_url: formData.get("website_url") as string,
+      logo_url: formData.get("logo_url") as string || null,
       members_count: parseInt(formData.get("members_count") as string) || 0,
       topics: topics,
       status: "active"
@@ -183,6 +184,19 @@ const AddCommunityDialog = ({ children }: AddCommunityDialogProps) => {
                 placeholder="https://comunidad.com"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="logo_url">URL del Logo</Label>
+            <Input
+              id="logo_url"
+              name="logo_url"
+              type="url"
+              placeholder="https://ejemplo.com/logo.png"
+            />
+            <p className="text-xs text-muted-foreground">
+              Ingresa la URL de una imagen para el logo de la comunidad
+            </p>
           </div>
 
           {/* Topics/Tags */}
