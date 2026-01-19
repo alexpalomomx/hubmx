@@ -114,6 +114,7 @@ export default function ManageCommunities() {
           location: formData.get("location")?.toString() || "",
           contact_email: formData.get("contact_email")?.toString() || "",
           website_url: formData.get("website_url")?.toString() || "",
+          logo_url: formData.get("logo_url")?.toString() || null,
           members_count: parseInt(formData.get("members_count")?.toString() || "0"),
           topics,
         })
@@ -349,6 +350,20 @@ export default function ManageCommunities() {
                     defaultValue={editingCommunity.website_url || ""}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-logo_url">URL del Logo</Label>
+                <Input
+                  id="edit-logo_url"
+                  name="logo_url"
+                  type="url"
+                  defaultValue={editingCommunity.logo_url || ""}
+                  placeholder="https://ejemplo.com/logo.png"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Ingresa la URL de una imagen para el logo de la comunidad
+                </p>
               </div>
 
               <div className="space-y-2">
