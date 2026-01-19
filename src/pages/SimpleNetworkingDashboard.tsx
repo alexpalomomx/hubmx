@@ -292,15 +292,18 @@ const SimpleNetworkingDashboard = () => {
                     </div>
                   )}
 
-                  {pendingRequests.length > 0 && (
+                  {/* Solicitudes recibidas (otros quieren conectar conmigo) */}
+                  {pendingRequests.filter(req => req.requested_id === user?.id).length > 0 && (
                     <div>
-                      <h3 className="font-semibold mb-2">Solicitudes pendientes ({pendingRequests.length})</h3>
+                      <h3 className="font-semibold mb-2">Solicitudes recibidas ({pendingRequests.filter(req => req.requested_id === user?.id).length})</h3>
                       <div className="grid gap-3">
-                        {pendingRequests.map((request) => (
+                        {pendingRequests
+                          .filter(req => req.requested_id === user?.id)
+                          .map((request) => (
                           <div key={request.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                <UserPlus className="h-5 w-5 text-orange-600" />
+                              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <UserPlus className="h-5 w-5 text-green-600" />
                               </div>
                               <div>
                                 <p className="font-medium">{request.requester?.display_name || 'Usuario'}</p>
@@ -333,6 +336,44 @@ const SimpleNetworkingDashboard = () => {
                                 Rechazar
                               </Button>
                             </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Solicitudes enviadas (yo quiero conectar con otros) */}
+                  {pendingRequests.filter(req => req.requester_id === user?.id).length > 0 && (
+                    <div>
+                      <h3 className="font-semibold mb-2">Solicitudes enviadas ({pendingRequests.filter(req => req.requester_id === user?.id).length})</h3>
+                      <div className="grid gap-3">
+                        {pendingRequests
+                          .filter(req => req.requester_id === user?.id)
+                          .map((request) => (
+                          <div key={request.id} className="flex items-center justify-between p-3 border rounded-lg bg-blue-50/50">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <UserPlus className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{request.requested?.display_name || 'Usuario'}</p>
+                                <p className="text-sm text-muted-foreground">Esperando respuesta...</p>
+                                {request.message && (
+                                  <p className="text-sm text-muted-foreground italic">"{request.message}"</p>
+                                )}
+                              </div>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                console.log('Cancelling connection:', request.id);
+                                updateConnection.mutate({ id: request.id, status: "cancelled" });
+                              }}
+                              disabled={updateConnection.isPending}
+                            >
+                              Cancelar
+                            </Button>
                           </div>
                         ))}
                       </div>
