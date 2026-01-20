@@ -37,8 +37,8 @@ const JoinSection = () => {
     },
     {
       id: "chapter",
-      title: "Capítulo Local",
-      description: "Crea un capítulo local de una comunidad existente",
+      title: "Registro de líder de comunidad",
+      description: "Regístrate como líder de una comunidad existente",
       icon: Building,
       benefits: [
         "Soporte organizacional",
@@ -47,7 +47,7 @@ const JoinSection = () => {
         "Material educativo",
         "Acompañamiento inicial"
       ],
-      cta: "Crear Capítulo"
+      cta: "Registrar como líder"
     },
     {
       id: "alliance",
