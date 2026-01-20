@@ -129,10 +129,10 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Unirse a {community.name}
+            Interés en {community.name}
           </DialogTitle>
           <DialogDescription>
-            Completa tus datos para unirte a esta comunidad
+            Registra tu interés para conocer a la comunidad y compartir información relevante
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
