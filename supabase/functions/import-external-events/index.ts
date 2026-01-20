@@ -48,6 +48,195 @@ interface EventSource {
   community_id?: string
 }
 
+// ==================== Eventbrite Parser ====================
+async function fetchEventbriteEvents(url: string): Promise<ParsedEvent[]> {
+  const events: ParsedEvent[] = []
+  
+  try {
+    console.log(`Fetching Eventbrite page: ${url}`)
+    
+    // Fetch the page HTML
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-MX,es;q=0.9,en;q=0.8',
+      }
+    })
+    
+    if (!response.ok) throw new Error(`Eventbrite fetch failed: ${response.status}`)
+    const html = await response.text()
+    
+    console.log(`Eventbrite HTML length: ${html.length} chars`)
+    
+    // Method 1: Extract JSON-LD structured data
+    const jsonLdMatches = html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)
+    
+    if (jsonLdMatches) {
+      for (const match of jsonLdMatches) {
+        try {
+          const jsonContent = match.replace(/<script[^>]*>|<\/script>/gi, '').trim()
+          const data = JSON.parse(jsonContent)
+          
+          // Handle array or single object
+          const items = Array.isArray(data) ? data : [data]
+          
+          for (const item of items) {
+            if (item['@type'] === 'Event' && item.name && item.startDate) {
+              const eventUrl = item.url || url
+              
+              events.push({
+                uid: eventUrl || crypto.randomUUID(),
+                title: item.name,
+                description: item.description || '',
+                start: new Date(item.startDate),
+                end: item.endDate ? new Date(item.endDate) : null,
+                location: extractEventbriteLocation(item.location),
+                url: eventUrl,
+              })
+            }
+          }
+        } catch (e) {
+          console.log('Eventbrite JSON-LD parse error:', e.message)
+        }
+      }
+    }
+    
+    // Method 2: Try to find __NEXT_DATA__ or window.__SERVER_DATA__
+    if (events.length === 0) {
+      const serverDataMatch = html.match(/window\.__SERVER_DATA__\s*=\s*(\{[\s\S]*?\});?\s*<\/script>/i)
+      if (serverDataMatch) {
+        try {
+          const serverData = JSON.parse(serverDataMatch[1])
+          const foundEvents = findEventbriteEventsInObject(serverData, url)
+          events.push(...foundEvents)
+          console.log(`Found ${foundEvents.length} events from __SERVER_DATA__`)
+        } catch (e) {
+          console.log('Server data parse error:', e.message)
+        }
+      }
+    }
+    
+    // Method 3: Parse event cards from HTML
+    if (events.length === 0) {
+      const eventCardMatches = html.match(/data-event-id="([^"]+)"/gi)
+      const eventUrlMatches = html.match(/href="(https:\/\/www\.eventbrite\.com[^"]*\/e\/[^"]+)"/gi)
+      
+      if (eventUrlMatches) {
+        const uniqueUrls = [...new Set(eventUrlMatches.map(m => m.match(/href="([^"]+)"/)?.[1]).filter(Boolean))]
+        
+        for (const eventUrl of uniqueUrls.slice(0, 20)) { // Limit to 20 events
+          try {
+            const eventData = await fetchSingleEventbriteEvent(eventUrl as string)
+            if (eventData) {
+              events.push(eventData)
+            }
+          } catch (e) {
+            console.log(`Error fetching event ${eventUrl}:`, e.message)
+          }
+        }
+      }
+    }
+    
+    console.log(`Found ${events.length} Eventbrite events`)
+  } catch (error) {
+    console.error('Eventbrite parsing error:', error)
+    throw error
+  }
+  
+  return events
+}
+
+async function fetchSingleEventbriteEvent(url: string): Promise<ParsedEvent | null> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+      }
+    })
+    
+    if (!response.ok) return null
+    const html = await response.text()
+    
+    // Extract JSON-LD
+    const jsonLdMatch = html.match(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/i)
+    if (jsonLdMatch) {
+      const data = JSON.parse(jsonLdMatch[1].replace(/<script[^>]*>|<\/script>/gi, '').trim())
+      if (data['@type'] === 'Event' && data.name && data.startDate) {
+        return {
+          uid: url,
+          title: data.name,
+          description: data.description || '',
+          start: new Date(data.startDate),
+          end: data.endDate ? new Date(data.endDate) : null,
+          location: extractEventbriteLocation(data.location),
+          url: url,
+        }
+      }
+    }
+  } catch (e) {
+    console.log(`Single event fetch error: ${e.message}`)
+  }
+  return null
+}
+
+function extractEventbriteLocation(location: any): string {
+  if (!location) return ''
+  if (typeof location === 'string') return location
+  if (location.name) {
+    if (location.address) {
+      const addr = location.address
+      const parts = [
+        location.name,
+        addr.streetAddress,
+        addr.addressLocality,
+        addr.addressRegion
+      ].filter(Boolean)
+      return parts.join(', ')
+    }
+    return location.name
+  }
+  if (location.address) {
+    const addr = location.address
+    return [addr.streetAddress, addr.addressLocality, addr.addressRegion]
+      .filter(Boolean).join(', ')
+  }
+  return ''
+}
+
+function findEventbriteEventsInObject(obj: any, baseUrl: string, events: ParsedEvent[] = []): ParsedEvent[] {
+  if (!obj || typeof obj !== 'object') return events
+  
+  // Look for event-like objects
+  if (obj.name && (obj.start || obj.startDate || obj.start_date)) {
+    const startDate = obj.start?.utc || obj.start?.local || obj.startDate || obj.start_date
+    const endDate = obj.end?.utc || obj.end?.local || obj.endDate || obj.end_date
+    
+    if (startDate) {
+      events.push({
+        uid: obj.url || obj.id || crypto.randomUUID(),
+        title: obj.name?.text || obj.name,
+        description: obj.description?.text || obj.description || obj.summary || '',
+        start: new Date(startDate),
+        end: endDate ? new Date(endDate) : null,
+        location: obj.venue?.name || obj.venue?.address?.localized_address_display || '',
+        url: obj.url || baseUrl,
+      })
+    }
+  }
+  
+  for (const key of Object.keys(obj)) {
+    if (Array.isArray(obj[key])) {
+      obj[key].forEach((item: any) => findEventbriteEventsInObject(item, baseUrl, events))
+    } else if (typeof obj[key] === 'object') {
+      findEventbriteEventsInObject(obj[key], baseUrl, events)
+    }
+  }
+  
+  return events
+}
+
 // ==================== ICS Parser ====================
 function parseICS(icsContent: string): ParsedEvent[] {
   const events: ParsedEvent[] = []
@@ -486,9 +675,7 @@ async function fetchEventsByType(source: EventSource): Promise<ParsedEvent[]> {
     case 'luma':
       return fetchLumaEvents(source.url)
     case 'eventbrite':
-      // TODO: Eventbrite requires API key
-      console.log('Eventbrite not yet implemented')
-      return []
+      return fetchEventbriteEvents(source.url)
     default:
       return []
   }

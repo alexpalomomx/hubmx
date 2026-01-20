@@ -18,7 +18,7 @@ import { es } from "date-fns/locale";
 interface EventSource {
   id: string;
   name: string;
-  source_type: "meetup" | "luma" | "ics";
+  source_type: "meetup" | "luma" | "ics" | "eventbrite";
   url: string;
   is_active: boolean;
   last_synced_at: string | null;
@@ -51,7 +51,7 @@ const ManageEventSources = () => {
   // Form state
   const [newSource, setNewSource] = useState({
     name: "",
-    source_type: "meetup" as "meetup" | "luma" | "ics",
+    source_type: "meetup" as "meetup" | "luma" | "ics" | "eventbrite",
     url: "",
   });
 
@@ -204,6 +204,8 @@ const ManageEventSources = () => {
         return { label: "Luma", color: "bg-purple-500" };
       case "ics":
         return { label: "ICS Feed", color: "bg-blue-500" };
+      case "eventbrite":
+        return { label: "Eventbrite", color: "bg-orange-500" };
       default:
         return { label: type, color: "bg-gray-500" };
     }
@@ -217,6 +219,8 @@ const ManageEventSources = () => {
         return "https://lu.ma/nombre-del-evento o https://lu.ma/calendar/xxx";
       case "ics":
         return "https://calendar.google.com/calendar/ical/xxx/basic.ics";
+      case "eventbrite":
+        return "https://www.eventbrite.com/o/nombre-organizador-123";
       default:
         return "";
     }
@@ -288,7 +292,7 @@ const ManageEventSources = () => {
                     <Label htmlFor="type">Tipo de Fuente</Label>
                     <Select
                       value={newSource.source_type}
-                      onValueChange={(value: "meetup" | "luma" | "ics") =>
+                      onValueChange={(value: "meetup" | "luma" | "ics" | "eventbrite") =>
                         setNewSource({ ...newSource, source_type: value })
                       }
                     >
@@ -298,6 +302,7 @@ const ManageEventSources = () => {
                       <SelectContent>
                         <SelectItem value="meetup">Meetup</SelectItem>
                         <SelectItem value="luma">Luma</SelectItem>
+                        <SelectItem value="eventbrite">Eventbrite</SelectItem>
                         <SelectItem value="ics">ICS Feed (Google Calendar, etc.)</SelectItem>
                       </SelectContent>
                     </Select>
@@ -313,6 +318,7 @@ const ManageEventSources = () => {
                     <p className="text-xs text-muted-foreground">
                       {newSource.source_type === "meetup" && "Ingresa la URL del grupo de Meetup"}
                       {newSource.source_type === "luma" && "Ingresa la URL del evento o calendario de Luma"}
+                      {newSource.source_type === "eventbrite" && "Ingresa la URL del organizador o evento de Eventbrite"}
                       {newSource.source_type === "ics" && "Ingresa la URL del feed ICS público"}
                     </p>
                   </div>
