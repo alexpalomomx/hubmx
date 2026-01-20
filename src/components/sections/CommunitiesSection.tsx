@@ -207,7 +207,7 @@ const CommunitiesSection = () => {
                         <JoinCommunityDialog community={{ id: community.id, name: community.name }}>
                           <Button className="flex-1" size="sm">
                             <Users className="mr-2 h-4 w-4" />
-                            Unirse
+                            Me interesa
                           </Button>
                         </JoinCommunityDialog>
                       ) : (
@@ -217,7 +217,7 @@ const CommunitiesSection = () => {
                           onClick={() => handleJoinCommunity(community)}
                         >
                           <Users className="mr-2 h-4 w-4" />
-                          Unirse
+                          Me interesa
                         </Button>
                       )}
                     </div>
