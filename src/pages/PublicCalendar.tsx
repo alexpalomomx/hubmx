@@ -1,24 +1,90 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Download, Smartphone, Share2, ArrowLeft, MapPin, Clock, Users } from "lucide-react";
+import { Calendar, Download, Smartphone, Share2, ArrowLeft, MapPin, Clock, Users, Heart, Check } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEventInterests } from "@/hooks/useSupabaseData";
+import { useToast } from "@/hooks/use-toast";
 
 const CALENDAR_FEED_URL = "https://itlyiyknweernejmpibd.supabase.co/functions/v1/calendar-feed";
 
 const PublicCalendar = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { toast: toastUI } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedEventType, setSelectedEventType] = useState<string>("all");
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [selectedTimeOfDay, setSelectedTimeOfDay] = useState<string>("all");
+  const [loadingEventId, setLoadingEventId] = useState<string | null>(null);
+  
+  const { data: userInterests } = useEventInterests(user?.id);
+
+  // Verificar si el usuario ya mostró interés en un evento
+  const hasInterest = (eventId: string) => {
+    return userInterests?.some((interest: any) => interest.event_id === eventId);
+  };
+
+  const handleInterest = async (event: any) => {
+    if (!user) {
+      toastUI({
+        title: "Inicia sesión requerido",
+        description: "Para mostrar interés en un evento, primero debes crear una cuenta o iniciar sesión.",
+        action: (
+          <Button variant="outline" size="sm" onClick={() => navigate("/auth?tab=signup")}>
+            Ir a registro
+          </Button>
+        ),
+      });
+      return;
+    }
+
+    // Si ya mostró interés, solo abrir el link
+    if (hasInterest(event.id)) {
+      if (event.registration_url) {
+        window.open(event.registration_url, "_blank");
+      } else {
+        toast.info("Este evento no tiene link de registro");
+      }
+      return;
+    }
+
+    setLoadingEventId(event.id);
+    
+    try {
+      const { error } = await supabase
+        .from('event_interests')
+        .insert({
+          user_id: user.id,
+          event_id: event.id,
+        });
+
+      if (error) throw error;
+
+      toast.success("¡Interés registrado! +5 puntos");
+      queryClient.invalidateQueries({ queryKey: ['event-interests'] });
+      queryClient.invalidateQueries({ queryKey: ['user-points'] });
+      
+      // Abrir el link de registro después de registrar interés
+      if (event.registration_url) {
+        window.open(event.registration_url, "_blank");
+      }
+    } catch (error: any) {
+      console.error("Error registering interest:", error);
+      toast.error("Error al registrar interés");
+    } finally {
+      setLoadingEventId(null);
+    }
+  };
 
   const { data: events, isLoading } = useQuery({
     queryKey: ["public-events", selectedCategory, selectedEventType, selectedLocation, selectedTimeOfDay],
@@ -359,16 +425,25 @@ const PublicCalendar = () => {
                     </p>
                   )}
 
-                  {event.registration_url && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full mt-2"
-                      onClick={() => window.open(event.registration_url, "_blank")}
-                    >
-                      Registrarse
-                    </Button>
-                  )}
+                  <Button 
+                    variant={hasInterest(event.id) ? "secondary" : "default"}
+                    size="sm" 
+                    className="w-full mt-2"
+                    onClick={() => handleInterest(event)}
+                    disabled={loadingEventId === event.id}
+                  >
+                    {hasInterest(event.id) ? (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Me interesa
+                      </>
+                    ) : (
+                      <>
+                        <Heart className="h-4 w-4 mr-2" />
+                        Me interesa
+                      </>
+                    )}
+                  </Button>
                 </CardContent>
               </Card>
             ))}

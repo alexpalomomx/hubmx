@@ -66,9 +66,13 @@ const EventsSection = () => {
       return;
     }
 
-    // Si ya mostró interés, no hacer nada
+    // Si ya mostró interés, solo abrir el link
     if (hasInterest(event.id)) {
-      toast.info("Ya mostraste interés en este evento");
+      if (event.registration_url) {
+        window.open(event.registration_url, "_blank");
+      } else {
+        toast.info("Este evento no tiene link de registro");
+      }
       return;
     }
 
@@ -87,6 +91,11 @@ const EventsSection = () => {
       toast.success("¡Interés registrado! +5 puntos");
       queryClient.invalidateQueries({ queryKey: ['event-interests'] });
       queryClient.invalidateQueries({ queryKey: ['user-points'] });
+      
+      // Abrir el link de registro después de registrar interés
+      if (event.registration_url) {
+        window.open(event.registration_url, "_blank");
+      }
     } catch (error: any) {
       console.error("Error registering interest:", error);
       toast.error("Error al registrar interés");
