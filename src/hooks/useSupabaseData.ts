@@ -375,3 +375,60 @@ export const useUserPoints = () => {
     },
   });
 };
+
+// Hook para registrar y obtener intereses en eventos
+export const useEventInterests = (userId?: string) => {
+  return useQuery({
+    queryKey: ['event-interests', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      
+      const { data, error } = await supabase
+        .from('event_interests')
+        .select(`
+          id,
+          event_id,
+          created_at,
+          events (
+            id,
+            title,
+            description,
+            event_date,
+            event_time,
+            location,
+            event_type,
+            status,
+            current_attendees,
+            max_attendees
+          )
+        `)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!userId,
+  });
+};
+
+// Hook para verificar si el usuario ya mostró interés en un evento
+export const useUserEventInterest = (userId?: string, eventId?: string) => {
+  return useQuery({
+    queryKey: ['user-event-interest', userId, eventId],
+    queryFn: async () => {
+      if (!userId || !eventId) return null;
+      
+      const { data, error } = await supabase
+        .from('event_interests')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('event_id', eventId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId && !!eventId,
+  });
+};
