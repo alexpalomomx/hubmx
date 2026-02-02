@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserCommunities, useUserEventRegistrations } from "@/hooks/useSupabaseData";
+import { useUserCommunities, useEventInterests } from "@/hooks/useSupabaseData";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("communities");
   const { data: userCommunities, isLoading: communitiesLoading } = useUserCommunities(user?.id);
-  const { data: userEvents, isLoading: eventsLoading } = useUserEventRegistrations(user?.email);
+  const { data: userEventInterests, isLoading: eventsLoading } = useEventInterests(user?.id);
   
   // Networking data
   const { data: connections } = useUserConnections();
@@ -286,7 +286,7 @@ const UserDashboard = () => {
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl font-semibold mb-4 flex items-center">
                 <Calendar className="mr-2 h-6 w-6" />
-                Mis Eventos
+                Eventos que me interesan
               </h2>
               
               {eventsLoading ? (
@@ -304,14 +304,15 @@ const UserDashboard = () => {
                     </Card>
                   ))}
                 </div>
-              ) : userEvents && userEvents.length > 0 ? (
+              ) : userEventInterests && userEventInterests.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {userEvents.map((registration: any) => {
-                    const event = registration.events;
+                  {userEventInterests.map((interest: any) => {
+                    const event = interest.events;
+                    if (!event) return null;
                     const isUpcoming = new Date(event.event_date) > new Date();
                     
                     return (
-                      <Card key={event.id} className="hover:shadow-lg transition-shadow">
+                      <Card key={interest.id} className="hover:shadow-lg transition-shadow">
                         <CardHeader>
                           <div className="flex items-start justify-between">
                             <div>
@@ -347,6 +348,9 @@ const UserDashboard = () => {
                               {event.max_attendees && ` de ${event.max_attendees}`}
                             </div>
                           </div>
+                          <p className="text-xs text-muted-foreground mt-3 border-t pt-2">
+                            Interesado desde: {format(new Date(interest.created_at), "dd 'de' MMMM, yyyy", { locale: es })}
+                          </p>
                         </CardContent>
                       </Card>
                     );
@@ -356,7 +360,7 @@ const UserDashboard = () => {
                 <Card>
                   <CardContent className="text-center py-8">
                     <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No te has registrado a ningún evento aún.</p>
+                    <p className="text-muted-foreground">No has mostrado interés en ningún evento aún.</p>
                     <div className="flex gap-4 justify-center mt-4">
                       <Button 
                         variant="outline" 

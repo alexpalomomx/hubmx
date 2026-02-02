@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Users, ExternalLink, Download, Smartphone } from "lucide-react";
-import { useEvents } from "@/hooks/useSupabaseData";
-import { EventRegistrationDialog } from "@/components/EventRegistrationDialog";
+import { Calendar, Clock, MapPin, Users, ExternalLink, Download, Smartphone, Heart, Check } from "lucide-react";
+import { useEvents, useEventInterests } from "@/hooks/useSupabaseData";
 import { SocialShare } from "@/components/ui/social-share";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,17 +10,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CALENDAR_FEED_URL = "https://itlyiyknweernejmpibd.supabase.co/functions/v1/calendar-feed";
 
 const EventsSection = () => {
   const { data: events, isLoading } = useEvents();
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast: toastUI } = useToast();
-
+  const queryClient = useQueryClient();
+  const { data: userInterests } = useEventInterests(user?.id);
+  const [loadingEventId, setLoadingEventId] = useState<string | null>(null);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -46,11 +47,16 @@ const EventsSection = () => {
       })
       .slice(0, 3) || [];
 
-  const handleRegister = (event: any) => {
+  // Verificar si el usuario ya mostró interés en un evento
+  const hasInterest = (eventId: string) => {
+    return userInterests?.some((interest: any) => interest.event_id === eventId);
+  };
+
+  const handleInterest = async (event: any) => {
     if (!user) {
       toastUI({
         title: "Inicia sesión requerido",
-        description: "Para registrarte a un evento, primero debes crear una cuenta o iniciar sesión.",
+        description: "Para mostrar interés en un evento, primero debes crear una cuenta o iniciar sesión.",
         action: (
           <Button variant="outline" size="sm" onClick={() => navigate("/auth?tab=signup")}>
             Ir a registro
@@ -60,8 +66,33 @@ const EventsSection = () => {
       return;
     }
 
-    setSelectedEvent(event);
-    setIsRegistrationOpen(true);
+    // Si ya mostró interés, no hacer nada
+    if (hasInterest(event.id)) {
+      toast.info("Ya mostraste interés en este evento");
+      return;
+    }
+
+    setLoadingEventId(event.id);
+    
+    try {
+      const { error } = await supabase
+        .from('event_interests')
+        .insert({
+          user_id: user.id,
+          event_id: event.id,
+        });
+
+      if (error) throw error;
+
+      toast.success("¡Interés registrado! +5 puntos");
+      queryClient.invalidateQueries({ queryKey: ['event-interests'] });
+      queryClient.invalidateQueries({ queryKey: ['user-points'] });
+    } catch (error: any) {
+      console.error("Error registering interest:", error);
+      toast.error("Error al registrar interés");
+    } finally {
+      setLoadingEventId(null);
+    }
   };
 
   const handleDownloadICS = () => {
@@ -219,6 +250,25 @@ const EventsSection = () => {
                     </div>
 
                     <div className="flex gap-2">
+                      <Button 
+                        variant={hasInterest(event.id) ? "secondary" : "default"}
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleInterest(event)}
+                        disabled={loadingEventId === event.id || hasInterest(event.id)}
+                      >
+                        {hasInterest(event.id) ? (
+                          <>
+                            <Check className="h-4 w-4 mr-2" />
+                            Me interesa
+                          </>
+                        ) : (
+                          <>
+                            <Heart className="h-4 w-4 mr-2" />
+                            Me interesa
+                          </>
+                        )}
+                      </Button>
                       <SocialShare 
                         url={window.location.origin}
                         title={`${event.title} - ${formatDate(event.event_date)}`}
@@ -326,11 +376,6 @@ const EventsSection = () => {
         </div>
       </div>
 
-      <EventRegistrationDialog
-        event={selectedEvent}
-        open={isRegistrationOpen}
-        onOpenChange={setIsRegistrationOpen}
-      />
     </section>
   );
 };
