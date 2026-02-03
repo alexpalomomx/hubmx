@@ -432,3 +432,38 @@ export const useUserEventInterest = (userId?: string, eventId?: string) => {
     enabled: !!userId && !!eventId,
   });
 };
+
+// Hook para obtener todos los intereses de eventos (admin)
+export const useAllEventInterests = (eventId?: string) => {
+  return useQuery({
+    queryKey: ['all-event-interests', eventId],
+    queryFn: async () => {
+      let query = supabase
+        .from('event_interests')
+        .select(`
+          id,
+          user_id,
+          event_id,
+          created_at,
+          events (
+            id,
+            title,
+            event_date
+          ),
+          profiles:user_id (
+            display_name,
+            avatar_url
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (eventId && eventId !== "all") {
+        query = query.eq('event_id', eventId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+  });
+};

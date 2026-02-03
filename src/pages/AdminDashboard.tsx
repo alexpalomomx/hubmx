@@ -33,7 +33,7 @@ import ManageEvents from "@/components/admin/ManageEvents";
 import ManageCalls from "@/components/admin/ManageCalls";
 import ManageAlliances from "@/components/admin/ManageAlliances";
 import ManageBlogPosts from "@/components/admin/ManageBlogPosts";
-import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistrations";
+import { ManageEventInterests } from "@/components/admin/ManageEventInterests";
 import { ManageCommunityData } from "@/components/admin/ManageCommunityData";
 import { ManagePendingApprovals } from "@/components/admin/ManagePendingApprovals";
 import ManageContentApprovals from "@/components/admin/ManageContentApprovals";
@@ -225,7 +225,7 @@ const AdminDashboard = () => {
                     </div>
                   </SelectItem>
                   <SelectItem value="events">Eventos</SelectItem>
-                  <SelectItem value="registrations">Registros</SelectItem>
+                  <SelectItem value="registrations">Intereses</SelectItem>
                   <SelectItem value="members">Miembros</SelectItem>
                   <SelectItem value="leaders">Líderes</SelectItem>
                   <SelectItem value="users">Usuarios</SelectItem>
@@ -306,7 +306,7 @@ const AdminDashboard = () => {
                   className="h-8 text-xs"
                 >
                   <FileText className="h-3 w-3 mr-1" />
-                  Registros
+                  Intereses
                 </Button>
                 <Button
                   variant={selectedSection === "members" ? "default" : "outline"}
@@ -490,7 +490,7 @@ const AdminDashboard = () => {
 
           {selectedSection === "registrations" && (
             <div className="space-y-6">
-              <ManageEventRegistrations />
+              <ManageEventInterests />
             </div>
           )}
 
