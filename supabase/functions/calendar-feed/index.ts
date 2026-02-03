@@ -85,7 +85,6 @@ Deno.serve(async (req) => {
     // Get URL params
     const url = new URL(req.url);
     const communityId = url.searchParams.get("community");
-    const communities = url.searchParams.get("communities"); // comma-separated IDs
     const category = url.searchParams.get("category");
 
     // Fetch approved/upcoming events
@@ -96,17 +95,8 @@ Deno.serve(async (req) => {
       .gte("event_date", getTodayInMexicoCityISODate())
       .order("event_date", { ascending: true });
 
-    // Filter by single community
     if (communityId) {
       query = query.eq("organizer_id", communityId);
-    }
-    
-    // Filter by multiple communities (comma-separated)
-    if (communities) {
-      const communityIds = communities.split(",").filter(Boolean);
-      if (communityIds.length > 0) {
-        query = query.in("organizer_id", communityIds);
-      }
     }
 
     if (category) {
