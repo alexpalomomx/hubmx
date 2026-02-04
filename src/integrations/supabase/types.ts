@@ -505,6 +505,7 @@ export type Database = {
           organizer_id: string | null
           registration_url: string | null
           rejection_reason: string | null
+          source_id: string | null
           status: string | null
           submitted_by: string | null
           title: string
@@ -529,6 +530,7 @@ export type Database = {
           organizer_id?: string | null
           registration_url?: string | null
           rejection_reason?: string | null
+          source_id?: string | null
           status?: string | null
           submitted_by?: string | null
           title: string
@@ -553,6 +555,7 @@ export type Database = {
           organizer_id?: string | null
           registration_url?: string | null
           rejection_reason?: string | null
+          source_id?: string | null
           status?: string | null
           submitted_by?: string | null
           title?: string
@@ -564,6 +567,13 @@ export type Database = {
             columns: ["organizer_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "event_sources"
             referencedColumns: ["id"]
           },
         ]
@@ -803,6 +813,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_calendar_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          include_all_sources: boolean | null
+          selected_sources: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          include_all_sources?: boolean | null
+          selected_sources?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          include_all_sources?: boolean | null
+          selected_sources?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_calendar_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_connections: {
         Row: {

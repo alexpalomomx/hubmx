@@ -20,7 +20,6 @@ function pad2(n: number): string {
 }
 
 function formatDateOnlyYYYYMMDD(dateStr: string): string {
-  // dateStr expected YYYY-MM-DD
   return dateStr.replace(/-/g, "");
 }
 
@@ -86,11 +85,33 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const communityId = url.searchParams.get("community");
     const category = url.searchParams.get("category");
+    const sources = url.searchParams.get("sources"); // Comma-separated source IDs
+    const userId = url.searchParams.get("user"); // For user preferences
+    const includeInternal = url.searchParams.get("internal") !== "false"; // Include events without source (created manually)
 
-    // Fetch approved/upcoming events
+    // Parse source IDs if provided
+    let sourceIds: string[] = [];
+    if (sources) {
+      sourceIds = sources.split(",").filter(Boolean);
+    }
+
+    // If user ID is provided, fetch their preferences
+    if (userId && !sources) {
+      const { data: prefs } = await supabase
+        .from("user_calendar_preferences")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      
+      if (prefs && !prefs.include_all_sources && prefs.selected_sources) {
+        sourceIds = prefs.selected_sources;
+      }
+    }
+
+    // Build query
     let query = supabase
       .from("events")
-      .select("*, organizer:organizer_id(name)")
+      .select("*, organizer:organizer_id(name), source:source_id(name)")
       .eq("approval_status", "approved")
       .gte("event_date", getTodayInMexicoCityISODate())
       .order("event_date", { ascending: true });
@@ -103,14 +124,38 @@ Deno.serve(async (req) => {
       query = query.eq("category", category);
     }
 
+    // Filter by sources
+    if (sourceIds.length > 0) {
+      if (includeInternal) {
+        // Include events from selected sources OR events without a source (internal/manual)
+        query = query.or(`source_id.in.(${sourceIds.join(",")}),source_id.is.null`);
+      } else {
+        // Only events from selected sources
+        query = query.in("source_id", sourceIds);
+      }
+    }
+
     const { data: events, error } = await query;
 
     if (error) {
       throw error;
     }
 
-    // Generate ICS content
-    const calendarName = "Hub de Comunidades - Eventos";
+    // Generate calendar name based on filters
+    let calendarName = "Hub de Comunidades - Eventos";
+    if (sourceIds.length > 0 && sourceIds.length < 5) {
+      // Get source names for the calendar name
+      const { data: sourcesData } = await supabase
+        .from("event_sources")
+        .select("name")
+        .in("id", sourceIds);
+      
+      if (sourcesData && sourcesData.length > 0) {
+        const sourceNames = sourcesData.map(s => s.name).join(", ");
+        calendarName = `Hub de Comunidades - ${sourceNames}`;
+      }
+    }
+
     let icsContent = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
@@ -119,7 +164,6 @@ Deno.serve(async (req) => {
       "METHOD:PUBLISH",
       `X-WR-CALNAME:${escapeICS(calendarName)}`,
       "X-WR-TIMEZONE:America/Mexico_City",
-      // Improve compatibility (Apple/Outlook) by defining the timezone
       "BEGIN:VTIMEZONE",
       "TZID:America/Mexico_City",
       "X-LIC-LOCATION:America/Mexico_City",
@@ -142,18 +186,16 @@ Deno.serve(async (req) => {
       
       if (event.event_time) {
         dtStart = `DTSTART;TZID=America/Mexico_City:${formatLocalDateTimeYYYYMMDDTHHMMSS(event.event_date, event.event_time)}`;
-
-        // Assume 2 hour duration if no end time
         const end = addHoursLocal(event.event_date, event.event_time, 2);
         dtEnd = `DTEND;TZID=America/Mexico_City:${formatLocalDateTimeYYYYMMDDTHHMMSS(end.date, end.time)}`;
       } else {
-        // All-day event
         dtStart = `DTSTART;VALUE=DATE:${formatDateOnlyYYYYMMDD(event.event_date)}`;
         const nextDay = addDays(event.event_date, 1);
         dtEnd = `DTEND;VALUE=DATE:${formatDateOnlyYYYYMMDD(nextDay)}`;
       }
 
       const organizer = event.organizer?.name || "Hub de Comunidades";
+      const sourceName = event.source?.name ? ` [${event.source.name}]` : "";
       const location = event.location || (event.event_type === "virtual" ? "Evento Virtual" : "");
 
       icsContent.push(
@@ -164,7 +206,7 @@ Deno.serve(async (req) => {
         dtEnd,
         `CREATED:${created}`,
         `LAST-MODIFIED:${updated}`,
-        `SUMMARY:${escapeICS(event.title)}`,
+        `SUMMARY:${escapeICS(event.title)}${escapeICS(sourceName)}`,
         `DESCRIPTION:${escapeICS(event.description || "")}`,
         `LOCATION:${escapeICS(location)}`,
         `ORGANIZER;CN=${escapeICS(organizer)}:MAILTO:eventos@hubdecomunidades.mx`,
@@ -176,7 +218,6 @@ Deno.serve(async (req) => {
 
     icsContent.push("END:VCALENDAR");
 
-    // Filter empty lines and join
     const icsString = icsContent.filter(line => line).join("\r\n");
 
     return new Response(icsString, {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Download, Smartphone, Share2, ArrowLeft, MapPin, Clock, Users, Heart, Check } from "lucide-react";
+import { Calendar, Share2, ArrowLeft, MapPin, Clock, Users, Heart, Check } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -13,8 +13,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEventInterests } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
-
-const CALENDAR_FEED_URL = "https://itlyiyknweernejmpibd.supabase.co/functions/v1/calendar-feed";
+import { CalendarSourceSelector } from "@/components/calendar/CalendarSourceSelector";
 
 const PublicCalendar = () => {
   const navigate = useNavigate();
@@ -158,27 +157,6 @@ const PublicCalendar = () => {
     },
   });
 
-  const getCalendarUrl = (protocol: "https" | "webcal" = "https") => {
-    const baseUrl = protocol === "webcal" 
-      ? CALENDAR_FEED_URL.replace("https://", "webcal://")
-      : CALENDAR_FEED_URL;
-    
-    if (selectedCategory && selectedCategory !== "all") {
-      return `${baseUrl}?category=${encodeURIComponent(selectedCategory)}`;
-    }
-    return baseUrl;
-  };
-
-  const handleDownloadICS = () => {
-    window.open(getCalendarUrl("https"), "_blank");
-    toast.success("Descargando calendario...");
-  };
-
-  const handleSubscribe = () => {
-    window.location.href = getCalendarUrl("webcal");
-    toast.success("Abriendo suscripción al calendario...");
-  };
-
   const handleShare = async () => {
     const shareData = {
       title: "Calendario de Eventos - Hub de Comunidades",
@@ -246,56 +224,10 @@ const PublicCalendar = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Subscribe Section */}
-        <Card className="mb-8 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Smartphone className="h-5 w-5" />
-              Sincroniza con tu Calendario
-            </CardTitle>
-            <CardDescription>
-              Suscríbete para recibir automáticamente todos los eventos en tu iPhone, Android o computadora
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button onClick={handleSubscribe} className="flex-1">
-                <Calendar className="h-4 w-4 mr-2" />
-                Suscribirse al Calendario
-              </Button>
-              <Button variant="outline" onClick={handleDownloadICS} className="flex-1">
-                <Download className="h-4 w-4 mr-2" />
-                Descargar Archivo .ics
-              </Button>
-            </div>
-            
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-              <h4 className="font-medium mb-3">Instrucciones:</h4>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <h5 className="font-medium text-sm flex items-center gap-2 mb-2">
-                    🍎 iPhone / iPad
-                  </h5>
-                  <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                    <li>Toca "Suscribirse al Calendario"</li>
-                    <li>Confirma la suscripción</li>
-                    <li>Los eventos aparecerán en tu app Calendario</li>
-                  </ol>
-                </div>
-                <div>
-                  <h5 className="font-medium text-sm flex items-center gap-2 mb-2">
-                    🤖 Android
-                  </h5>
-                  <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                    <li>Toca "Descargar Archivo .ics"</li>
-                    <li>Abre el archivo descargado</li>
-                    <li>Selecciona Google Calendar para importar</li>
-                  </ol>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Subscribe Section with Source Selector */}
+        <div className="mb-8">
+          <CalendarSourceSelector />
+        </div>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
