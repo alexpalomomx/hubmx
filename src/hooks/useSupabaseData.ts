@@ -450,7 +450,7 @@ export const useAllEventInterests = (eventId?: string) => {
             title,
             event_date
           ),
-          profiles:user_id (
+          profiles (
             display_name,
             avatar_url
           )
