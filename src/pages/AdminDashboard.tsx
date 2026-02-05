@@ -45,6 +45,7 @@ import { ManageCommunityMembers } from "@/components/admin/ManageCommunityMember
 import ManageCommunityLeaders from "@/components/admin/ManageCommunityLeaders";
 import ManageNetworking from "@/components/admin/ManageNetworking";
 import ManageEventSources from "@/components/admin/ManageEventSources";
+import ManageLeaderRegistrations from "@/components/admin/ManageLeaderRegistrations";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -228,6 +229,7 @@ const AdminDashboard = () => {
                   <SelectItem value="registrations">Intereses</SelectItem>
                   <SelectItem value="members">Miembros</SelectItem>
                   <SelectItem value="leaders">Líderes</SelectItem>
+                  <SelectItem value="leader-registrations">Solicitudes Líder</SelectItem>
                   <SelectItem value="users">Usuarios</SelectItem>
                   <SelectItem value="alliances">Alianzas</SelectItem>
                   <SelectItem value="calls">Convocatorias</SelectItem>
@@ -325,6 +327,15 @@ const AdminDashboard = () => {
                 >
                   <Award className="h-3 w-3 mr-1" />
                   Líderes
+                </Button>
+                <Button
+                  variant={selectedSection === "leader-registrations" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("leader-registrations")}
+                  className="h-8 text-xs"
+                >
+                  <Award className="h-3 w-3 mr-1" />
+                  Solicitudes Líder
                 </Button>
                 <Button
                   variant={selectedSection === "calls" ? "default" : "outline"}
@@ -503,6 +514,12 @@ const AdminDashboard = () => {
           {selectedSection === "leaders" && (
             <div className="space-y-6">
               <ManageCommunityLeaders />
+            </div>
+          )}
+
+          {selectedSection === "leader-registrations" && (
+            <div className="space-y-6">
+              <ManageLeaderRegistrations />
             </div>
           )}
 
