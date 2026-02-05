@@ -578,6 +578,62 @@ export type Database = {
           },
         ]
       }
+      leader_registrations: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          community_id: string | null
+          created_at: string
+          description: string | null
+          email: string
+          id: string
+          leader_name: string
+          phone: string
+          rejection_reason: string | null
+          status: string
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          community_id?: string | null
+          created_at?: string
+          description?: string | null
+          email: string
+          id?: string
+          leader_name: string
+          phone: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          community_id?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string
+          id?: string
+          leader_name?: string
+          phone?: string
+          rejection_reason?: string | null
+          status?: string
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leader_registrations_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentorship_requests: {
         Row: {
           created_at: string

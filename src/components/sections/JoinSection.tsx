@@ -6,19 +6,23 @@ import { Users, Building, HandHeart, ArrowRight, CheckCircle } from "lucide-reac
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCommunities } from "@/hooks/useSupabaseData";
 
 const JoinSection = () => {
   const [selectedType, setSelectedType] = useState("community");
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    leaderName: "",
     email: "",
     phone: "",
     description: "",
-    category: "Tecnología"
+    category: "Tecnología",
+    communityId: ""
   });
   const { toast } = useToast();
   const { user } = useAuth();
+  const { data: communities } = useCommunities();
 
   const registrationTypes = [
     {
@@ -118,14 +122,35 @@ const JoinSection = () => {
           title: "¡Solicitud enviada exitosamente!",
           description: "Tu solicitud ha sido enviada y será revisada por nuestro equipo antes de ser publicada.",
         });
+      } else if (selectedType === "chapter") {
+        const { error } = await supabase
+          .from("leader_registrations")
+          .insert({
+            leader_name: formData.leaderName,
+            email: formData.email,
+            phone: formData.phone,
+            description: formData.description,
+            community_id: formData.communityId || null,
+            status: "pending",
+            ...(user && { submitted_by: user.id })
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "¡Solicitud enviada exitosamente!",
+          description: "Tu solicitud de registro como líder ha sido enviada y será revisada por nuestro equipo.",
+        });
       }
 
       setFormData({
         name: "",
+        leaderName: "",
         email: "",
         phone: "",
         description: "",
-        category: selectedType === 'alliance' ? 'Empresa Privada' : 'Tecnología'
+        category: selectedType === 'alliance' ? 'Empresa Privada' : 'Tecnología',
+        communityId: ""
       });
 
     } catch (error) {
@@ -220,6 +245,24 @@ const JoinSection = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {selectedType === "chapter" && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Nombre del Líder
+                      </label>
+                      <input
+                        type="text"
+                        name="leaderName"
+                        value={formData.leaderName}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                        placeholder="Tu nombre completo"
+                      />
+                    </div>
+                  )}
+
+                  {selectedType !== "chapter" && (
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       Nombre de la {selectedType === 'alliance' ? 'Organización' : 'Comunidad'}
@@ -230,10 +273,33 @@ const JoinSection = () => {
                       value={formData.name}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
                       placeholder={`Nombre de tu ${selectedType === 'alliance' ? 'organización' : 'comunidad'}`}
                     />
                   </div>
+                  )}
+
+                  {selectedType === "chapter" && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Comunidad a liderar
+                      </label>
+                      <select
+                        name="communityId"
+                        value={formData.communityId}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                      >
+                        <option value="">Selecciona una comunidad</option>
+                        {communities?.map((community) => (
+                          <option key={community.id} value={community.id}>
+                            {community.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   
                   <div>
                     <label className="block text-sm font-medium mb-2">Email de contacto</label>
@@ -243,7 +309,7 @@ const JoinSection = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
                       placeholder="contacto@ejemplo.com"
                     />
                   </div>
@@ -256,7 +322,7 @@ const JoinSection = () => {
                       value={formData.phone}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
                       placeholder="+52 123 456 7890"
                     />
                   </div>
@@ -268,11 +334,12 @@ const JoinSection = () => {
                       value={formData.description}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary h-24 resize-none"
-                      placeholder="Cuéntanos sobre tu proyecto..."
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary h-24 resize-none bg-background"
+                      placeholder={selectedType === "chapter" ? "Cuéntanos sobre tu experiencia y motivación para liderar..." : "Cuéntanos sobre tu proyecto..."}
                     />
                   </div>
 
+                  {selectedType !== "chapter" && (
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       {selectedType === 'alliance' ? 'Tipo de Alianza' : 'Categoría Principal'}
@@ -281,7 +348,7 @@ const JoinSection = () => {
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
                     >
                       {selectedType === 'alliance' ? (
                         <>
@@ -301,6 +368,7 @@ const JoinSection = () => {
                       )}
                     </select>
                   </div>
+                  )}
 
                   <Button 
                     type="submit" 
