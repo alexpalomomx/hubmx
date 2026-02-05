@@ -58,6 +58,7 @@ const AdminDashboard = () => {
   const { data: pendingData } = usePendingApprovals();
   const [selectedSection, setSelectedSection] = useState("communities");
   const [approvalsTab, setApprovalsTab] = useState<"communities" | "alliances">("communities");
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
@@ -72,7 +73,7 @@ const AdminDashboard = () => {
   }, [user, isAdmin, isCoordinator, loading, navigate]);
 
   useEffect(() => {
-    if (pendingData) {
+    if (pendingData && !initialLoadDone) {
       const totalPending = (pendingData.communities?.length || 0) +
         (pendingData.alliances?.length || 0) +
         (pendingData.events?.length || 0) +
@@ -90,8 +91,10 @@ const AdminDashboard = () => {
       } else if ((pendingData.communities?.length || 0) > 0) {
         setApprovalsTab("communities");
       }
+
+      setInitialLoadDone(true);
     }
-  }, [pendingData]);
+  }, [pendingData, initialLoadDone]);
 
   if (loading) {
     return (

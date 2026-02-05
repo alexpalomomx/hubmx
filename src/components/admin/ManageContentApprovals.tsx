@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, XCircle, Clock, Calendar, Building, Megaphone, FileText } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Calendar, Building, Megaphone, FileText, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -31,6 +31,7 @@ const ManageContentApprovals = ({
   const [isApproving, setIsApproving] = useState(false);
   const [action, setAction] = useState<'approve' | 'reject'>('approve');
   const [rejectionReason, setRejectionReason] = useState('');
+  const [isApprovingAll, setIsApprovingAll] = useState(false);
 
   const handleApproval = async (item: any, table: string, action: 'approve' | 'reject') => {
     setSelectedItem({ ...item, table });
@@ -121,6 +122,54 @@ const ManageContentApprovals = ({
     ...pendingBlogPosts.map(item => ({ ...item, type: 'blog_posts' }))
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+  const handleApproveAll = async () => {
+    if (allPendingItems.length === 0) return;
+
+    setIsApprovingAll(true);
+    try {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const updateData = {
+        approval_status: 'approved',
+        approved_by: userId,
+        approved_at: new Date().toISOString()
+      };
+
+      // Agrupar items por tipo para hacer menos queries
+      const itemsByType = allPendingItems.reduce((acc, item) => {
+        if (!acc[item.type]) acc[item.type] = [];
+        acc[item.type].push(item.id);
+        return acc;
+      }, {} as { [key: string]: string[] });
+
+      // Aprobar todos en paralelo
+      const promises = Object.entries(itemsByType).map(([type, ids]: [string, string[]]) =>
+        supabase.from(type as any).update(updateData).in('id', ids)
+      );
+
+      await Promise.all(promises);
+
+      toast({
+        title: "Todo Aprobado",
+        description: `Se aprobaron ${allPendingItems.length} elementos exitosamente`,
+      });
+
+      // Invalidar queries
+      queryClient.invalidateQueries({ queryKey: ['pending-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['alliances'] });
+      queryClient.invalidateQueries({ queryKey: ['calls'] });
+      queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "No se pudieron aprobar todos los elementos",
+        variant: "destructive",
+      });
+    } finally {
+      setIsApprovingAll(false);
+    }
+  };
+
   if (allPendingItems.length === 0) {
     return (
       <Card>
@@ -141,13 +190,25 @@ const ManageContentApprovals = ({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-orange-600" />
-            Contenido Pendiente de Aprobación
-          </CardTitle>
-          <CardDescription>
-            Revisa y aprueba el contenido enviado por colaboradores
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-orange-600" />
+                Contenido Pendiente de Aprobación
+              </CardTitle>
+              <CardDescription>
+                Revisa y aprueba el contenido enviado por colaboradores
+              </CardDescription>
+            </div>
+            <Button
+              onClick={handleApproveAll}
+              disabled={isApprovingAll}
+              className="shrink-0"
+            >
+              <CheckCheck className="h-4 w-4 mr-2" />
+              {isApprovingAll ? "Aprobando..." : `Aprobar Todo (${allPendingItems.length})`}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
