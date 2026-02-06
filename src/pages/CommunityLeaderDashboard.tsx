@@ -12,7 +12,8 @@ import {
   Plus,
   BarChart3,
   Network,
-  Link2
+  Link2,
+  Sparkles
 } from "lucide-react";
 import { useMyEvents, useEventRegistrations } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
@@ -20,6 +21,7 @@ import AddEventDialog from "@/components/admin/AddEventDialog";
 import ManageMyEvents from "@/components/admin/ManageMyEvents";
 import ManageMyEventSources from "@/components/admin/ManageMyEventSources";
 import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistrations";
+import EventDateRecommender from "@/components/admin/EventDateRecommender";
 
 const CommunityLeaderDashboard = () => {
   const { user, isCommunityLeader, loading } = useAuth();
@@ -189,6 +191,7 @@ const CommunityLeaderDashboard = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border shadow-lg z-50">
                   <SelectItem value="events">Mis Eventos</SelectItem>
+                  <SelectItem value="ai-recommender">Recomendador IA</SelectItem>
                   <SelectItem value="sources">Fuentes Externas</SelectItem>
                   <SelectItem value="registrations">Registros</SelectItem>
                   <SelectItem value="networking">Networking</SelectItem>
@@ -210,6 +213,18 @@ const CommunityLeaderDashboard = () => {
                 </AddEventDialog>
               </div>
               <ManageMyEvents communityId={myCommunity?.id} />
+            </div>
+          )}
+
+          {selectedSection === "ai-recommender" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Sparkles className="h-6 w-6" />
+                  Recomendador de Fechas con IA
+                </h2>
+              </div>
+              <EventDateRecommender />
             </div>
           )}
 
