@@ -701,12 +701,137 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
     const body = await req.json().catch(() => ({}))
-    const { sources, single_url } = body as { sources?: EventSource[], single_url?: string }
+    const { sources, single_url, sync_all } = body as { sources?: EventSource[], single_url?: string, sync_all?: boolean }
     
     let importedCount = 0
     let updatedCount = 0
     let errorCount = 0
     const results: { source: string, imported: number, updated: number, error?: string }[] = []
+    
+    // If sync_all is true OR no params provided, fetch all active sources from database
+    let sourcesToProcess = sources || []
+    if (sync_all || (!single_url && (!sources || sources.length === 0))) {
+      console.log('Fetching all active event sources from database...')
+      const { data: dbSources, error: dbError } = await supabase
+        .from('event_sources')
+        .select('id, name, source_type, url')
+        .eq('is_active', true)
+      
+      if (dbError) {
+        console.error('Error fetching sources:', dbError)
+      } else if (dbSources && dbSources.length > 0) {
+        console.log(`Found ${dbSources.length} active sources`)
+        sourcesToProcess = dbSources.map(s => ({
+          id: s.id,
+          name: s.name,
+          type: s.source_type as 'ics' | 'meetup' | 'luma' | 'eventbrite',
+          url: s.url,
+        }))
+        
+        // Update each source after processing
+        for (const source of sourcesToProcess) {
+          try {
+            console.log(`Processing source: ${source.name} (${source.type})`)
+            const events = await fetchEventsByType(source)
+            let sourceImported = 0
+            let sourceUpdated = 0
+            
+            for (const event of events) {
+              const { dateStr: eventDate, timeStr: eventTime } = toMexicoCityTime(event.start)
+              
+              const { data: existingRows, error: existingError } = await supabase
+                .from('events')
+                .select('id')
+                .eq('registration_url', event.url)
+
+              if (existingError) {
+                console.error('Existing lookup error:', existingError)
+                errorCount++
+                continue
+              }
+
+              const eventData = {
+                title: event.title,
+                description: event.description.substring(0, 5000),
+                event_date: eventDate,
+                event_time: eventTime,
+                location: event.location,
+                registration_url: event.url,
+                event_type: event.location ? 'presencial' : 'virtual',
+                status: 'upcoming',
+                source_id: (source as any).id || null,
+                updated_at: new Date().toISOString(),
+              }
+
+              if (existingRows && existingRows.length > 0) {
+                const ids = existingRows.map((r) => r.id)
+                const { error } = await supabase
+                  .from('events')
+                  .update(eventData)
+                  .in('id', ids)
+
+                if (error) {
+                  console.error('Update error:', error)
+                  errorCount++
+                } else {
+                  sourceUpdated += ids.length
+                  updatedCount += ids.length
+                }
+              } else {
+                const { error } = await supabase.from('events').insert({
+                  ...eventData,
+                  approval_status: 'pending',
+                })
+                
+                if (error) {
+                  console.error('Insert error:', error)
+                  errorCount++
+                } else {
+                  sourceImported++
+                  importedCount++
+                }
+              }
+            }
+            
+            // Update source sync status
+            await supabase
+              .from('event_sources')
+              .update({
+                last_synced_at: new Date().toISOString(),
+                events_imported: sourceImported + sourceUpdated,
+                sync_error: null,
+              })
+              .eq('id', (source as any).id)
+            
+            results.push({ source: source.name, imported: sourceImported, updated: sourceUpdated })
+          } catch (error) {
+            console.error(`Error processing ${source.name}:`, error)
+            
+            // Update source with error
+            await supabase
+              .from('event_sources')
+              .update({
+                last_synced_at: new Date().toISOString(),
+                sync_error: error.message,
+              })
+              .eq('id', (source as any).id)
+            
+            results.push({ source: source.name, imported: 0, updated: 0, error: error.message })
+          }
+        }
+        
+        // Return early if we processed sync_all
+        return new Response(
+          JSON.stringify({
+            success: true,
+            mode: 'sync_all',
+            summary: { total_imported: importedCount, total_updated: updatedCount, total_errors: errorCount },
+            results,
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+        )
+      }
+    }
     
     // Process single URL
     if (single_url) {
