@@ -69,3 +69,6 @@ verify_jwt = false
 
 [functions.calendar-feed]
 verify_jwt = false
+
+[functions.recommend-event-date]
+verify_jwt = false

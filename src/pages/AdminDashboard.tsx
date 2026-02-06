@@ -19,7 +19,8 @@ import {
   Award,
   Briefcase,
   RefreshCw,
-  Trophy
+  Trophy,
+  Sparkles
 } from "lucide-react";
 import { useStats, useCommunities, useEvents, useAlliances, useCalls, usePendingApprovals } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
@@ -46,6 +47,7 @@ import ManageCommunityLeaders from "@/components/admin/ManageCommunityLeaders";
 import ManageNetworking from "@/components/admin/ManageNetworking";
 import ManageEventSources from "@/components/admin/ManageEventSources";
 import ManageLeaderRegistrations from "@/components/admin/ManageLeaderRegistrations";
+import EventDateRecommender from "@/components/admin/EventDateRecommender";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -238,6 +240,7 @@ const AdminDashboard = () => {
                   <SelectItem value="calls">Convocatorias</SelectItem>
                   <SelectItem value="blog">Blog</SelectItem>
                   <SelectItem value="event-sources">Fuentes Externas</SelectItem>
+                  <SelectItem value="ai-recommender">Recomendador IA</SelectItem>
                   <SelectItem value="networking">Networking</SelectItem>
                   <SelectItem value="gamification">Gamificación</SelectItem>
                 </SelectContent>
@@ -366,6 +369,15 @@ const AdminDashboard = () => {
                 >
                   <RefreshCw className="h-3 w-3 mr-1" />
                   Fuentes Externas
+                </Button>
+                <Button
+                  variant={selectedSection === "ai-recommender" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("ai-recommender")}
+                  className="h-8 text-xs"
+                >
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  IA Fechas
                 </Button>
                 <div className="xl:hidden flex gap-2">
                   <Button
@@ -592,6 +604,18 @@ const AdminDashboard = () => {
           {selectedSection === "event-sources" && (
             <div className="space-y-6">
               <ManageEventSources />
+            </div>
+          )}
+
+          {selectedSection === "ai-recommender" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Sparkles className="h-6 w-6" />
+                  Recomendador de Fechas con IA
+                </h2>
+              </div>
+              <EventDateRecommender />
             </div>
           )}
 
