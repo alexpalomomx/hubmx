@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAlliances } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import AddAllianceDialog from "./AddAllianceDialog";
 import { 
   Building, 
   Globe, 
@@ -41,6 +42,10 @@ interface Alliance {
 const ManageAlliances = () => {
   const { data: alliances, refetch } = useAlliances();
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; alliance: Alliance | null }>({
+    open: false,
+    alliance: null
+  });
+  const [editDialog, setEditDialog] = useState<{ open: boolean; alliance: Alliance | null }>({
     open: false,
     alliance: null
   });
@@ -182,7 +187,7 @@ const ManageAlliances = () => {
                       <Eye className="h-4 w-4 mr-1" />
                       {alliance.status === 'active' ? 'Desactivar' : 'Activar'}
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setEditDialog({ open: true, alliance })}>
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button 
@@ -258,6 +263,14 @@ const ManageAlliances = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AddAllianceDialog
+        alliance={editDialog.alliance}
+        open={editDialog.open}
+        onOpenChange={(open) => setEditDialog({ open, alliance: open ? editDialog.alliance : null })}
+      >
+        <span />
+      </AddAllianceDialog>
     </>
   );
 };
