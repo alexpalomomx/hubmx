@@ -30,7 +30,7 @@ serve(async (req) => {
 
     const { data: events, error: eventsError } = await supabase
       .from("events")
-      .select("title, event_date, event_time, location, event_type, organizer_id")
+      .select("id, title, event_date, event_time, location, event_type, organizer_id")
       .gte("event_date", today.toISOString().split("T")[0])
       .lte("event_date", threeMonthsLater.toISOString().split("T")[0])
       .order("event_date", { ascending: true });
@@ -40,9 +40,12 @@ serve(async (req) => {
       throw new Error("Failed to fetch events");
     }
 
-    // Format events for AI analysis
+    // Get the base URL for event links
+    const baseUrl = req.headers.get("origin") || req.headers.get("referer")?.replace(/\/+$/, "") || supabaseUrl.replace(".supabase.co", ".lovable.app");
+
+    // Format events for AI analysis with links
     const eventsContext = events?.map(e => 
-      `- ${e.event_date} ${e.event_time || ''}: "${e.title}" (${e.event_type}, ${e.location || 'sin ubicación'})`
+      `- ${e.event_date} ${e.event_time || ''}: "${e.title}" (${e.event_type}, ${e.location || 'sin ubicación'}) — [Ver evento](${baseUrl}?event=${e.id})`
     ).join("\n") || "No hay eventos programados";
 
     const systemPrompt = `Eres un asistente experto en planificación de eventos para comunidades tech en México. 
@@ -59,6 +62,7 @@ Responde siempre en español y de forma estructurada con:
 - 3 fechas recomendadas con justificación breve
 - Horario sugerido
 - Advertencias si hay conflictos potenciales
+- IMPORTANTE: Cuando menciones eventos existentes, incluye siempre el link en formato markdown que se te proporcionó para cada evento, así el usuario puede consultarlos.
 
 Fecha actual: ${today.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
 
