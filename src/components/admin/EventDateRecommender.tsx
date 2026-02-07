@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Calendar, Sparkles, Loader2, CalendarDays, Clock, AlertCircle } from "lucide-react";
+import { Calendar, Sparkles, Loader2, CalendarDays, Clock, AlertCircle, ExternalLink } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const EventDateRecommender = () => {
@@ -160,8 +160,19 @@ const EventDateRecommender = () => {
               </Badge>
             </div>
             
-            <div className="bg-muted/50 rounded-lg p-4 prose prose-sm max-w-none dark:prose-invert">
-              <ReactMarkdown>{recommendation}</ReactMarkdown>
+            <div className="bg-muted/50 rounded-lg p-4 prose prose-sm max-w-none dark:prose-invert prose-a:text-primary prose-a:font-semibold prose-a:underline prose-a:decoration-primary/50 hover:prose-a:decoration-primary">
+              <ReactMarkdown
+                components={{
+                  a: ({ href, children }) => (
+                    <a href={href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary font-semibold underline decoration-primary/50 hover:decoration-primary">
+                      {children}
+                      <ExternalLink className="h-3 w-3 inline-block" />
+                    </a>
+                  ),
+                }}
+              >
+                {recommendation}
+              </ReactMarkdown>
             </div>
 
             <div className="flex items-start gap-2 text-sm text-muted-foreground bg-accent/50 p-3 rounded-lg border border-border">
