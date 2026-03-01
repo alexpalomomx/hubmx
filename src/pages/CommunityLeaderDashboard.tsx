@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
   Calendar, 
   Users, 
@@ -13,14 +14,15 @@ import {
   BarChart3,
   Network,
   Link2,
-  Sparkles
+  Sparkles,
+  Heart
 } from "lucide-react";
-import { useMyEvents, useEventRegistrations } from "@/hooks/useSupabaseData";
+import { useMyEvents, useCommunityEventInterests } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import AddEventDialog from "@/components/admin/AddEventDialog";
 import ManageMyEvents from "@/components/admin/ManageMyEvents";
 import ManageMyEventSources from "@/components/admin/ManageMyEventSources";
-import { ManageEventRegistrations } from "@/components/admin/ManageEventRegistrations";
+
 import EventDateRecommender from "@/components/admin/EventDateRecommender";
 
 const CommunityLeaderDashboard = () => {
@@ -31,7 +33,7 @@ const CommunityLeaderDashboard = () => {
   const [loadingCommunity, setLoadingCommunity] = useState(true);
   
   const { data: myEvents } = useMyEvents(user?.id, myCommunity?.id);
-  const { data: registrations } = useEventRegistrations();
+  const { data: communityInterests } = useCommunityEventInterests(myCommunity?.id);
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
@@ -99,10 +101,6 @@ const CommunityLeaderDashboard = () => {
     return null;
   }
 
-  const myRegistrations = registrations?.filter(reg => 
-    myEvents?.some(event => event.id === reg.event_id)
-  ) || [];
-
   const statsCards = [
     {
       title: "Mi Comunidad",
@@ -119,11 +117,11 @@ const CommunityLeaderDashboard = () => {
       color: "text-blue-600"
     },
     {
-      title: "Registros Totales",
-      value: myRegistrations.length,
-      icon: Users,
-      description: "Participantes en eventos",
-      color: "text-green-600"
+      title: "Intereses Totales",
+      value: communityInterests?.length || 0,
+      icon: Heart,
+      description: "Intereses en eventos externos",
+      color: "text-red-600"
     }
   ];
 
@@ -193,7 +191,7 @@ const CommunityLeaderDashboard = () => {
                   <SelectItem value="events">Mis Eventos</SelectItem>
                   <SelectItem value="ai-recommender">Recomendador IA</SelectItem>
                   <SelectItem value="sources">Fuentes Externas</SelectItem>
-                  <SelectItem value="registrations">Registros</SelectItem>
+                  <SelectItem value="interests">Intereses en Eventos</SelectItem>
                   <SelectItem value="networking">Networking</SelectItem>
                 </SelectContent>
               </Select>
@@ -236,16 +234,64 @@ const CommunityLeaderDashboard = () => {
                   Fuentes de Eventos Externos
                 </h2>
               </div>
-              <ManageMyEventSources />
+              <ManageMyEventSources communityId={myCommunity?.id} />
             </div>
           )}
 
-          {selectedSection === "registrations" && (
+          {selectedSection === "interests" && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Registros a Eventos</h2>
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Heart className="h-6 w-6 text-red-500" />
+                  Intereses en Eventos de Fuentes Externas
+                </h2>
               </div>
-              <ManageEventRegistrations />
+              {communityInterests && communityInterests.length > 0 ? (
+                <div className="grid gap-4">
+                  {communityInterests.map((interest: any) => (
+                    <Card key={interest.id}>
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-lg">
+                            {interest.events?.title}
+                          </CardTitle>
+                          <Badge variant="outline">
+                            {new Date(interest.created_at).toLocaleDateString('es-MX')}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                            {(interest.profiles?.display_name || 'U').charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium">{interest.profiles?.display_name || 'Usuario anónimo'}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Mostró interés el {new Date(interest.created_at).toLocaleDateString('es-MX')}
+                            </p>
+                          </div>
+                        </div>
+                        {interest.events?.event_date && (
+                          <div className="mt-3 pt-3 border-t">
+                            <p className="text-sm text-muted-foreground">
+                              Evento: {new Date(interest.events.event_date).toLocaleDateString('es-MX')}
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="flex items-center justify-center h-32">
+                    <p className="text-muted-foreground">
+                      No hay intereses registrados para eventos de tus fuentes externas
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 
