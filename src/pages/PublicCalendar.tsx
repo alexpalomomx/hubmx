@@ -24,6 +24,7 @@ const PublicCalendar = () => {
   const [selectedEventType, setSelectedEventType] = useState<string>("all");
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [selectedTimeOfDay, setSelectedTimeOfDay] = useState<string>("all");
+  const [selectedSource, setSelectedSource] = useState<string>("all");
   const [loadingEventId, setLoadingEventId] = useState<string | null>(null);
   
   const { data: userInterests } = useEventInterests(user?.id);
@@ -85,8 +86,21 @@ const PublicCalendar = () => {
     }
   };
 
+  const { data: eventSources } = useQuery({
+    queryKey: ["event-sources-filter"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("event_sources")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: events, isLoading } = useQuery({
-    queryKey: ["public-events", selectedCategory, selectedEventType, selectedLocation, selectedTimeOfDay],
+    queryKey: ["public-events", selectedCategory, selectedEventType, selectedLocation, selectedTimeOfDay, selectedSource],
     queryFn: async () => {
       let query = supabase
         .from("events")
@@ -105,6 +119,14 @@ const PublicCalendar = () => {
 
       if (selectedLocation && selectedLocation !== "all") {
         query = query.ilike("location", `%${selectedLocation}%`);
+      }
+
+      if (selectedSource && selectedSource !== "all") {
+        if (selectedSource === "internal") {
+          query = query.is("source_id", null);
+        } else {
+          query = query.eq("source_id", selectedSource);
+        }
       }
 
       const { data, error } = await query;
@@ -281,6 +303,21 @@ const PublicCalendar = () => {
               <SelectItem value="afternoon">Tarde (12-18h)</SelectItem>
               <SelectItem value="evening">Noche (18-22h)</SelectItem>
               <SelectItem value="night">Madrugada (22-6h)</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedSource} onValueChange={setSelectedSource}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Fuente" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las fuentes</SelectItem>
+              <SelectItem value="internal">Eventos internos</SelectItem>
+              {eventSources?.map((source) => (
+                <SelectItem key={source.id} value={source.id}>
+                  {source.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
