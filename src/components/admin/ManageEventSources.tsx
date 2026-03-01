@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useCommunities } from "@/hooks/useSupabaseData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ interface EventSource {
   sync_error: string | null;
   events_imported: number;
   created_at: string;
+  community_id: string | null;
 }
 
 const useEventSources = () => {
@@ -45,6 +47,7 @@ const useEventSources = () => {
 const ManageEventSources = () => {
   const queryClient = useQueryClient();
   const { data: sources, isLoading } = useEventSources();
+  const { data: communities } = useCommunities();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [syncingId, setSyncingId] = useState<string | null>(null);
   
@@ -115,7 +118,23 @@ const ManageEventSources = () => {
       toast.error("Error: " + error.message);
     },
   });
+  const assignCommunityMutation = useMutation({
+    mutationFn: async ({ id, communityId }: { id: string; communityId: string | null }) => {
+      const { error } = await supabase
+        .from("event_sources")
+        .update({ community_id: communityId })
+        .eq("id", id);
 
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event-sources"] });
+      toast.success("Comunidad asignada");
+    },
+    onError: (error: any) => {
+      toast.error("Error: " + error.message);
+    },
+  });
   const syncSource = async (source: EventSource) => {
     setSyncingId(source.id);
     try {
@@ -349,6 +368,7 @@ const ManageEventSources = () => {
                 <TableHead>Estado</TableHead>
                 <TableHead>Última Sync</TableHead>
                 <TableHead>Eventos</TableHead>
+                <TableHead>Comunidad</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -400,7 +420,28 @@ const ManageEventSources = () => {
                     <TableCell>
                       <Badge variant="secondary">{source.events_imported}</Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell>
+                      <Select
+                        value={source.community_id || "none"}
+                        onValueChange={(value) =>
+                          assignCommunityMutation.mutate({
+                            id: source.id,
+                            communityId: value === "none" ? null : value,
+                          })
+                        }
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Sin asignar" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sin asignar</SelectItem>
+                          {communities?.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <div className="flex justify-end gap-2">
                         <Button
                           variant="outline"

@@ -445,6 +445,7 @@ export type Database = {
       }
       event_sources: {
         Row: {
+          community_id: string | null
           created_at: string
           created_by: string | null
           events_imported: number
@@ -458,6 +459,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          community_id?: string | null
           created_at?: string
           created_by?: string | null
           events_imported?: number
@@ -471,6 +473,7 @@ export type Database = {
           url: string
         }
         Update: {
+          community_id?: string | null
           created_at?: string
           created_by?: string | null
           events_imported?: number
@@ -483,7 +486,15 @@ export type Database = {
           updated_at?: string
           url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "event_sources_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       events: {
         Row: {

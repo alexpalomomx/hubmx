@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { Plus, RefreshCw, Trash2, ExternalLink, Calendar, AlertCircle, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useMyEventSources } from "@/hooks/useSupabaseData";
+import { useMyEventSources, useCommunityEventSources } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface EventSource {
@@ -29,10 +29,23 @@ interface EventSource {
   created_at: string;
 }
 
-const ManageMyEventSources = () => {
+interface ManageMyEventSourcesProps {
+  communityId?: string;
+}
+
+const ManageMyEventSources = ({ communityId }: ManageMyEventSourcesProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { data: sources, isLoading } = useMyEventSources(user?.id);
+  const { data: mySources, isLoading: myLoading } = useMyEventSources(user?.id);
+  const { data: communitySources, isLoading: communityLoading } = useCommunityEventSources(communityId);
+  
+  // Combine sources: own + community-assigned (deduplicated)
+  const isLoading = myLoading || communityLoading;
+  const sources = (() => {
+    const myIds = new Set((mySources || []).map(s => s.id));
+    const assignedOnly = (communitySources || []).filter(s => !myIds.has(s.id));
+    return [...(mySources || []), ...assignedOnly];
+  })();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [syncingId, setSyncingId] = useState<string | null>(null);
   
@@ -343,6 +356,9 @@ const ManageMyEventSources = () => {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{source.name}</span>
+                        {source.created_by !== user?.id && (
+                          <Badge variant="outline" className="text-xs">Asignada</Badge>
+                        )}
                         <a
                           href={source.url}
                           target="_blank"
@@ -360,12 +376,18 @@ const ManageMyEventSources = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Switch
-                          checked={source.is_active}
-                          onCheckedChange={(checked) =>
-                            toggleActiveMutation.mutate({ id: source.id, isActive: checked })
-                          }
-                        />
+                        {source.created_by === user?.id ? (
+                          <Switch
+                            checked={source.is_active}
+                            onCheckedChange={(checked) =>
+                              toggleActiveMutation.mutate({ id: source.id, isActive: checked })
+                            }
+                          />
+                        ) : (
+                          <Badge variant={source.is_active ? "default" : "secondary"}>
+                            {source.is_active ? "Activa" : "Inactiva"}
+                          </Badge>
+                        )}
                         {source.sync_error ? (
                           <span title={source.sync_error}>
                             <AlertCircle className="h-4 w-4 text-destructive" />
@@ -395,14 +417,16 @@ const ManageMyEventSources = () => {
                             className={`h-4 w-4 ${syncingId === source.id ? "animate-spin" : ""}`}
                           />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => deleteSourceMutation.mutate(source.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {source.created_by === user?.id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => deleteSourceMutation.mutate(source.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
