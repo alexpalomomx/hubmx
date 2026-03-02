@@ -145,38 +145,37 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 sm:h-16">
+            <div className="flex items-center gap-2 min-w-0">
               <Button
                 variant="ghost"
+                size="icon"
                 onClick={() => navigate("/")}
-                className="flex items-center space-x-2"
+                className="shrink-0"
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span>Volver al inicio</span>
               </Button>
-              <div className="h-6 w-px bg-border"></div>
-              <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-                Dashboard Administrativo
+              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent truncate">
+                Dashboard Admin
               </h1>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs sm:text-sm text-muted-foreground truncate max-w-[180px]">
                 {user.email}
               </span>
-              <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">
-                {isAdmin ? 'Admin' : 'Coordinador'}
+              <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded shrink-0">
+                {isAdmin ? 'Admin' : 'Coord'}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 overflow-x-hidden">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {statsCards.map((stat) => (
@@ -415,10 +414,10 @@ const AdminDashboard = () => {
           {/* Content Sections */}
           {selectedSection === "communities" && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Gestión de Comunidades</h2>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold">Gestión de Comunidades</h2>
                 <AddCommunityDialog>
-                  <Button>
+                  <Button className="w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
                     Nueva Comunidad
                   </Button>
@@ -501,10 +500,10 @@ const AdminDashboard = () => {
 
           {selectedSection === "events" && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Gestión de Eventos</h2>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold">Gestión de Eventos</h2>
                 <AddEventDialog>
-                  <Button>
+                  <Button className="w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
                     Nuevo Evento
                   </Button>
@@ -546,16 +545,16 @@ const AdminDashboard = () => {
 
           {selectedSection === "alliances" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold">Gestión de Alianzas</h2>
-                  <p className="text-muted-foreground">
+                  <h2 className="text-xl sm:text-2xl font-bold">Gestión de Alianzas</h2>
+                  <p className="text-muted-foreground text-sm">
                     Administra alianzas y colaboradores
                   </p>
                 </div>
                 {isAdmin && (
                   <AddAllianceDialog>
-                    <Button variant="hero">
+                    <Button variant="hero" className="w-full sm:w-auto">
                       <Building className="mr-2 h-4 w-4" />
                       Nueva Alianza
                     </Button>
@@ -568,10 +567,10 @@ const AdminDashboard = () => {
 
           {selectedSection === "calls" && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Gestión de Convocatorias</h2>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold">Gestión de Convocatorias</h2>
                 <AddCallDialog>
-                  <Button>
+                  <Button className="w-full sm:w-auto">
                     <Plus className="h-4 w-4 mr-2" />
                     Nueva Convocatoria
                   </Button>
@@ -583,15 +582,15 @@ const AdminDashboard = () => {
 
           {selectedSection === "blog" && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold">Gestión del Blog</h2>
-                  <p className="text-muted-foreground">
+                  <h2 className="text-xl sm:text-2xl font-bold">Gestión del Blog</h2>
+                  <p className="text-muted-foreground text-sm">
                     Administra publicaciones y contenido
                   </p>
                 </div>
                 <AddBlogPostDialog>
-                  <Button variant="hero">
+                  <Button variant="hero" className="w-full sm:w-auto">
                     <FileText className="mr-2 h-4 w-4" />
                     Nueva Publicación
                   </Button>
@@ -609,10 +608,10 @@ const AdminDashboard = () => {
 
           {selectedSection === "ai-recommender" && (
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <Sparkles className="h-6 w-6" />
-                  Recomendador de Fechas con IA
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 sm:h-6 sm:w-6" />
+                  Recomendador IA
                 </h2>
               </div>
               <EventDateRecommender />
