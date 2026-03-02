@@ -376,10 +376,10 @@ const EventsSection = () => {
               variant="community" 
               size="lg"
               onClick={() => navigate("/auth?tab=signup")}
-              className="group"
+              className="group whitespace-normal text-center max-w-full"
             >
               Crea tu cuenta para ver el calendario completo
-              <ExternalLink className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+              <ExternalLink className="h-4 w-4 ml-2 shrink-0 group-hover:translate-x-0.5 transition-transform" />
             </Button>
           )}
         </div>
