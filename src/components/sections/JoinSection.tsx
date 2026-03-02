@@ -292,12 +292,25 @@ const JoinSection = () => {
                         className="w-full px-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
                       >
                         <option value="">Selecciona una comunidad</option>
-                        {communities?.map((community) => (
+                        {communities?.filter(c => c.status === 'active').map((community) => (
                           <option key={community.id} value={community.id}>
                             {community.name}
                           </option>
                         ))}
                       </select>
+                      <div className="mt-2 p-3 bg-muted/50 border border-border rounded-md">
+                        <p className="text-sm text-muted-foreground">
+                          ¿No encuentras tu comunidad?{" "}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedType("community")}
+                            className="text-primary font-medium hover:underline"
+                          >
+                            Regístrala primero aquí
+                          </button>
+                          {" "}y espera su aprobación. Una vez aprobada, podrás registrarte como líder.
+                        </p>
+                      </div>
                     </div>
                   )}
                   
