@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CalendarSourceSelector } from "@/components/calendar/CalendarSourceSelector";
 
 const PublicCalendar = () => {
+  useEffect(() => { window.scrollTo(0, 0); }, []);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
