@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCommunities } from "@/hooks/useSupabaseData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -27,7 +26,35 @@ interface EventSource {
   events_imported: number;
   created_at: string;
   community_id: string | null;
+  assigned_leader_id: string | null;
 }
+
+interface LeaderProfile {
+  user_id: string;
+  display_name: string | null;
+}
+
+const useLeaderProfiles = () => {
+  return useQuery({
+    queryKey: ["leader-profiles"],
+    queryFn: async () => {
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "community_leader");
+      if (rolesError) throw rolesError;
+      if (!roles || roles.length === 0) return [] as LeaderProfile[];
+
+      const userIds = roles.map(r => r.user_id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("user_id, display_name")
+        .in("user_id", userIds);
+      if (profilesError) throw profilesError;
+      return (profiles || []) as LeaderProfile[];
+    },
+  });
+};
 
 const useEventSources = () => {
   return useQuery({
@@ -47,7 +74,7 @@ const useEventSources = () => {
 const ManageEventSources = () => {
   const queryClient = useQueryClient();
   const { data: sources, isLoading } = useEventSources();
-  const { data: communities } = useCommunities();
+  const { data: leaders } = useLeaderProfiles();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [syncingId, setSyncingId] = useState<string | null>(null);
   
@@ -118,18 +145,18 @@ const ManageEventSources = () => {
       toast.error("Error: " + error.message);
     },
   });
-  const assignCommunityMutation = useMutation({
-    mutationFn: async ({ id, communityId }: { id: string; communityId: string | null }) => {
+  const assignLeaderMutation = useMutation({
+    mutationFn: async ({ id, leaderId }: { id: string; leaderId: string | null }) => {
       const { error } = await supabase
         .from("event_sources")
-        .update({ community_id: communityId })
+        .update({ assigned_leader_id: leaderId })
         .eq("id", id);
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event-sources"] });
-      toast.success("Comunidad asignada");
+      toast.success("Líder asignado");
     },
     onError: (error: any) => {
       toast.error("Error: " + error.message);
@@ -368,7 +395,7 @@ const ManageEventSources = () => {
                 <TableHead>Estado</TableHead>
                 <TableHead>Última Sync</TableHead>
                 <TableHead>Eventos</TableHead>
-                <TableHead>Comunidad</TableHead>
+                <TableHead>Líder asignado</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -422,22 +449,22 @@ const ManageEventSources = () => {
                     </TableCell>
                     <TableCell>
                       <Select
-                        value={source.community_id || "none"}
+                        value={source.assigned_leader_id || "none"}
                         onValueChange={(value) =>
-                          assignCommunityMutation.mutate({
+                          assignLeaderMutation.mutate({
                             id: source.id,
-                            communityId: value === "none" ? null : value,
+                            leaderId: value === "none" ? null : value,
                           })
                         }
                       >
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Sin asignar" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
                           <SelectItem value="none">Sin asignar</SelectItem>
-                          {communities?.map((c) => (
-                            <SelectItem key={c.id} value={c.id}>
-                              {c.name}
+                          {leaders?.map((leader) => (
+                            <SelectItem key={leader.user_id} value={leader.user_id}>
+                              {leader.display_name || "Sin nombre"}
                             </SelectItem>
                           ))}
                         </SelectContent>
