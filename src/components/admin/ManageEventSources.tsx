@@ -26,7 +26,35 @@ interface EventSource {
   events_imported: number;
   created_at: string;
   community_id: string | null;
+  assigned_leader_id: string | null;
 }
+
+interface LeaderProfile {
+  user_id: string;
+  display_name: string | null;
+}
+
+const useLeaderProfiles = () => {
+  return useQuery({
+    queryKey: ["leader-profiles"],
+    queryFn: async () => {
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "community_leader");
+      if (rolesError) throw rolesError;
+      if (!roles || roles.length === 0) return [] as LeaderProfile[];
+
+      const userIds = roles.map(r => r.user_id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("user_id, display_name")
+        .in("user_id", userIds);
+      if (profilesError) throw profilesError;
+      return (profiles || []) as LeaderProfile[];
+    },
+  });
+};
 
 const useEventSources = () => {
   return useQuery({
