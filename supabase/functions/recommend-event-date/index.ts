@@ -69,7 +69,20 @@ Responde siempre en español y de forma estructurada con:
 
 Fecha actual: ${today.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
 
-    const userPrompt = `Analiza los siguientes eventos programados y recomienda las mejores fechas para un nuevo evento.
+    const userPrompt = specificDate 
+      ? `Analiza los siguientes eventos programados y dime si la fecha **${specificDate}** es buena para realizar un nuevo evento.
+
+**Eventos existentes:**
+${eventsContext}
+
+**Detalles del nuevo evento:**
+- Fecha a evaluar: ${specificDate}
+- Tipo de evento: ${eventType || 'no especificado'}
+- Duración estimada: ${duration || '2 horas'}
+${communityId ? `- Comunidad organizadora: ${communityId}` : ''}
+
+Indica si hay conflictos ese día, qué tan buena opción es, y sugiere el mejor horario. Si hay conflictos, sugiere 2 fechas alternativas cercanas.`
+      : `Analiza los siguientes eventos programados y recomienda las mejores fechas para un nuevo evento.
 
 **Eventos existentes:**
 ${eventsContext}
