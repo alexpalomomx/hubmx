@@ -97,7 +97,27 @@ export const useMyEventSources = (userId?: string) => {
   });
 };
 
-// Hook para obtener fuentes de eventos asignadas a una comunidad
+// Hook para obtener fuentes de eventos asignadas a un líder
+export const useLeaderAssignedEventSources = (userId?: string) => {
+  return useQuery({
+    queryKey: ["leader-assigned-event-sources", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      
+      const { data, error } = await supabase
+        .from("event_sources")
+        .select("*")
+        .eq("assigned_leader_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
+  });
+};
+
+// Hook legacy para obtener fuentes de eventos asignadas a una comunidad
 export const useCommunityEventSources = (communityId?: string) => {
   return useQuery({
     queryKey: ["community-event-sources", communityId],

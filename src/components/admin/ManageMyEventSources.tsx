@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { Plus, RefreshCw, Trash2, ExternalLink, Calendar, AlertCircle, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useMyEventSources, useCommunityEventSources } from "@/hooks/useSupabaseData";
+import { useMyEventSources, useLeaderAssignedEventSources } from "@/hooks/useSupabaseData";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface EventSource {
@@ -37,13 +37,13 @@ const ManageMyEventSources = ({ communityId }: ManageMyEventSourcesProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { data: mySources, isLoading: myLoading } = useMyEventSources(user?.id);
-  const { data: communitySources, isLoading: communityLoading } = useCommunityEventSources(communityId);
+  const { data: assignedSources, isLoading: assignedLoading } = useLeaderAssignedEventSources(user?.id);
   
-  // Combine sources: own + community-assigned (deduplicated)
-  const isLoading = myLoading || communityLoading;
+  // Combine sources: own + assigned to me as leader (deduplicated)
+  const isLoading = myLoading || assignedLoading;
   const sources = (() => {
     const myIds = new Set((mySources || []).map(s => s.id));
-    const assignedOnly = (communitySources || []).filter(s => !myIds.has(s.id));
+    const assignedOnly = (assignedSources || []).filter(s => !myIds.has(s.id));
     return [...(mySources || []), ...assignedOnly];
   })();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
