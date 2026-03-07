@@ -258,7 +258,7 @@ const PublicCalendar = () => {
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Categoría" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
               <SelectItem value="all">Todas las categorías</SelectItem>
               {categories?.map((cat) => (
                 <SelectItem key={cat} value={cat}>
@@ -272,7 +272,7 @@ const PublicCalendar = () => {
             <SelectTrigger className="w-full sm:w-[160px]">
               <SelectValue placeholder="Tipo" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
               <SelectItem value="all">Todos los tipos</SelectItem>
               <SelectItem value="virtual">Virtual</SelectItem>
               <SelectItem value="presencial">Presencial</SelectItem>
@@ -284,7 +284,7 @@ const PublicCalendar = () => {
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Ubicación" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
               <SelectItem value="all">Todas las ubicaciones</SelectItem>
               {locations?.map((loc) => (
                 <SelectItem key={loc} value={loc}>
@@ -298,7 +298,7 @@ const PublicCalendar = () => {
             <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Horario" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
               <SelectItem value="all">Cualquier horario</SelectItem>
               <SelectItem value="morning">Mañana (6-12h)</SelectItem>
               <SelectItem value="afternoon">Tarde (12-18h)</SelectItem>
@@ -311,7 +311,7 @@ const PublicCalendar = () => {
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Fuente" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
               <SelectItem value="all">Todas las fuentes</SelectItem>
               <SelectItem value="internal">Eventos internos</SelectItem>
               {eventSources?.map((source) => (
