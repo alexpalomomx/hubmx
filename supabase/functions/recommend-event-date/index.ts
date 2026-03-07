@@ -21,7 +21,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { preferredMonth, eventType, duration, communityId } = await req.json();
+    const { preferredMonth, eventType, duration, communityId, specificDate } = await req.json();
 
     // Get events from the next 3 months
     const today = new Date();
@@ -30,7 +30,7 @@ serve(async (req) => {
 
     const { data: events, error: eventsError } = await supabase
       .from("events")
-      .select("id, title, event_date, event_time, location, event_type, organizer_id")
+      .select("id, title, event_date, event_time, location, event_type, organizer_id, registration_url")
       .gte("event_date", today.toISOString().split("T")[0])
       .lte("event_date", threeMonthsLater.toISOString().split("T")[0])
       .order("event_date", { ascending: true });
@@ -40,13 +40,16 @@ serve(async (req) => {
       throw new Error("Failed to fetch events");
     }
 
-    // Get the base URL for event links
-    const baseUrl = req.headers.get("origin") || req.headers.get("referer")?.replace(/\/+$/, "") || supabaseUrl.replace(".supabase.co", ".lovable.app");
+    // Get the base URL for event links (calendar page)
+    const origin = req.headers.get("origin") || req.headers.get("referer")?.replace(/\/+$/, "") || "";
+    const calendarUrl = origin ? `${origin}/calendario` : "";
 
-    // Format events for AI analysis with links
-    const eventsContext = events?.map(e => 
-      `- ${e.event_date} ${e.event_time || ''}: "${e.title}" (${e.event_type}, ${e.location || 'sin ubicación'}) — [Ver evento](${baseUrl}?event=${e.id})`
-    ).join("\n") || "No hay eventos programados";
+    // Format events for AI analysis with links - use registration_url if available, otherwise link to calendar
+    const eventsContext = events?.map(e => {
+      const eventLink = e.registration_url || calendarUrl;
+      const linkText = e.registration_url ? "Ver evento" : "Ver calendario";
+      return `- ${e.event_date} ${e.event_time || ''}: "${e.title}" (${e.event_type}, ${e.location || 'sin ubicación'}) — [${linkText}](${eventLink})`;
+    }).join("\n") || "No hay eventos programados";
 
     const systemPrompt = `Eres un asistente experto en planificación de eventos para comunidades tech en México. 
 Tu rol es analizar el calendario de eventos existentes y recomendar las mejores fechas para nuevos eventos.
@@ -66,7 +69,20 @@ Responde siempre en español y de forma estructurada con:
 
 Fecha actual: ${today.toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
 
-    const userPrompt = `Analiza los siguientes eventos programados y recomienda las mejores fechas para un nuevo evento.
+    const userPrompt = specificDate 
+      ? `Analiza los siguientes eventos programados y dime si la fecha **${specificDate}** es buena para realizar un nuevo evento.
+
+**Eventos existentes:**
+${eventsContext}
+
+**Detalles del nuevo evento:**
+- Fecha a evaluar: ${specificDate}
+- Tipo de evento: ${eventType || 'no especificado'}
+- Duración estimada: ${duration || '2 horas'}
+${communityId ? `- Comunidad organizadora: ${communityId}` : ''}
+
+Indica si hay conflictos ese día, qué tan buena opción es, y sugiere el mejor horario. Si hay conflictos, sugiere 2 fechas alternativas cercanas.`
+      : `Analiza los siguientes eventos programados y recomienda las mejores fechas para un nuevo evento.
 
 **Eventos existentes:**
 ${eventsContext}
