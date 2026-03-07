@@ -445,6 +445,7 @@ export type Database = {
       }
       event_sources: {
         Row: {
+          assigned_leader_id: string | null
           community_id: string | null
           created_at: string
           created_by: string | null
@@ -459,6 +460,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          assigned_leader_id?: string | null
           community_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -473,6 +475,7 @@ export type Database = {
           url: string
         }
         Update: {
+          assigned_leader_id?: string | null
           community_id?: string | null
           created_at?: string
           created_by?: string | null
