@@ -5,16 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Calendar, Sparkles, Loader2, CalendarDays, Clock, AlertCircle, ExternalLink } from "lucide-react";
+import { Calendar as CalendarIcon, Sparkles, Loader2, CalendarDays, Clock, AlertCircle, ExternalLink } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
 const EventDateRecommender = () => {
   const [preferredMonth, setPreferredMonth] = useState<string>("");
   const [eventType, setEventType] = useState<string>("");
   const [duration, setDuration] = useState<string>("2 horas");
+  const [specificDate, setSpecificDate] = useState<Date | undefined>(undefined);
   const [recommendation, setRecommendation] = useState<string | null>(null);
   const [eventsAnalyzed, setEventsAnalyzed] = useState<number>(0);
 
@@ -33,12 +38,19 @@ const EventDateRecommender = () => {
 
   const recommendMutation = useMutation({
     mutationFn: async () => {
+      const body: any = {
+        eventType,
+        duration,
+      };
+
+      if (specificDate) {
+        body.specificDate = format(specificDate, "yyyy-MM-dd");
+      } else {
+        body.preferredMonth = preferredMonth;
+      }
+
       const { data, error } = await supabase.functions.invoke("recommend-event-date", {
-        body: {
-          preferredMonth,
-          eventType,
-          duration,
-        },
+        body,
       });
 
       if (error) throw error;
@@ -75,14 +87,62 @@ const EventDateRecommender = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-2">
+            <Label>Fecha específica (opcional)</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !specificDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {specificDate ? format(specificDate, "PPP", { locale: es }) : "Elegir fecha"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={specificDate}
+                  onSelect={(date) => {
+                    setSpecificDate(date);
+                    if (date) setPreferredMonth("");
+                  }}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {specificDate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs w-full"
+                onClick={() => setSpecificDate(undefined)}
+              >
+                Limpiar fecha
+              </Button>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="month">Mes preferido</Label>
-            <Select value={preferredMonth} onValueChange={setPreferredMonth}>
+            <Select
+              value={preferredMonth}
+              onValueChange={(v) => {
+                setPreferredMonth(v);
+                if (v) setSpecificDate(undefined);
+              }}
+              disabled={!!specificDate}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar mes" />
+                <SelectValue placeholder={specificDate ? "Fecha seleccionada" : "Seleccionar mes"} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
                 <SelectItem value="próximas 2 semanas">Próximas 2 semanas</SelectItem>
                 {getMonthOptions().map((month) => (
                   <SelectItem key={month.value} value={month.value}>
@@ -99,7 +159,7 @@ const EventDateRecommender = () => {
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar tipo" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
                 <SelectItem value="presencial">Presencial</SelectItem>
                 <SelectItem value="virtual">Virtual</SelectItem>
                 <SelectItem value="híbrido">Híbrido</SelectItem>
@@ -117,7 +177,7 @@ const EventDateRecommender = () => {
               <SelectTrigger>
                 <SelectValue placeholder="Seleccionar duración" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
                 <SelectItem value="1 hora">1 hora</SelectItem>
                 <SelectItem value="2 horas">2 horas</SelectItem>
                 <SelectItem value="3 horas">3 horas</SelectItem>
@@ -139,9 +199,14 @@ const EventDateRecommender = () => {
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Analizando calendario...
             </>
+          ) : specificDate ? (
+            <>
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              Verificar disponibilidad del {format(specificDate, "d 'de' MMMM", { locale: es })}
+            </>
           ) : (
             <>
-              <Calendar className="mr-2 h-4 w-4" />
+              <CalendarIcon className="mr-2 h-4 w-4" />
               Obtener Recomendación de Fecha
             </>
           )}
