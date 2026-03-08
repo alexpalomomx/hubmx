@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Plus, X, Save, User, MapPin, Link, Star } from "lucide-react";
+import { LocationSelector } from "@/components/LocationSelector";
 import {
   useNetworkingProfile,
   useUpdateNetworkingProfile,
