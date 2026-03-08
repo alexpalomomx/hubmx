@@ -175,14 +175,17 @@ export default function ManageEvents() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4">
-        {events?.map((event) => (
+        {events?.map((event) => {
+          const isExternal = !!(event as any).source_id;
+
+          return (
           <Card key={event.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-lg">{event.title}</CardTitle>
-                    {(event as any).source_id && (
+                    {isExternal && (
                       <Badge variant="secondary" className="text-xs">
                         📡 {(event as any).source?.name || "Fuente externa"}
                         {(event as any).source?.source_type && ` (${(event as any).source.source_type})`}
