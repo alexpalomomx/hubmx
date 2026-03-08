@@ -286,15 +286,9 @@ export default function ManageCommunities() {
                       <SelectValue placeholder="Selecciona una categoría" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="tecnologia">Tecnología</SelectItem>
-                      <SelectItem value="salud">Salud</SelectItem>
-                      <SelectItem value="educacion">Educación</SelectItem>
-                      <SelectItem value="medio-ambiente">Medio Ambiente</SelectItem>
-                      <SelectItem value="arte-cultura">Arte y Cultura</SelectItem>
-                      <SelectItem value="deportes">Deportes</SelectItem>
-                      <SelectItem value="emprendimiento">Emprendimiento</SelectItem>
-                      <SelectItem value="voluntariado">Voluntariado</SelectItem>
-                      <SelectItem value="otros">Otros</SelectItem>
+                      {dynamicCategories.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

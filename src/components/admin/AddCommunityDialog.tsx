@@ -23,14 +23,7 @@ const AddCommunityDialog = ({ children }: AddCommunityDialogProps) => {
   const [currentTopic, setCurrentTopic] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const categories = [
-    { value: "tech", label: "Tecnología" },
-    { value: "education", label: "Educación" },
-    { value: "social", label: "Impacto Social" },
-    { value: "entrepreneurship", label: "Emprendimiento" },
-    { value: "web3", label: "Web3" }
-  ];
+  const { data: categories = [] } = useCommunityCategories();
 
   const handleAddTopic = () => {
     if (currentTopic.trim() && !topics.includes(currentTopic.trim())) {
