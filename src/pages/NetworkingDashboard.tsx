@@ -157,10 +157,10 @@ const NetworkingDashboard = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <MessageSquare className="h-8 w-8 text-purple-500" />
+                <BookOpen className="h-8 w-8 text-purple-500" />
                 <div>
-                  <p className="text-2xl font-bold">{unreadMessages}</p>
-                  <p className="text-sm text-muted-foreground">Conversaciones</p>
+                  <p className="text-2xl font-bold">{activeMentorships}</p>
+                  <p className="text-sm text-muted-foreground">Mentorías</p>
                 </div>
               </div>
             </CardContent>
