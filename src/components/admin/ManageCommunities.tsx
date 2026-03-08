@@ -287,7 +287,7 @@ export default function ManageCommunities() {
           </DialogHeader>
           {editingCommunity && (
             <form onSubmit={handleSaveEdit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-name">Nombre *</Label>
                   <Input
