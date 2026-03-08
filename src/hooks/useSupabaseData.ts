@@ -144,11 +144,89 @@ export const useCommunityEventInterests = (communityId?: string) => {
     queryFn: async () => {
       if (!communityId) return [];
 
-      // Get source IDs for this community
       const { data: sources, error: sourcesError } = await supabase
         .from("event_sources")
         .select("id")
         .eq("community_id", communityId);
+
+      if (sourcesError) throw sourcesError;
+      if (!sources || sources.length === 0) return [];
+
+      const sourceIds = sources.map(s => s.id);
+
+      const { data: events, error: eventsError } = await supabase
+        .from("events")
+        .select("id, title, event_date")
+        .in("source_id", sourceIds);
+
+      if (eventsError) throw eventsError;
+      if (!events || events.length === 0) return [];
+
+      const eventIds = events.map(e => e.id);
+
+      const { data: interests, error: interestsError } = await supabase
+        .from("event_interests")
+        .select(`
+          id,
+          user_id,
+          event_id,
+          created_at,
+          events (id, title, event_date),
+          profiles (display_name, avatar_url)
+        `)
+        .in("event_id", eventIds)
+        .order("created_at", { ascending: false });
+
+      if (interestsError) throw interestsError;
+      return interests || [];
+    },
+    enabled: !!communityId,
+  });
+};
+
+// Hook para obtener eventos de fuentes externas asignadas a un líder
+export const useLeaderSourceEvents = (userId?: string) => {
+  return useQuery({
+    queryKey: ["leader-source-events", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+
+      // Get sources assigned to this leader
+      const { data: sources, error: sourcesError } = await supabase
+        .from("event_sources")
+        .select("id")
+        .eq("assigned_leader_id", userId);
+
+      if (sourcesError) throw sourcesError;
+      if (!sources || sources.length === 0) return [];
+
+      const sourceIds = sources.map(s => s.id);
+
+      const { data: events, error: eventsError } = await supabase
+        .from("events")
+        .select(`*, organizer:organizer_id(name)`)
+        .in("source_id", sourceIds)
+        .order("event_date", { ascending: true });
+
+      if (eventsError) throw eventsError;
+      return events || [];
+    },
+    enabled: !!userId,
+  });
+};
+
+// Hook para obtener intereses de eventos de fuentes asignadas a un líder
+export const useLeaderEventInterests = (userId?: string) => {
+  return useQuery({
+    queryKey: ["leader-event-interests", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+
+      // Get sources assigned to this leader
+      const { data: sources, error: sourcesError } = await supabase
+        .from("event_sources")
+        .select("id")
+        .eq("assigned_leader_id", userId);
 
       if (sourcesError) throw sourcesError;
       if (!sources || sources.length === 0) return [];
@@ -183,7 +261,7 @@ export const useCommunityEventInterests = (communityId?: string) => {
       if (interestsError) throw interestsError;
       return interests || [];
     },
-    enabled: !!communityId,
+    enabled: !!userId,
   });
 };
 
