@@ -386,6 +386,15 @@ const AdminDashboard = () => {
                   <Sparkles className="h-3 w-3 mr-1" />
                   IA Fechas
                 </Button>
+                <Button
+                  variant={selectedSection === "impact-report" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("impact-report")}
+                  className="h-8 text-xs"
+                >
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Impacto
+                </Button>
                 <div className="xl:hidden flex gap-2">
                   <Button
                     variant={selectedSection === "users" ? "default" : "outline"}
