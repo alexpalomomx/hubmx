@@ -243,6 +243,7 @@ const AdminDashboard = () => {
                   <SelectItem value="ai-recommender">Recomendador IA</SelectItem>
                   <SelectItem value="networking">Networking</SelectItem>
                   <SelectItem value="gamification">Gamificación</SelectItem>
+                  <SelectItem value="categories">Categorías</SelectItem>
                 </SelectContent>
               </Select>
             </div>
