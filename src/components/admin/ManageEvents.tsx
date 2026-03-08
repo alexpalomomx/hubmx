@@ -15,20 +15,27 @@ import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+interface EventSource {
+  name: string;
+  source_type: string;
+}
+
 interface Event {
   id: string;
   title: string;
   description: string;
   event_date: string;
-  event_time: string;
+  event_time: string | null;
   location: string;
   event_type: string;
   category: string;
   max_attendees: number;
   current_attendees: number;
-  registration_url: string;
+  registration_url: string | null;
   image_url: string;
   status: string;
+  source_id: string | null;
+  source: EventSource | null;
   organizer: { name: string } | null;
 }
 
