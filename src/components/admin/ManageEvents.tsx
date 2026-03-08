@@ -359,39 +359,42 @@ export default function ManageEvents() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                <div className="text-xs sm:text-sm text-muted-foreground truncate">
                   {event.organizer?.name && `Organizado por: ${event.organizer.name}`}
                 </div>
 
                 {isExternal ? (
                   <p className="text-xs text-muted-foreground italic">
-                    Este evento se gestiona desde la fuente externa
+                    Evento de fuente externa
                   </p>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleToggleStatus(event.id, event.status, event.title)}
+                      className="text-xs"
                     >
-                      Cambiar Estado
+                      Estado
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(event)}
+                      className="text-xs"
                     >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Editar
+                      <Edit className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Editar</span>
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(event.id, event.title)}
+                      className="text-xs"
                     >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Eliminar
+                      <Trash2 className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Eliminar</span>
                     </Button>
                   </div>
                 )}
