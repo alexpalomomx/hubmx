@@ -6,18 +6,31 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
-import { Download, FileSpreadsheet, Heart } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Download, FileSpreadsheet, Heart, Search } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 
 export function ManageEventInterests() {
   const [selectedEventId, setSelectedEventId] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: events, isLoading: eventsLoading } = useEvents();
   const { data: interests, isLoading: interestsLoading } = useAllEventInterests(
     selectedEventId === "all" ? undefined : selectedEventId
   );
   const { data: allInterests } = useAllEventInterests();
+
+  const filteredInterests = useMemo(() => {
+    if (!interests) return [];
+    if (!searchQuery.trim()) return interests;
+    const q = searchQuery.toLowerCase();
+    return interests.filter((i) => {
+      const eventTitle = ((i.events as any)?.title || "").toLowerCase();
+      const userName = ((i.profiles as any)?.display_name || "").toLowerCase();
+      return eventTitle.includes(q) || userName.includes(q);
+    });
+  }, [interests, searchQuery]);
 
   // Function to export interests to Excel
   const exportToExcel = (dataToExport: any[], filename: string) => {
@@ -101,8 +114,17 @@ export function ManageEventInterests() {
               ))}
             </SelectContent>
           </Select>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar evento o usuario..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 w-[250px]"
+            />
+          </div>
           <Badge variant="secondary">
-            {interests?.length || 0} intereses
+            {filteredInterests.length} intereses
           </Badge>
         </div>
         
@@ -131,7 +153,7 @@ export function ManageEventInterests() {
       </div>
 
       <div className="grid gap-4">
-        {interests?.length === 0 ? (
+        {filteredInterests.length === 0 ? (
           <Card>
             <CardContent className="flex items-center justify-center h-32">
               <p className="text-muted-foreground">
@@ -140,7 +162,7 @@ export function ManageEventInterests() {
             </CardContent>
           </Card>
         ) : (
-          interests?.map((interest) => (
+          filteredInterests.map((interest) => (
             <Card key={interest.id}>
               <CardHeader>
                 <div className="flex justify-between items-start">
