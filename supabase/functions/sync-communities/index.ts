@@ -229,6 +229,7 @@ async function syncCommunitiesToLegion(hubSupabase: any, legionSupabase: any) {
         .insert(legionCommunity)
       console.log(`Creada en Legion: ${hub.name} (categoría: ${hub.category} -> ${mappedType})`)
     }
+  }
 }
 
 async function syncInterestsFromLegion(legionSupabase: any, hubSupabase: any) {
