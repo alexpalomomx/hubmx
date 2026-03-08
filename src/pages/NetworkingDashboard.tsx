@@ -405,24 +405,6 @@ const NetworkingDashboard = () => {
             </Card>
           )}
 
-          {activeTab === "messages" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Mensajes
-                </CardTitle>
-                <CardDescription>
-                  Gestiona tus conversaciones con otros miembros
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div style={{ height: '500px' }}>
-                  <MessagingInterface />
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {activeTab === "suggestions" && (
             <NetworkingSuggestions />
