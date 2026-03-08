@@ -41,7 +41,7 @@ export const EnhancedUserDashboard = () => {
   const { data: connectionRequests } = useConnectionRequests();
   const { data: mentorshipRequests } = useMentorshipRequests();
   const { data: unreadNotifications } = useUnreadNotificationCount();
-  const { data: conversations } = useConversations();
+  
   const { data: suggestions } = useNetworkingSuggestions();
   const { data: networkingStats } = useNetworkingStats();
 
