@@ -179,8 +179,12 @@ const CommunitiesSection = () => {
         )}
 
         {/* CTA */}
-        <div className="text-center mt-12">
-          <Button variant="hero" size="lg" onClick={() => navigate("/comunidades")}>
+        <div className="text-center mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+          <Button variant="hero" size="lg" onClick={() => navigate("/mapa")} className="group">
+            <MapPin className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+            Explorar mapa de comunidades
+          </Button>
+          <Button variant="outline" size="lg" onClick={() => navigate("/comunidades")}>
             Ver todas las comunidades
           </Button>
         </div>

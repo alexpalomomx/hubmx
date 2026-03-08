@@ -20,6 +20,7 @@ import CodeOfConduct from "./pages/CodeOfConduct";
 import PublicCalendar from "./pages/PublicCalendar";
 import FAQ from "./pages/FAQ";
 import CommunitiesPage from "./pages/CommunitiesPage";
+import CommunityMapPage from "./pages/CommunityMapPage";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/faq" element={<FAQ />} />
             <Route path="/calendario" element={<PublicCalendar />} />
             <Route path="/comunidades" element={<CommunitiesPage />} />
+            <Route path="/mapa" element={<CommunityMapPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
