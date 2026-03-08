@@ -228,12 +228,12 @@ export default function ManageCommunities() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                   {community.contact_email && (
                     <span className="flex items-center gap-1">
                       <Mail className="h-3 w-3" />
-                      {community.contact_email}
+                      <span className="truncate max-w-[150px] sm:max-w-none">{community.contact_email}</span>
                     </span>
                   )}
                   {community.website_url && (
@@ -244,30 +244,33 @@ export default function ManageCommunities() {
                   )}
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleToggleStatus(community.id, community.status, community.name)}
+                    className="text-xs sm:text-sm"
                   >
-                    <Eye className="h-4 w-4 mr-1" />
-                    {community.status === "active" ? "Desactivar" : "Activar"}
+                    <Eye className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">{community.status === "active" ? "Desactivar" : "Activar"}</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEdit(community)}
+                    className="text-xs sm:text-sm"
                   >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
+                    <Edit className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Editar</span>
                   </Button>
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => handleDelete(community.id, community.name)}
+                    className="text-xs sm:text-sm"
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Eliminar
+                    <Trash2 className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Eliminar</span>
                   </Button>
                 </div>
               </div>
