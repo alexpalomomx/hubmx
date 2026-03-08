@@ -48,7 +48,6 @@ export const EnhancedUserDashboard = () => {
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
   const pendingConnectionRequests = connectionRequests?.filter(req => req.status === "pending") || [];
   const pendingMentorshipRequests = mentorshipRequests?.filter(req => req.status === "pending") || [];
-  const unreadMessages = conversations?.filter(conv => conv.messages?.some((msg: any) => !msg.is_read)) || [];
 
   const networkingStatsCards = [
     {
