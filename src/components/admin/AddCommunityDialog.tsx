@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
+import { useCommunityCategories } from "@/hooks/useCommunityCategories";
 
 interface AddCommunityDialogProps {
   children: React.ReactNode;
