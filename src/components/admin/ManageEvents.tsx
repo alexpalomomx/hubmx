@@ -7,12 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Edit, Trash2, Calendar, MapPin, Users, Clock } from "lucide-react";
+import { Edit, Trash2, Calendar, MapPin, Users, Clock, Filter } from "lucide-react";
 import { useEvents } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isPast, isToday, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
 interface EventSource {
