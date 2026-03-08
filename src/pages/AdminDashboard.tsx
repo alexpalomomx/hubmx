@@ -234,7 +234,7 @@ const AdminDashboard = () => {
                   </SelectItem>
                   <SelectItem value="events">Eventos</SelectItem>
                   <SelectItem value="registrations">Intereses</SelectItem>
-                  <SelectItem value="members">Miembros</SelectItem>
+                  <SelectItem value="members">Interesados</SelectItem>
                   <SelectItem value="leaders">Líderes</SelectItem>
                   <SelectItem value="leader-registrations">Solicitudes Líder</SelectItem>
                   <SelectItem value="users">Usuarios</SelectItem>
