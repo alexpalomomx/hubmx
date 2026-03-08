@@ -40,7 +40,7 @@ export const ManageCommunityMembers: React.FC = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              <CardTitle>Miembros de Comunidades</CardTitle>
+              <CardTitle>Interesados de Comunidades</CardTitle>
             </div>
             <Badge variant="secondary">Total: {members?.length || 0}</Badge>
           </div>
