@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Users, 
   UserPlus, 
-  MessageSquare, 
   BookOpen, 
   Search,
   Network,
