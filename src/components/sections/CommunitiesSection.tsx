@@ -9,6 +9,7 @@ import { SocialShare } from "@/components/ui/social-share";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useCommunityCategories } from "@/hooks/useCommunityCategories";
 
 const CommunitiesSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
