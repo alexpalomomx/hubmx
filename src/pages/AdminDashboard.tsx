@@ -408,6 +408,15 @@ const AdminDashboard = () => {
                     <Trophy className="h-3 w-3 mr-1" />
                     Gamificación
                   </Button>
+                  <Button
+                    variant={selectedSection === "categories" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedSection("categories")}
+                    className="h-8 text-xs"
+                  >
+                    <Settings className="h-3 w-3 mr-1" />
+                    Categorías
+                  </Button>
                 </div>
               </div>
             </div>
