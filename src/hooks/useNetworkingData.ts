@@ -7,25 +7,31 @@ export const useUserConnections = () => {
   return useQuery({
     queryKey: ["user-connections"],
     queryFn: async () => {
-      // Get connections and then fetch profile data separately
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // Only fetch connections where the current user is involved
       const { data: connections, error } = await supabase
         .from("user_connections")
         .select("*")
+        .or(`requester_id.eq.${user.id},requested_id.eq.${user.id}`)
         .order("created_at", { ascending: false });
       
       if (error) throw error;
 
-      // Get all unique user IDs
-      const userIds = [
-        ...connections.map(c => c.requester_id),
-        ...connections.map(c => c.requested_id)
-      ];
+      // Get all unique OTHER user IDs (not the current user)
+      const otherUserIds = connections.map(c => 
+        c.requester_id === user.id ? c.requested_id : c.requester_id
+      );
+      const uniqueUserIds = [...new Set(otherUserIds)];
 
-      // Get profile data for all users
+      if (uniqueUserIds.length === 0) return [];
+
+      // Get profile data for other users
       const { data: profiles } = await supabase
         .from("profiles")
         .select("*")
-        .in("user_id", userIds);
+        .in("user_id", uniqueUserIds);
 
       // Combine data
       const connectionsWithProfiles = connections.map(connection => ({
