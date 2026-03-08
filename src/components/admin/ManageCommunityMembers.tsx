@@ -68,11 +68,11 @@ export const ManageCommunityMembers: React.FC = () => {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-sm text-muted-foreground">Cargando miembros...</div>
+            <div className="text-sm text-muted-foreground">Cargando interesados...</div>
           ) : error ? (
-            <div className="text-sm text-destructive">Error al cargar miembros.</div>
+            <div className="text-sm text-destructive">Error al cargar interesados.</div>
           ) : filtered.length === 0 ? (
-            <div className="text-sm text-muted-foreground">No hay miembros para mostrar.</div>
+            <div className="text-sm text-muted-foreground">No hay interesados para mostrar.</div>
           ) : (
             <div className="rounded-md border border-border overflow-x-auto">
               <Table>
