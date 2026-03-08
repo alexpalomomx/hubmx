@@ -180,7 +180,12 @@ export default function ManageEvents() {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <CardTitle className="text-lg">{event.title}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-lg">{event.title}</CardTitle>
+                    {(event as any).source_id && (
+                      <Badge variant="secondary" className="text-xs">Fuente externa</Badge>
+                    )}
+                  </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
