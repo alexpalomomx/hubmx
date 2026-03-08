@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import SEOHead from "@/components/SEOHead";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -124,6 +125,7 @@ const AuthPage = () => {
   };
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
+      <SEOHead title="Iniciar Sesión" description="Accede a HUB MX para conectar con comunidades tech en México y Latinoamérica." path="/auth" />
       <div className="w-full max-w-md">
         {/* Back Button */}
         <Button

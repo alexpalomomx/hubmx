@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, MapPin, Users, ExternalLink, X, Globe } from "lucide-react";
 import { useCommunities } from "@/hooks/useSupabaseData";
 import { LATAM_COUNTRIES } from "@/lib/latam-locations";
+import SEOHead from "@/components/SEOHead";
 
 // SVG paths for simplified LATAM country shapes (centered positions for markers)
 const COUNTRY_POSITIONS: Record<string, { x: number; y: number; label: string }> = {
@@ -56,6 +57,7 @@ const CommunityMapPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Mapa de Comunidades" description="Mapa interactivo de comunidades tech en México y Latinoamérica." path="/mapa" />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

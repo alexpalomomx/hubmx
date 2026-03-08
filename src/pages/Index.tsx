@@ -10,12 +10,18 @@ import JoinSection from "@/components/sections/JoinSection";
 import Footer from "@/components/sections/Footer";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
+import SEOHead from "@/components/SEOHead";
 
 const Index = () => {
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
   return (
     <div className="min-h-screen">
+      <SEOHead
+        title="Inicio"
+        description="HUB MX conecta comunidades tech en México y Latinoamérica. Encuentra eventos, networking, mentorías y oportunidades para crecer en tecnología."
+        path="/"
+      />
       <Header />
       <main>
         <div id="inicio">
