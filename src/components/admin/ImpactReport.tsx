@@ -255,7 +255,7 @@ export const ImpactReport = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Distribución por Temática</CardTitle>
+                <CardTitle>Distribución por Categoría</CardTitle>
                 <CardDescription>Comunidades agrupadas por categoría</CardDescription>
               </CardHeader>
               <CardContent>
