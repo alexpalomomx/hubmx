@@ -47,6 +47,32 @@ export default function ManageEvents() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const getExternalSourceTypeFromUrl = (registrationUrl?: string | null) => {
+    if (!registrationUrl) return null;
+
+    try {
+      const hostname = new URL(registrationUrl).hostname.toLowerCase();
+      if (hostname.includes("lu.ma")) return "luma";
+      if (hostname.includes("meetup.com")) return "meetup";
+      if (hostname.includes("eventbrite")) return "eventbrite";
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const getEventSourceMeta = (event: Event) => {
+    const sourceTypeFromUrl = getExternalSourceTypeFromUrl(event.registration_url);
+    const sourceType = event.source?.source_type || sourceTypeFromUrl;
+    const sourceName = event.source?.name || (sourceType ? "Fuente externa" : null);
+
+    return {
+      isExternal: Boolean(event.source_id || sourceType),
+      sourceName,
+      sourceType,
+    };
+  };
+
   const handleEdit = (event: Event) => {
     setEditingEvent(event);
     setIsEditDialogOpen(true);
