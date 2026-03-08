@@ -328,12 +328,25 @@ const PublicCalendar = () => {
             </SelectContent>
           </Select>
 
-          <div className="text-sm text-muted-foreground self-center ml-auto">
-            {events?.length || 0} eventos próximos
+          <div className="flex items-center gap-2 self-center ml-auto">
+            <span className="text-sm text-muted-foreground">
+              {events?.length || 0} eventos
+            </span>
+            <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v)} size="sm">
+              <ToggleGroupItem value="cards" aria-label="Vista tarjetas">
+                <LayoutGrid className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="calendar" aria-label="Vista calendario">
+                <CalendarDays className="h-4 w-4" />
+              </ToggleGroupItem>
+              <ToggleGroupItem value="list" aria-label="Vista lista">
+                <List className="h-4 w-4" />
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
         </div>
 
-        {/* Events List */}
+        {/* Events Views */}
         {isLoading ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -349,6 +362,19 @@ const PublicCalendar = () => {
               </Card>
             ))}
           </div>
+        ) : viewMode === "calendar" ? (
+          <EventCalendarView
+            events={events || []}
+            onEventClick={handleInterest}
+            hasInterest={hasInterest}
+          />
+        ) : viewMode === "list" ? (
+          <EventListView
+            events={events || []}
+            onEventClick={handleInterest}
+            hasInterest={hasInterest}
+            loadingEventId={loadingEventId}
+          />
         ) : events && events.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
@@ -435,9 +461,3 @@ const PublicCalendar = () => {
             </CardContent>
           </Card>
         )}
-      </div>
-    </div>
-  );
-};
-
-export default PublicCalendar;
