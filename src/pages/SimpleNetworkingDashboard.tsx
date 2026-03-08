@@ -374,15 +374,6 @@ const SimpleNetworkingDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* Messages Tab */}
-          <TabsContent value="messages" className="mt-6">
-            <div className="h-[600px]">
-              <MessagingInterface 
-                initialConversationId={initialConversationId}
-                initialOtherUser={initialOtherUser}
-              />
-            </div>
-          </TabsContent>
 
           {/* Suggestions Tab */}
           <TabsContent value="suggestions" className="mt-6">
