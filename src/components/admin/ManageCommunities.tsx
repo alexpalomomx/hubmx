@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Edit, Trash2, Eye, Users, Globe, Mail } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Edit, Trash2, Eye, Users, Globe, Mail, MapPin } from "lucide-react";
 import { useCommunities } from "@/hooks/useSupabaseData";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCommunityCategories } from "@/hooks/useCommunityCategories";
+import { LocationSelector } from "@/components/LocationSelector";
 
 interface Community {
   id: string;
@@ -20,6 +21,8 @@ interface Community {
   description: string;
   category: string;
   location: string;
+  country: string;
+  state: string;
   contact_email: string;
   website_url: string;
   logo_url: string;
@@ -37,9 +40,13 @@ export default function ManageCommunities() {
   const [editingCommunity, setEditingCommunity] = useState<Community | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editCountry, setEditCountry] = useState("");
+  const [editState, setEditState] = useState("");
 
   const handleEdit = (community: Community) => {
     setEditingCommunity(community);
+    setEditCountry(community.country || "México");
+    setEditState(community.state || "");
     setIsEditDialogOpen(true);
   };
 
@@ -106,6 +113,7 @@ export default function ManageCommunities() {
     
     try {
       const topics = formData.get("topics")?.toString().split(",").map(t => t.trim()).filter(Boolean) || [];
+      const locationParts = [editState, editCountry].filter(Boolean);
       
       const { error } = await supabase
         .from("communities")
@@ -113,7 +121,9 @@ export default function ManageCommunities() {
           name: formData.get("name")?.toString() || "",
           description: formData.get("description")?.toString() || "",
           category: formData.get("category")?.toString() || "",
-          location: formData.get("location")?.toString() || "",
+          location: locationParts.join(", ") || formData.get("location")?.toString() || "",
+          country: editCountry || null,
+          state: editState || null,
           contact_email: formData.get("contact_email")?.toString() || "",
           website_url: formData.get("website_url")?.toString() || "",
           logo_url: formData.get("logo_url")?.toString() || null,
@@ -179,8 +189,11 @@ export default function ManageCommunities() {
                         <Users className="h-4 w-4" />
                         {community.members_count} miembros
                       </span>
-                      {community.location && (
-                        <span>{community.location}</span>
+                      {(community.state || community.country) && (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {[community.state, community.country].filter(Boolean).join(", ")}
+                        </span>
                       )}
                     </div>
                   </div>
@@ -306,15 +319,15 @@ export default function ManageCommunities() {
                 />
               </div>
 
+              {/* Location Selector */}
+              <LocationSelector
+                country={editCountry}
+                state={editState}
+                onCountryChange={setEditCountry}
+                onStateChange={setEditState}
+              />
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-location">Ubicación</Label>
-                  <Input
-                    id="edit-location"
-                    name="location"
-                    defaultValue={editingCommunity.location || ""}
-                  />
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-members_count">Número de Miembros</Label>
                   <Input
@@ -325,9 +338,6 @@ export default function ManageCommunities() {
                     defaultValue={editingCommunity.members_count || 0}
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-contact_email">Email de Contacto</Label>
                   <Input
@@ -337,6 +347,9 @@ export default function ManageCommunities() {
                     defaultValue={editingCommunity.contact_email || ""}
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-website_url">Sitio Web</Label>
                   <Input
@@ -346,20 +359,16 @@ export default function ManageCommunities() {
                     defaultValue={editingCommunity.website_url || ""}
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-logo_url">URL del Logo</Label>
-                <Input
-                  id="edit-logo_url"
-                  name="logo_url"
-                  type="url"
-                  defaultValue={editingCommunity.logo_url || ""}
-                  placeholder="https://ejemplo.com/logo.png"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Ingresa la URL de una imagen para el logo de la comunidad
-                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-logo_url">URL del Logo</Label>
+                  <Input
+                    id="edit-logo_url"
+                    name="logo_url"
+                    type="url"
+                    defaultValue={editingCommunity.logo_url || ""}
+                    placeholder="https://ejemplo.com/logo.png"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
