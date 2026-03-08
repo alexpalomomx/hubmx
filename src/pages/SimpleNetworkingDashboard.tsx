@@ -246,27 +246,23 @@ const SimpleNetworkingDashboard = () => {
                                   </p>
                               </div>
                             </div>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={async () => {
-                                const otherUserId = connection.requester_id === user?.id 
-                                  ? connection.requested_id 
-                                  : connection.requester_id;
-                                const conv = await getOrCreateConversation.mutateAsync(otherUserId);
-                                setInitialConversationId(conv.id);
-                                setInitialOtherUser({
-                                  id: otherUserId,
-                                  display_name: otherUser?.display_name,
-                                  avatar_url: otherUser?.avatar_url,
-                                });
-                                setActiveTab("messages");
-                              }}
-                              disabled={getOrCreateConversation.isPending}
-                            >
-                              <MessageSquare className="h-4 w-4 mr-2" />
-                              Mensaje
-                            </Button>
+                            {otherUser?.phone ? (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  const phone = otherUser.phone.replace(/\D/g, '');
+                                  window.open(`https://wa.me/${phone}`, '_blank');
+                                }}
+                              >
+                                <Phone className="h-4 w-4 mr-2" />
+                                WhatsApp
+                              </Button>
+                            ) : (
+                              <Badge variant="secondary" className="text-xs">
+                                Sin teléfono
+                              </Badge>
+                            )}
                           </div>
                           );
                         })}
