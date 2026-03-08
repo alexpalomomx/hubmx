@@ -43,7 +43,8 @@ const AddCommunityDialog = ({ children }: AddCommunityDialogProps) => {
     e.preventDefault();
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     const locationParts = [state, country].filter(Boolean);
     const data = {
       name: formData.get("name") as string,
@@ -72,7 +73,7 @@ const AddCommunityDialog = ({ children }: AddCommunityDialogProps) => {
       queryClient.invalidateQueries({ queryKey: ["communities"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
 
-      e.currentTarget.reset();
+      form.reset();
       setTopics([]);
       setCountry("México");
       setState("");
