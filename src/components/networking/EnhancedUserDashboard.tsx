@@ -27,7 +27,6 @@ import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 import { useNetworkingSuggestions } from "@/hooks/useNetworkingSuggestions";
 import { useNetworkingStats } from "@/hooks/useNetworkingAnalytics";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
-import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { NetworkingSuggestions } from "./NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "./NetworkingAnalyticsDashboard";
 import MentorshipCenter from "./MentorshipCenter";
