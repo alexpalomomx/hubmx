@@ -139,10 +139,10 @@ const AdminDashboard = () => {
       color: "text-purple-600"
     },
     {
-      title: "Miembros",
+      title: "Interesados",
       value: stats?.members || 0,
       icon: Users,
-      description: "Total de miembros",
+      description: "Total de interesados",
       color: "text-orange-600"
     }
   ];
