@@ -9,10 +9,12 @@ import { SocialShare } from "@/components/ui/social-share";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useCommunityCategories } from "@/hooks/useCommunityCategories";
 
 const CommunitiesSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { data: communities, isLoading, error } = useCommunities(selectedCategory);
+  const { data: dbCategories = [] } = useCommunityCategories();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -31,17 +33,12 @@ const CommunitiesSection = () => {
       return;
     }
     
-    // Si está autenticado, no hacer nada aquí, el JoinCommunityDialog se encargará
     return true;
   };
 
   const categories = [
     { id: "all", name: "Todas" },
-    { id: "tech", name: "Tecnología" },
-    { id: "social", name: "Impacto Social" },
-    { id: "education", name: "Educación" },
-    { id: "entrepreneurship", name: "Emprendimiento" },
-    { id: "web3", name: "Web3" }
+    ...dbCategories.map(c => ({ id: c.value, name: c.label }))
   ];
 
   const getCommunityIcon = (category: string) => {

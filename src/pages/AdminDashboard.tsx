@@ -42,6 +42,7 @@ import ManageUsers from "@/components/admin/ManageUsers";
 import { CommunitySync } from "@/components/admin/CommunitySync";
 import { ApiCredentials } from "@/components/admin/ApiCredentials";
 import { GamificationManager } from "@/components/admin/GamificationManager";
+import { ManageCommunityCategories } from "@/components/admin/ManageCommunityCategories";
 import { ManageCommunityMembers } from "@/components/admin/ManageCommunityMembers";
 import ManageCommunityLeaders from "@/components/admin/ManageCommunityLeaders";
 import ManageNetworking from "@/components/admin/ManageNetworking";
@@ -242,6 +243,7 @@ const AdminDashboard = () => {
                   <SelectItem value="ai-recommender">Recomendador IA</SelectItem>
                   <SelectItem value="networking">Networking</SelectItem>
                   <SelectItem value="gamification">Gamificación</SelectItem>
+                  <SelectItem value="categories">Categorías</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -627,6 +629,12 @@ const AdminDashboard = () => {
           {selectedSection === "gamification" && (
             <div className="space-y-6">
               <GamificationManager />
+            </div>
+          )}
+
+          {selectedSection === "categories" && (
+            <div className="space-y-6">
+              <ManageCommunityCategories />
             </div>
           )}
         </div>
