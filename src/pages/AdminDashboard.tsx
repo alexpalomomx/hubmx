@@ -245,6 +245,7 @@ const AdminDashboard = () => {
                   <SelectItem value="networking">Networking</SelectItem>
                   <SelectItem value="gamification">Gamificación</SelectItem>
                   <SelectItem value="categories">Categorías</SelectItem>
+                  <SelectItem value="impact-report">Reporte de Impacto</SelectItem>
                 </SelectContent>
               </Select>
             </div>
