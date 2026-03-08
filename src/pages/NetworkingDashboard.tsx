@@ -34,8 +34,6 @@ import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggest
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
 import NetworkingProfileForm from "@/components/networking/NetworkingProfileForm";
 import MentorshipCenter from "@/components/networking/MentorshipCenter";
-import { MessagingInterface } from "@/components/messaging/MessagingInterface";
-import { useConversations, useGetOrCreateConversation } from "@/hooks/useMessaging";
 import { useMentorshipRequests } from "@/hooks/useNetworkingData";
 
 const NetworkingDashboard = () => {
