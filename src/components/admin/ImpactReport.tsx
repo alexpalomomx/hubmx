@@ -206,7 +206,7 @@ export const ImpactReport = () => {
       <Tabs defaultValue="events" className="space-y-4">
         <TabsList>
           <TabsTrigger value="events">Top Eventos</TabsTrigger>
-          <TabsTrigger value="categories">Temáticas</TabsTrigger>
+          <TabsTrigger value="categories">Categorías</TabsTrigger>
           <TabsTrigger value="ai-themes" className="flex items-center gap-1">
             <Sparkles className="h-3 w-3" />
             Temáticas IA
