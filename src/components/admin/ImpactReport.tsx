@@ -114,7 +114,7 @@ export const ImpactReport = () => {
       "Nº Comunidades": c.value,
     }));
     const wsCat = XLSX.utils.json_to_sheet(catData);
-    XLSX.utils.book_append_sheet(wb, wsCat, "Temáticas");
+    XLSX.utils.book_append_sheet(wb, wsCat, "Categorías");
 
     const commData = data.communities.map((c) => ({
       Comunidad: c.name,
