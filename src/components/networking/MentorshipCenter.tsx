@@ -300,13 +300,23 @@ const MentorshipCenter = () => {
                               </div>
                             </div>
                              <div className="flex gap-2">
-                               <Button 
-                                 variant="outline" 
-                                 size="sm"
-                                 onClick={() => {/* TODO: Implementar mensajería */}}
-                               >
-                                 <MessageSquare className="h-4 w-4" />
-                               </Button>
+                               {otherUser?.phone ? (
+                                 <Button 
+                                   variant="outline" 
+                                   size="sm"
+                                   onClick={() => {
+                                     const phone = otherUser.phone.replace(/\D/g, '');
+                                     window.open(`https://wa.me/${phone}`, '_blank');
+                                   }}
+                                 >
+                                   <Phone className="h-4 w-4 mr-2" />
+                                   WhatsApp
+                                 </Button>
+                               ) : (
+                                 <Badge variant="secondary" className="text-xs">
+                                   No tiene WhatsApp
+                                 </Badge>
+                               )}
                               {mentorship.status === "pending" && isMentor && (
                                 <>
                                   <Button 
