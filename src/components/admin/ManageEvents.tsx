@@ -209,7 +209,7 @@ export default function ManageEvents() {
     <div className="space-y-6">
       <div className="grid gap-4">
         {events?.map((event) => {
-          const isExternal = !!(event as any).source_id;
+          const { isExternal, sourceName, sourceType } = getEventSourceMeta(event as Event);
 
           return (
           <Card key={event.id} className="hover:shadow-lg transition-shadow">
@@ -220,8 +220,8 @@ export default function ManageEvents() {
                     <CardTitle className="text-lg">{event.title}</CardTitle>
                     {isExternal && (
                       <Badge variant="secondary" className="text-xs">
-                        📡 {(event as any).source?.name || "Fuente externa"}
-                        {(event as any).source?.source_type && ` (${(event as any).source.source_type})`}
+                        📡 {sourceName || "Fuente externa"}
+                        {sourceType && ` (${sourceType})`}
                       </Badge>
                     )}
                   </div>
