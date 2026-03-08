@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Share2, ArrowLeft, MapPin, Clock, Users, Heart, Check } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Calendar, Share2, ArrowLeft, MapPin, Clock, Users, Heart, Check, LayoutGrid, CalendarDays, List } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +16,8 @@ import { useEventInterests } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
 import SEOHead from "@/components/SEOHead";
 import { CalendarSourceSelector } from "@/components/calendar/CalendarSourceSelector";
+import { EventCalendarView } from "@/components/calendar/EventCalendarView";
+import { EventListView } from "@/components/calendar/EventListView";
 
 const PublicCalendar = () => {
   useEffect(() => { window.scrollTo(0, 0); }, []);
