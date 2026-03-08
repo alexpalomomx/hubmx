@@ -288,7 +288,7 @@ export const ImpactReport = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Detalle por Temática</CardTitle>
+                <CardTitle>Detalle por Categoría</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {data.categoryData.map((cat, i) => (
