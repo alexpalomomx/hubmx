@@ -311,7 +311,7 @@ const EventsSection = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pastEvents.map((event) => (
-                <Card key={event.id} className="opacity-75 hover:opacity-100 transition-opacity duration-300">
+                <Card key={event.id} className="opacity-75 hover:opacity-100 transition-opacity duration-300 flex flex-col">
                   <CardHeader className="pb-4">
                     <div className="flex justify-between items-start mb-2">
                        <Badge variant="secondary">
@@ -321,27 +321,27 @@ const EventsSection = () => {
                         Finalizado
                       </Badge>
                     </div>
-                    <CardTitle className="text-lg">
+                    <CardTitle className="text-lg line-clamp-2">
                       {event.title}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex flex-col flex-1">
                     <p className="text-muted-foreground mb-4 text-sm line-clamp-2">
                       {event.description}
                     </p>
                     
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        <span>{formatDate(event.event_date)}</span>
+                        <Calendar className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{formatDate(event.event_date)}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="h-4 w-4" />
+                        <Users className="h-4 w-4 shrink-0" />
                         <span>{event.current_attendees || 0} participantes</span>
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mt-auto">
                       <Button variant="outline" size="sm" className="flex-1">
                         Ver evidencia
                       </Button>
