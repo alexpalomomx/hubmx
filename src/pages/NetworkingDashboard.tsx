@@ -90,15 +90,6 @@ const NetworkingDashboard = () => {
     });
   };
 
-  const handleStartConversation = async (otherUserId: string) => {
-    try {
-      const conversation = await getOrCreateConversation.mutateAsync(otherUserId);
-      // Switch to messages tab and set initial conversation
-      setActiveTab("messages");
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-    }
-  };
 
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
   const pendingRequests = connectionRequests?.filter(req => req.requested_id === user.id) || [];
