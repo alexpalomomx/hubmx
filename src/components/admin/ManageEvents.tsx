@@ -294,10 +294,10 @@ export default function ManageEvents() {
           return (
           <Card key={event.id} className={`hover:shadow-lg transition-shadow ${past ? "opacity-70" : ""}`}>
             <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <CardTitle className="text-lg">{event.title}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg">{event.title}</CardTitle>
                     {past ? (
                       <Badge variant="outline" className="text-xs border-muted-foreground/40">
                         Ya pasó
@@ -314,20 +314,20 @@ export default function ManageEvents() {
                       </Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                       {format(new Date(event.event_date), "dd 'de' MMMM, yyyy", { locale: es })}
                     </span>
                     {event.event_time && (
                       <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                         {event.event_time}
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <Badge variant="outline">{event.event_type}</Badge>
                 </div>
               </div>
