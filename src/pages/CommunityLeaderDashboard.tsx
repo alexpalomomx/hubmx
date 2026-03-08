@@ -254,9 +254,9 @@ const CommunityLeaderDashboard = () => {
                   Intereses en Eventos de Fuentes Externas
                 </h2>
               </div>
-              {communityInterests && communityInterests.length > 0 ? (
+              {leaderInterests && leaderInterests.length > 0 ? (
                 <div className="grid gap-4">
-                  {communityInterests.map((interest: any) => (
+                  {leaderInterests.map((interest: any) => (
                     <Card key={interest.id}>
                       <CardHeader>
                         <div className="flex justify-between items-start">
