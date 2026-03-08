@@ -461,3 +461,9 @@ const PublicCalendar = () => {
             </CardContent>
           </Card>
         )}
+      </div>
+    </div>
+  );
+};
+
+export default PublicCalendar;
