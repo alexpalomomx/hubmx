@@ -13,7 +13,8 @@ import {
   Calendar,
   User,
   Search,
-  Send
+  Send,
+  Phone
 } from "lucide-react";
 import { useMentorshipRequests, useCreateMentorshipRequest, useMemberDirectory, useUpdateMentorship } from "@/hooks/useNetworkingData";
 import { useAuth } from "@/contexts/AuthContext";
