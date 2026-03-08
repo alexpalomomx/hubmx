@@ -35,6 +35,7 @@ const CommunityLeaderDashboard = () => {
   const { data: myEvents } = useMyEvents(user?.id, myCommunity?.id);
   const { data: leaderSourceEvents } = useLeaderSourceEvents(user?.id);
   const { data: leaderInterests } = useLeaderEventInterests(user?.id);
+  const { data: communityMembers } = useCommunityMembers(myCommunity?.id);
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
@@ -197,6 +198,7 @@ const CommunityLeaderDashboard = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border shadow-lg z-50">
                   <SelectItem value="events">Mis Eventos</SelectItem>
+                  <SelectItem value="community-interests">Interesados en la Comunidad</SelectItem>
                   <SelectItem value="ai-recommender">Recomendador IA</SelectItem>
                   <SelectItem value="sources">Fuentes Externas</SelectItem>
                   <SelectItem value="interests">Intereses en Eventos</SelectItem>
