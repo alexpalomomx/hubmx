@@ -229,17 +229,90 @@ export default function ManageEvents() {
 
   return (
     <div className="space-y-6">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <Filter className="h-4 w-4" />
+          Filtrar:
+        </div>
+        <div className="flex gap-1">
+          <Button
+            variant={timeFilter === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTimeFilter("all")}
+          >
+            Todos
+          </Button>
+          <Button
+            variant={timeFilter === "upcoming" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTimeFilter("upcoming")}
+          >
+            Próximos
+          </Button>
+          <Button
+            variant={timeFilter === "past" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTimeFilter("past")}
+          >
+            Pasados
+          </Button>
+        </div>
+        <div className="w-px h-6 bg-border" />
+        <div className="flex gap-1">
+          <Button
+            variant={sourceFilter === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSourceFilter("all")}
+          >
+            Todas las fuentes
+          </Button>
+          <Button
+            variant={sourceFilter === "manual" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSourceFilter("manual")}
+          >
+            Manuales
+          </Button>
+          <Button
+            variant={sourceFilter === "external" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSourceFilter("external")}
+          >
+            Externos
+          </Button>
+        </div>
+        <span className="ml-auto text-xs text-muted-foreground">
+          {filteredEvents?.length || 0} de {events?.length || 0} eventos
+        </span>
+      </div>
+
       <div className="grid gap-4">
-        {events?.map((event) => {
+        {filteredEvents?.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            No hay eventos que coincidan con los filtros seleccionados.
+          </div>
+        )}
+        {filteredEvents?.map((event) => {
           const { isExternal, sourceName, sourceType } = getEventSourceMeta(event as Event);
+          const past = isEventPast(event.event_date);
 
           return (
-          <Card key={event.id} className="hover:shadow-lg transition-shadow">
+          <Card key={event.id} className={`hover:shadow-lg transition-shadow ${past ? "opacity-70" : ""}`}>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <CardTitle className="text-lg">{event.title}</CardTitle>
+                    {past ? (
+                      <Badge variant="outline" className="text-xs border-muted-foreground/40">
+                        Ya pasó
+                      </Badge>
+                    ) : (
+                      <Badge className="text-xs bg-green-600 hover:bg-green-700 text-white">
+                        Próximo
+                      </Badge>
+                    )}
                     {isExternal && (
                       <Badge variant="secondary" className="text-xs">
                         📡 {sourceName || "Fuente externa"}
