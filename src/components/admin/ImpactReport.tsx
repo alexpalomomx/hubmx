@@ -166,19 +166,21 @@ export const ImpactReport = () => {
           </h2>
           <p className="text-sm text-muted-foreground">Métricas generales de la plataforma</p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {(Object.keys(TIME_LABELS) as TimeRange[]).map((range) => (
-            <Button
-              key={range}
-              variant={timeRange === range ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTimeRange(range)}
-              className="text-xs"
-            >
-              {TIME_LABELS[range]}
-            </Button>
-          ))}
-          <Button variant="outline" size="sm" onClick={exportToExcel} className="text-xs">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-1 flex-wrap">
+            {(Object.keys(TIME_LABELS) as TimeRange[]).map((range) => (
+              <Button
+                key={range}
+                variant={timeRange === range ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTimeRange(range)}
+                className="text-xs h-8"
+              >
+                {TIME_LABELS[range]}
+              </Button>
+            ))}
+          </div>
+          <Button variant="outline" size="sm" onClick={exportToExcel} className="text-xs h-8 self-start">
             <Download className="h-3 w-3 mr-1" />
             Excel
           </Button>

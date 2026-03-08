@@ -87,22 +87,20 @@ export function ManageEventInterests() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-            <Heart className="h-6 w-6 text-red-500" />
-            Intereses en Eventos
-          </h2>
-          <p className="text-muted-foreground">
-            Visualiza los usuarios interesados en cada evento
-          </p>
-        </div>
+      <div>
+        <h2 className="text-xl sm:text-2xl font-semibold tracking-tight flex items-center gap-2">
+          <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-red-500" />
+          Intereses en Eventos
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Visualiza los usuarios interesados en cada evento
+        </p>
       </div>
 
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Select value={selectedEventId} onValueChange={setSelectedEventId}>
-            <SelectTrigger className="w-[300px]">
+            <SelectTrigger className="w-full sm:w-[300px]">
               <SelectValue placeholder="Filtrar por evento" />
             </SelectTrigger>
             <SelectContent>
@@ -114,29 +112,31 @@ export function ManageEventInterests() {
               ))}
             </SelectContent>
           </Select>
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar evento o usuario..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 w-[250px]"
+              className="pl-9 w-full sm:w-[250px]"
             />
           </div>
-          <Badge variant="secondary">
+          <Badge variant="secondary" className="self-start sm:self-auto">
             {filteredInterests.length} intereses
           </Badge>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
             size="sm"
             onClick={handleExportFiltered}
             disabled={!interests || interests.length === 0}
+            className="text-xs sm:text-sm"
           >
-            <Download className="h-4 w-4 mr-2" />
-            {selectedEventId === "all" ? "Exportar Todos" : "Exportar Evento"}
+            <Download className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{selectedEventId === "all" ? "Exportar Todos" : "Exportar Evento"}</span>
+            <span className="sm:hidden">Exportar</span>
           </Button>
           
           {selectedEventId !== "all" && (
@@ -144,9 +144,11 @@ export function ManageEventInterests() {
               variant="outline"
               size="sm"
               onClick={handleExportAll}
+              className="text-xs sm:text-sm"
             >
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Exportar Todos los Intereses
+              <FileSpreadsheet className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Exportar Todos los Intereses</span>
+              <span className="sm:hidden">Exportar Todo</span>
             </Button>
           )}
         </div>
