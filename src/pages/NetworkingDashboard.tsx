@@ -91,7 +91,6 @@ const NetworkingDashboard = () => {
 
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
   const pendingRequests = connectionRequests?.filter(req => req.requested_id === user.id) || [];
-  const unreadMessages = conversations?.length || 0;
   const activeMentorships = mentorshipRequests?.filter(req => 
     (req.mentor_id === user.id || req.mentee_id === user.id) && req.status === "active"
   )?.length || 0;
