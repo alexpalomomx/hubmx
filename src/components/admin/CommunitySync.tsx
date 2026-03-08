@@ -113,12 +113,7 @@ export const CommunitySync = () => {
         <div className="space-y-2">
           <p className="text-sm font-medium">Datos sincronizados:</p>
           <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">Usuarios</Badge>
-            <Badge variant="secondary">Perfiles</Badge>
             <Badge variant="secondary">Comunidades</Badge>
-            <Badge variant="secondary">Miembros</Badge>
-            <Badge variant="secondary">Puntos</Badge>
-            <Badge variant="secondary">Gamificación</Badge>
           </div>
         </div>
 
