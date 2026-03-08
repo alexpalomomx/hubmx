@@ -48,7 +48,6 @@ const SimpleNetworkingDashboard = () => {
   
   const createConnection = useCreateConnection();
   const updateConnection = useUpdateConnection();
-  const getOrCreateConversation = useGetOrCreateConversation();
 
   // Calculate stats
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
