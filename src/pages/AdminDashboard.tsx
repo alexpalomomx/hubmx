@@ -49,6 +49,7 @@ import ManageNetworking from "@/components/admin/ManageNetworking";
 import ManageEventSources from "@/components/admin/ManageEventSources";
 import ManageLeaderRegistrations from "@/components/admin/ManageLeaderRegistrations";
 import EventDateRecommender from "@/components/admin/EventDateRecommender";
+import { ImpactReport } from "@/components/admin/ImpactReport";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
