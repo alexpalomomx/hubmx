@@ -178,7 +178,6 @@ const NetworkingDashboard = () => {
               <SelectItem value="directory">Directorio</SelectItem>
               <SelectItem value="connections">Conexiones</SelectItem>
               <SelectItem value="requests">Solicitudes</SelectItem>
-              <SelectItem value="messages">Mensajes</SelectItem>
               <SelectItem value="suggestions">Sugerencias</SelectItem>
               <SelectItem value="mentorship">Mentorías</SelectItem>
               <SelectItem value="profile">Mi Perfil</SelectItem>
