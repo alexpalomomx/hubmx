@@ -330,7 +330,7 @@ export default function ManageCommunities() {
                 onStateChange={setEditState}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-members_count">Número de Miembros</Label>
                   <Input
