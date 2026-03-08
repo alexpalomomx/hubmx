@@ -31,12 +31,13 @@ const ManageCommunityLeaders = () => {
   const { data: communities } = useCommunities();
   
   const [leaders, setLeaders] = useState<any[]>([]);
+  const [leaderUsers, setLeaderUsers] = useState<any[]>([]);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const [selectedLeader, setSelectedLeader] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    userId: "",
     communityId: "",
   });
 
