@@ -205,6 +205,7 @@ export type Database = {
           category: string
           contact_email: string | null
           contact_phone: string | null
+          country: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -214,6 +215,7 @@ export type Database = {
           members_count: number | null
           name: string
           social_links: Json | null
+          state: string | null
           status: string | null
           topics: string[] | null
           updated_at: string
@@ -223,6 +225,7 @@ export type Database = {
           category: string
           contact_email?: string | null
           contact_phone?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -232,6 +235,7 @@ export type Database = {
           members_count?: number | null
           name: string
           social_links?: Json | null
+          state?: string | null
           status?: string | null
           topics?: string[] | null
           updated_at?: string
@@ -241,6 +245,7 @@ export type Database = {
           category?: string
           contact_email?: string | null
           contact_phone?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -250,6 +255,7 @@ export type Database = {
           members_count?: number | null
           name?: string
           social_links?: Json | null
+          state?: string | null
           status?: string | null
           topics?: string[] | null
           updated_at?: string
@@ -541,6 +547,7 @@ export type Database = {
           approved_at: string | null
           approved_by: string | null
           category: string | null
+          country: string | null
           created_at: string
           created_by: string | null
           current_attendees: number | null
@@ -556,6 +563,7 @@ export type Database = {
           registration_url: string | null
           rejection_reason: string | null
           source_id: string | null
+          state: string | null
           status: string | null
           submitted_by: string | null
           title: string
@@ -566,6 +574,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           category?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           current_attendees?: number | null
@@ -581,6 +590,7 @@ export type Database = {
           registration_url?: string | null
           rejection_reason?: string | null
           source_id?: string | null
+          state?: string | null
           status?: string | null
           submitted_by?: string | null
           title: string
@@ -591,6 +601,7 @@ export type Database = {
           approved_at?: string | null
           approved_by?: string | null
           category?: string | null
+          country?: string | null
           created_at?: string
           created_by?: string | null
           current_attendees?: number | null
@@ -606,6 +617,7 @@ export type Database = {
           registration_url?: string | null
           rejection_reason?: string | null
           source_id?: string | null
+          state?: string | null
           status?: string | null
           submitted_by?: string | null
           title?: string
