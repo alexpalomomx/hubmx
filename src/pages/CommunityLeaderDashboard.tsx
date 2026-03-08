@@ -17,7 +17,7 @@ import {
   Sparkles,
   Heart
 } from "lucide-react";
-import { useMyEvents, useLeaderSourceEvents, useLeaderEventInterests } from "@/hooks/useSupabaseData";
+import { useMyEvents, useLeaderSourceEvents, useLeaderEventInterests, useCommunityMembers } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import AddEventDialog from "@/components/admin/AddEventDialog";
 import ManageMyEvents from "@/components/admin/ManageMyEvents";
