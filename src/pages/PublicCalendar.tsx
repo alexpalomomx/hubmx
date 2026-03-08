@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEventInterests } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
-import { CalendarSourceSelector } from "@/components/calendar/CalendarSourceSelector";
+import SEOHead from "@/components/SEOHead";
 
 const PublicCalendar = () => {
   useEffect(() => { window.scrollTo(0, 0); }, []);

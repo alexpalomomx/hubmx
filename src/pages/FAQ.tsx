@@ -4,12 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ArrowLeft, HelpCircle, Users, Calendar, Network, MessageSquare, BookOpen, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 
 const FAQ = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Preguntas Frecuentes" description="Respuestas a las preguntas más comunes sobre HUB MX, comunidades tech, eventos y networking." path="/faq" />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center gap-4 mb-8">
           <Button 

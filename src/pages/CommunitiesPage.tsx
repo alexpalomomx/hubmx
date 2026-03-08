@@ -65,6 +65,11 @@ const CommunitiesPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Comunidades"
+        description="Explora y únete a comunidades tech en México y Latinoamérica. Tecnología, educación, emprendimiento y más."
+        path="/comunidades"
+      />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
