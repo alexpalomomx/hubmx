@@ -179,7 +179,7 @@ const CommunitiesSection = () => {
                   <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
-                      <span>{(community.members_count || 0).toLocaleString()} miembros</span>
+                      <span>{(community.members_count || 0).toLocaleString()} interesados</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
