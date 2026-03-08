@@ -302,7 +302,7 @@ const SimpleNetworkingDashboard = () => {
                       </Button>
                     </div>
                   )}
-
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
