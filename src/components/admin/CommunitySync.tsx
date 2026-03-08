@@ -124,8 +124,9 @@ export const CommunitySync = () => {
         <div className="space-y-2">
           <p className="text-sm font-medium">Datos sincronizados:</p>
           <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">Comunidades</Badge>
-            <Badge variant="secondary">Interesados</Badge>
+            {getSyncBadges().map((b) => (
+              <Badge key={b.label} variant="secondary">{b.label}</Badge>
+            ))}
           </div>
         </div>
 
