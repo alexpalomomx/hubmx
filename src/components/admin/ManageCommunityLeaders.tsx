@@ -91,11 +91,33 @@ const ManageCommunityLeaders = () => {
     }
   };
 
+  const fetchLeaderUsers = async () => {
+    try {
+      // Get users with community_leader role
+      const { data: roles, error } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'community_leader');
+      if (error) throw error;
+      if (!roles || roles.length === 0) { setLeaderUsers([]); return; }
+
+      const userIds = roles.map(r => r.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, display_name')
+        .in('user_id', userIds);
+
+      setLeaderUsers(profiles || []);
+    } catch (error) {
+      console.error('Error fetching leader users:', error);
+    }
+  };
+
   const handleAssignLeader = async () => {
-    if (!formData.email || !formData.communityId) {
+    if (!formData.userId || !formData.communityId) {
       toast({
         title: "Error",
-        description: "Por favor completa todos los campos",
+        description: "Por favor selecciona un líder y una comunidad",
         variant: "destructive",
       });
       return;
@@ -103,30 +125,7 @@ const ManageCommunityLeaders = () => {
 
     setLoading(true);
     try {
-      let userId: string | null = null;
-
-      if (formData.email.includes('@')) {
-        const { data: uid, error: rpcError } = await supabase.rpc('get_user_id_by_email', { _email: formData.email });
-        if (rpcError) throw rpcError;
-        userId = uid as unknown as string | null;
-      } else {
-        const { data: profileByName, error: nameError } = await supabase
-          .from('profiles')
-          .select('user_id, display_name')
-          .ilike('display_name', `%${formData.email}%`)
-          .maybeSingle();
-        if (nameError) throw nameError;
-        userId = profileByName?.user_id || null;
-      }
-
-      if (!userId) {
-        toast({
-          title: "Usuario no encontrado",
-          description: "Verifica el correo o nombre e inténtalo de nuevo",
-          variant: "destructive",
-        });
-        return;
-      }
+      const userId = formData.userId;
 
       // Check if user already has community_leader role
       const { data: existingRole } = await supabase
