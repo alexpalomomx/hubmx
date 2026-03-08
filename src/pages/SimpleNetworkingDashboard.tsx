@@ -27,6 +27,8 @@ import {
   useUpdateConnection
 } from "@/hooks/useNetworkingData";
 import { useUnreadNotificationCount } from "@/hooks/useNotifications";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { MemberCard } from "@/components/networking/MemberCard";
 import NetworkingProfileForm from "@/components/networking/NetworkingProfileForm";
 import MentorshipCenter from "@/components/networking/MentorshipCenter";
