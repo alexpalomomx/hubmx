@@ -187,12 +187,11 @@ const JoinSection = () => {
           {registrationTypes.map((type) => (
             <Card 
               key={type.id} 
-              className={`cursor-pointer transition-all duration-300 hover:shadow-glow ${
+              className={`transition-all duration-300 ${
                 selectedType === type.id 
                   ? 'ring-2 ring-primary shadow-glow' 
                   : 'hover:shadow-card'
               }`}
-              onClick={() => setSelectedType(type.id)}
             >
               <CardHeader className="text-center">
                 <div className={`w-16 h-16 mx-auto rounded-full bg-gradient-hero flex items-center justify-center mb-4 ${
@@ -202,10 +201,18 @@ const JoinSection = () => {
                 </div>
                 <CardTitle className="text-xl">{type.title}</CardTitle>
               </CardHeader>
-              <CardContent className="text-center">
+              <CardContent className="text-center space-y-4">
                 <p className="text-muted-foreground">
                   {type.description}
                 </p>
+                <Button
+                  variant={selectedType === type.id ? "default" : "outline"}
+                  className="w-full group"
+                  onClick={() => setSelectedType(type.id)}
+                >
+                  {type.cta}
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
               </CardContent>
             </Card>
           ))}
