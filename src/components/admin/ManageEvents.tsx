@@ -294,10 +294,10 @@ export default function ManageEvents() {
           return (
           <Card key={event.id} className={`hover:shadow-lg transition-shadow ${past ? "opacity-70" : ""}`}>
             <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <CardTitle className="text-lg">{event.title}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg">{event.title}</CardTitle>
                     {past ? (
                       <Badge variant="outline" className="text-xs border-muted-foreground/40">
                         Ya pasó
@@ -314,20 +314,20 @@ export default function ManageEvents() {
                       </Badge>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                       {format(new Date(event.event_date), "dd 'de' MMMM, yyyy", { locale: es })}
                     </span>
                     {event.event_time && (
                       <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                         {event.event_time}
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <Badge variant="outline">{event.event_type}</Badge>
                 </div>
               </div>
@@ -339,17 +339,17 @@ export default function ManageEvents() {
                 </p>
               )}
               
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                 {event.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    {event.location}
+                  <span className="flex items-center gap-1 max-w-full">
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="truncate">{event.location}</span>
                   </span>
                 )}
                 {event.max_attendees && (
                   <span className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    {event.current_attendees || 0}/{event.max_attendees} asistentes
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                    {event.current_attendees || 0}/{event.max_attendees}
                   </span>
                 )}
                 {event.category && (
@@ -359,39 +359,42 @@ export default function ManageEvents() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                <div className="text-xs sm:text-sm text-muted-foreground truncate">
                   {event.organizer?.name && `Organizado por: ${event.organizer.name}`}
                 </div>
 
                 {isExternal ? (
                   <p className="text-xs text-muted-foreground italic">
-                    Este evento se gestiona desde la fuente externa
+                    Evento de fuente externa
                   </p>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleToggleStatus(event.id, event.status, event.title)}
+                      className="text-xs"
                     >
-                      Cambiar Estado
+                      Estado
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(event)}
+                      className="text-xs"
                     >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Editar
+                      <Edit className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Editar</span>
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(event.id, event.title)}
+                      className="text-xs"
                     >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Eliminar
+                      <Trash2 className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Eliminar</span>
                     </Button>
                   </div>
                 )}
@@ -430,7 +433,7 @@ export default function ManageEvents() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-event_date">Fecha del Evento *</Label>
                   <Input
@@ -461,7 +464,7 @@ export default function ManageEvents() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-event_type">Tipo de Evento *</Label>
                   <Select name="event_type" defaultValue={editingEvent.event_type}>
@@ -485,7 +488,7 @@ export default function ManageEvents() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-max_attendees">Máximo de Asistentes</Label>
                   <Input
