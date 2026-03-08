@@ -134,16 +134,16 @@ const SimpleNetworkingDashboard = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <MessageSquare className="h-8 w-8 text-purple-500" />
+                <Bell className="h-8 w-8 text-purple-500" />
                 <div className="flex items-center gap-2">
-                  <p className="text-2xl font-bold">0</p>
+                  <p className="text-2xl font-bold">{unreadNotifications || 0}</p>
                   {unreadNotifications && unreadNotifications > 0 && (
                     <Badge variant="destructive" className="text-xs">
                       {unreadNotifications}
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">Mensajes</p>
+                <p className="text-sm text-muted-foreground">Notificaciones</p>
               </div>
             </CardContent>
           </Card>
