@@ -229,5 +229,118 @@ async function syncCommunitiesToLegion(hubSupabase: any, legionSupabase: any) {
         .insert(legionCommunity)
       console.log(`Creada en Legion: ${hub.name} (categoría: ${hub.category} -> ${mappedType})`)
     }
+}
+
+async function syncInterestsFromLegion(legionSupabase: any, hubSupabase: any) {
+  console.log('Sincronizando interesados desde Legion Hack MX...')
+
+  // Get interests not yet synced
+  const { data: legionInterests, error: legionError } = await legionSupabase
+    .from('community_interests')
+    .select('*')
+    .eq('synced_to_hub', false)
+
+  if (legionError) {
+    console.error('Error obteniendo interesados de Legion:', legionError)
+    throw legionError
   }
+
+  if (!legionInterests || legionInterests.length === 0) {
+    console.log('No hay interesados nuevos para sincronizar')
+    return
+  }
+
+  console.log(`Encontrados ${legionInterests.length} interesados nuevos en Legion`)
+
+  // Build community ID mapping: Legion community_id -> Hub community_id (via name)
+  const legionCommunityIds = [...new Set(legionInterests.map((i: any) => i.community_id))]
+  
+  const { data: legionCommunities } = await legionSupabase
+    .from('communities')
+    .select('id, nombre')
+    .in('id', legionCommunityIds)
+
+  const legionIdToName: Record<string, string> = {}
+  for (const c of legionCommunities || []) {
+    legionIdToName[c.id] = c.nombre
+  }
+
+  // Get Hub communities by name
+  const communityNames = Object.values(legionIdToName)
+  const { data: hubCommunities } = await hubSupabase
+    .from('communities')
+    .select('id, name')
+    .in('name', communityNames)
+
+  const hubNameToId: Record<string, string> = {}
+  for (const c of hubCommunities || []) {
+    hubNameToId[c.name] = c.id
+  }
+
+  let synced = 0
+  const syncedIds: string[] = []
+
+  for (const interest of legionInterests) {
+    const communityName = legionIdToName[interest.community_id]
+    const hubCommunityId = communityName ? hubNameToId[communityName] : null
+
+    if (!hubCommunityId) {
+      console.log(`Comunidad no encontrada en HUB para interesado: ${interest.email || interest.phone}`)
+      continue
+    }
+
+    // Check if already exists in HUB by email+community or phone+community
+    const orFilters = []
+    if (interest.email) orFilters.push(`email.eq.${interest.email}`)
+    if (interest.phone) orFilters.push(`phone.eq.${interest.phone}`)
+
+    if (orFilters.length > 0) {
+      const { data: existing } = await hubSupabase
+        .from('community_members')
+        .select('id')
+        .eq('community_id', hubCommunityId)
+        .or(orFilters.join(','))
+        .maybeSingle()
+
+      if (existing) {
+        // Already exists, just mark as synced
+        syncedIds.push(interest.id)
+        continue
+      }
+    }
+
+    // Insert into HUB
+    const { error: insertError } = await hubSupabase
+      .from('community_members')
+      .insert({
+        community_id: hubCommunityId,
+        nickname: interest.email?.split('@')[0] || interest.phone || 'Sin nombre',
+        phone: interest.phone || '',
+        email: interest.email || null,
+        status: 'active',
+      })
+
+    if (insertError) {
+      console.error(`Error insertando interesado ${interest.email}:`, insertError)
+      continue
+    }
+
+    syncedIds.push(interest.id)
+    synced++
+  }
+
+  // Mark synced in Legion
+  if (syncedIds.length > 0) {
+    const { error: updateError } = await legionSupabase
+      .from('community_interests')
+      .update({ synced_to_hub: true })
+      .in('id', syncedIds)
+
+    if (updateError) {
+      console.error('Error marcando interesados como sincronizados:', updateError)
+    }
+  }
+
+  console.log(`Interesados sincronizados: ${synced} nuevos, ${syncedIds.length - synced} ya existían`)
+}
 }
