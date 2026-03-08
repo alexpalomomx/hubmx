@@ -43,6 +43,7 @@ const App = () => (
             <Route path="/code-of-conduct" element={<CodeOfConduct />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/calendario" element={<PublicCalendar />} />
+            <Route path="/comunidades" element={<CommunitiesPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
