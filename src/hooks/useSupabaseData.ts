@@ -32,7 +32,8 @@ export const useEvents = (status?: string) => {
         .from("events")
         .select(`
           *,
-          organizer:organizer_id(name)
+          organizer:organizer_id(name),
+          source:source_id(name, source_type)
         `)
         .order("event_date", { ascending: true });
 
