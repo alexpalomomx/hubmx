@@ -264,9 +264,6 @@ export default function ManageMyEvents({ communityId }: ManageMyEventsProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={getStatusColor(event.status)}>
-                    {getStatusLabel(event.status)}
-                  </Badge>
                   <Badge variant="outline">{event.event_type}</Badge>
                 </div>
               </div>
