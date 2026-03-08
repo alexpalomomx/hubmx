@@ -44,6 +44,7 @@ const ManageCommunityLeaders = () => {
   // Fetch leaders on component mount
   useEffect(() => {
     fetchLeaders();
+    fetchLeaderUsers();
   }, []);
 
   const fetchLeaders = async () => {
