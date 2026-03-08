@@ -7,7 +7,7 @@
     <script>
       (function () {
         var path = window.location.pathname + window.location.search + window.location.hash;
-        window.location.replace('/#' + path);
+        window.location.replace('/?redirect=' + encodeURIComponent(path));
       })();
     </script>
   </head>

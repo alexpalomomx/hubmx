@@ -46,6 +46,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <RedirectFromLegacy404 />
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
