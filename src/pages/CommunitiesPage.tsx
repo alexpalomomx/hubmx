@@ -1,27 +1,28 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Users, MapPin, Loader2 } from "lucide-react";
+import { ExternalLink, Filter, Users, MapPin, Loader2, ArrowLeft } from "lucide-react";
 import { useCommunities } from "@/hooks/useSupabaseData";
 import { JoinCommunityDialog } from "@/components/JoinCommunityDialog";
 import { SocialShare } from "@/components/ui/social-share";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useCommunityCategories } from "@/hooks/useCommunityCategories";
 
-const CommunitiesSection = () => {
-  const { data: communities, isLoading, error } = useCommunities("all");
+const CommunitiesPage = () => {
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const { data: communities, isLoading, error } = useCommunities(selectedCategory);
+  const { data: dbCategories = [] } = useCommunityCategories();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Pick 3 random communities, shuffle on each mount
-  const randomCommunities = useMemo(() => {
-    if (!communities || communities.length === 0) return [];
-    const shuffled = [...communities].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 3);
-  }, [communities]);
+  const categories = [
+    { id: "all", name: "Todas" },
+    ...dbCategories.map((c) => ({ id: c.value, name: c.label })),
+  ];
 
   const handleJoinCommunity = () => {
     if (!user) {
@@ -47,32 +48,50 @@ const CommunitiesSection = () => {
     return colors[category] || "from-gray-500 to-gray-600";
   };
 
-  if (error) {
-    return (
-      <section id="comunidades" className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-destructive">Error al cargar las comunidades</p>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section id="comunidades" className="py-20 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Comunidades{" "}
-            <span className="bg-gradient-community bg-clip-text text-transparent">Activas</span>
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Descubre y conecta con comunidades que están transformando el mundo
-            a través de la tecnología, la educación y el impacto social.
-          </p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="border-b border-border bg-card">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3 h-16">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-community bg-clip-text text-transparent">
+              Comunidades
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Filter */}
+        <div className="flex flex-wrap items-center gap-2 mb-8">
+          <div className="flex items-center gap-2 mr-4">
+            <Filter className="h-5 w-5 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Filtrar por:</span>
+          </div>
+          {categories.map((category) => (
+            <Button
+              key={category.id}
+              variant={selectedCategory === category.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(category.id)}
+              className="transition-all duration-200"
+            >
+              {category.name}
+            </Button>
+          ))}
         </div>
 
-        {/* Loading State */}
+        {/* Error */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-destructive">Error al cargar las comunidades</p>
+          </div>
+        )}
+
+        {/* Loading */}
         {isLoading && (
           <div className="flex justify-center items-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -80,10 +99,10 @@ const CommunitiesSection = () => {
           </div>
         )}
 
-        {/* Communities Grid - 3 random */}
-        {randomCommunities.length > 0 && (
+        {/* Grid */}
+        {communities && communities.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {randomCommunities.map((community) => (
+            {communities.map((community) => (
               <Card key={community.id} className="group hover:shadow-community transition-all duration-300 hover:-translate-y-2">
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
@@ -174,19 +193,12 @@ const CommunitiesSection = () => {
 
         {communities && communities.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No se encontraron comunidades.</p>
+            <p className="text-muted-foreground">No se encontraron comunidades en esta categoría.</p>
           </div>
         )}
-
-        {/* CTA */}
-        <div className="text-center mt-12">
-          <Button variant="hero" size="lg" onClick={() => navigate("/comunidades")}>
-            Ver todas las comunidades
-          </Button>
-        </div>
       </div>
-    </section>
+    </div>
   );
 };
 
-export default CommunitiesSection;
+export default CommunitiesPage;
