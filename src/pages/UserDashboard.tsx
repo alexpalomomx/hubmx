@@ -16,6 +16,7 @@ import { MessagingInterface } from "@/components/messaging/MessagingInterface";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
+import { ReferralLink } from "@/components/ReferralLink";
 import { useState } from "react";
 
 const UserDashboard = () => {
