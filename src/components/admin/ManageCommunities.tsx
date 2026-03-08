@@ -31,6 +31,7 @@ interface Community {
 
 export default function ManageCommunities() {
   const { data: communities, isLoading } = useCommunities();
+  const { data: dynamicCategories = [] } = useCommunityCategories();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingCommunity, setEditingCommunity] = useState<Community | null>(null);
