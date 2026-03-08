@@ -16,6 +16,7 @@ import { MessagingInterface } from "@/components/messaging/MessagingInterface";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
+import { ReferralLink } from "@/components/ReferralLink";
 import { useState } from "react";
 
 const UserDashboard = () => {
@@ -113,7 +114,11 @@ const UserDashboard = () => {
           </p>
         </div>
 
-        {/* Networking Stats Cards */}
+        {/* Referral Link */}
+        <div className="mb-8">
+          <ReferralLink />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/networking")}>
             <CardContent className="p-4">

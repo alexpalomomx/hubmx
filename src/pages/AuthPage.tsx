@@ -17,10 +17,15 @@ const AuthPage = () => {
   const [inviteMode, setInviteMode] = useState(false);
   const [newPassword, setNewPassword] = useState("");
 
-  // Get default tab from URL params
+  // Get default tab and referral code from URL params
   const defaultTab = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('tab') === 'signup' ? 'signup' : 'signin';
+  }, []);
+
+  const referralCode = useMemo(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('ref') || null;
   }, []);
 
   useEffect(() => {
@@ -71,9 +76,37 @@ const AuthPage = () => {
     if (!error) {
       // Update profile with phone after successful signup
       try {
-        await supabase.from("profiles").update({ phone }).eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+        const currentUser = (await supabase.auth.getUser()).data.user;
+        if (currentUser) {
+          await supabase.from("profiles").update({ phone }).eq("user_id", currentUser.id);
+          
+          // Handle referral code - record who referred this user
+          if (referralCode) {
+            try {
+              await supabase.from("referrals" as any).update({
+                referred_user_id: currentUser.id,
+                referred_email: email,
+                status: 'completed',
+                completed_at: new Date().toISOString()
+              } as any).eq('referral_code', referralCode).eq('status', 'pending');
+              
+              // Award points to referrer
+              const { data: referral } = await supabase.from("referrals" as any).select('referrer_id').eq('referral_code', referralCode).single();
+              if (referral) {
+                await supabase.rpc('award_points', {
+                  _user_id: (referral as any).referrer_id,
+                  _points: 10,
+                  _action_type: 'referral',
+                  _description: 'Usuario referido se registró'
+                });
+              }
+            } catch (refErr) {
+              console.warn('Error processing referral:', refErr);
+            }
+          }
+        }
       } catch (profileError) {
-        console.warn("Could not update phone in profile:", profileError);
+        console.warn("Could not update profile:", profileError);
       }
       navigate("/");
     }
