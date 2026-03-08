@@ -18,6 +18,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import CodeOfConduct from "./pages/CodeOfConduct";
 import PublicCalendar from "./pages/PublicCalendar";
 import FAQ from "./pages/FAQ";
+import CommunitiesPage from "./pages/CommunitiesPage";
 
 const queryClient = new QueryClient();
 
