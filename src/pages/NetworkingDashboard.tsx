@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Users, 
   UserPlus, 
-  MessageSquare, 
   BookOpen, 
   Search,
   Network,
@@ -19,7 +18,8 @@ import {
   ArrowLeft,
   Sparkles,
   BarChart3,
-  ChevronDown
+  ChevronDown,
+  Phone
 } from "lucide-react";
 import { 
   useUserConnections, 
@@ -34,8 +34,6 @@ import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggest
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
 import NetworkingProfileForm from "@/components/networking/NetworkingProfileForm";
 import MentorshipCenter from "@/components/networking/MentorshipCenter";
-import { MessagingInterface } from "@/components/messaging/MessagingInterface";
-import { useConversations, useGetOrCreateConversation } from "@/hooks/useMessaging";
 import { useMentorshipRequests } from "@/hooks/useNetworkingData";
 
 const NetworkingDashboard = () => {
@@ -50,12 +48,10 @@ const NetworkingDashboard = () => {
     search: searchQuery
   });
   const { data: networkingProfile } = useNetworkingProfile(user?.id);
-  const { data: conversations } = useConversations();
-  const { data: mentorshipRequests } = useMentorshipRequests();
-  const getOrCreateConversation = useGetOrCreateConversation();
   
   const updateConnection = useUpdateConnection();
   const createConnection = useCreateConnection();
+  const { data: mentorshipRequests } = useMentorshipRequests();
 
   if (loading) {
     return (
@@ -92,19 +88,9 @@ const NetworkingDashboard = () => {
     });
   };
 
-  const handleStartConversation = async (otherUserId: string) => {
-    try {
-      const conversation = await getOrCreateConversation.mutateAsync(otherUserId);
-      // Switch to messages tab and set initial conversation
-      setActiveTab("messages");
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-    }
-  };
 
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
   const pendingRequests = connectionRequests?.filter(req => req.requested_id === user.id) || [];
-  const unreadMessages = conversations?.length || 0;
   const activeMentorships = mentorshipRequests?.filter(req => 
     (req.mentor_id === user.id || req.mentee_id === user.id) && req.status === "active"
   )?.length || 0;
@@ -171,26 +157,15 @@ const NetworkingDashboard = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <MessageSquare className="h-8 w-8 text-purple-500" />
+                <BookOpen className="h-8 w-8 text-purple-500" />
                 <div>
-                  <p className="text-2xl font-bold">{unreadMessages}</p>
-                  <p className="text-sm text-muted-foreground">Conversaciones</p>
+                  <p className="text-2xl font-bold">{activeMentorships}</p>
+                  <p className="text-sm text-muted-foreground">Mentorías</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <BookOpen className="h-8 w-8 text-orange-500" />
-                <div>
-                  <p className="text-2xl font-bold">{activeMentorships}</p>
-                  <p className="text-sm text-muted-foreground">Mentorías Activas</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         <div className="flex items-center justify-between mb-6">
@@ -203,7 +178,6 @@ const NetworkingDashboard = () => {
               <SelectItem value="directory">Directorio</SelectItem>
               <SelectItem value="connections">Conexiones</SelectItem>
               <SelectItem value="requests">Solicitudes</SelectItem>
-              <SelectItem value="messages">Mensajes</SelectItem>
               <SelectItem value="suggestions">Sugerencias</SelectItem>
               <SelectItem value="mentorship">Mentorías</SelectItem>
               <SelectItem value="profile">Mi Perfil</SelectItem>
@@ -333,14 +307,21 @@ const NetworkingDashboard = () => {
                                   Conectado desde {new Date(connection.created_at).toLocaleDateString()}
                                 </p>
                               </div>
-                               <Button 
-                                 variant="outline" 
-                                 size="sm"
-                                 onClick={() => handleStartConversation(otherUser?.user_id || '')}
-                                 disabled={getOrCreateConversation.isPending}
-                               >
-                                 <MessageSquare className="h-4 w-4" />
-                               </Button>
+                               {otherUser?.phone ? (
+                                 <Button 
+                                   variant="outline" 
+                                   size="sm"
+                                   onClick={() => {
+                                     const phone = otherUser.phone.replace(/\D/g, '');
+                                     window.open(`https://wa.me/${phone}`, '_blank');
+                                   }}
+                                 >
+                                   <Phone className="h-4 w-4 mr-1" />
+                                   WhatsApp
+                                 </Button>
+                               ) : (
+                                 <Badge variant="secondary" className="text-xs">Sin teléfono</Badge>
+                               )}
                             </div>
                           </CardContent>
                         </Card>
@@ -424,24 +405,6 @@ const NetworkingDashboard = () => {
             </Card>
           )}
 
-          {activeTab === "messages" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Mensajes
-                </CardTitle>
-                <CardDescription>
-                  Gestiona tus conversaciones con otros miembros
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div style={{ height: '500px' }}>
-                  <MessagingInterface />
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {activeTab === "suggestions" && (
             <NetworkingSuggestions />

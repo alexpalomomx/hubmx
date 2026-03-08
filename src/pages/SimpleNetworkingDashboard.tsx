@@ -9,13 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Users, 
   UserPlus, 
-  MessageSquare, 
   BookOpen, 
   Search,
   Network,
   ArrowLeft,
   TrendingUp,
-  Bell
+  Bell,
+  Phone
 } from "lucide-react";
 import { 
   useMemberDirectory, 
@@ -29,18 +29,14 @@ import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 import { MemberCard } from "@/components/networking/MemberCard";
 import NetworkingProfileForm from "@/components/networking/NetworkingProfileForm";
 import MentorshipCenter from "@/components/networking/MentorshipCenter";
-import { MessagingInterface } from "@/components/messaging/MessagingInterface";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
-import { useGetOrCreateConversation } from "@/hooks/useMessaging";
 
 const SimpleNetworkingDashboard = () => {
   const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("directory");
-  const [initialConversationId, setInitialConversationId] = useState<string | undefined>(undefined);
-  const [initialOtherUser, setInitialOtherUser] = useState<any>(undefined);
   
   const { data: members, isLoading: membersLoading } = useMemberDirectory({
     search: searchQuery
@@ -52,7 +48,6 @@ const SimpleNetworkingDashboard = () => {
   
   const createConnection = useCreateConnection();
   const updateConnection = useUpdateConnection();
-  const getOrCreateConversation = useGetOrCreateConversation();
 
   // Calculate stats
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
@@ -139,16 +134,16 @@ const SimpleNetworkingDashboard = () => {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <MessageSquare className="h-8 w-8 text-purple-500" />
+                <Bell className="h-8 w-8 text-purple-500" />
                 <div className="flex items-center gap-2">
-                  <p className="text-2xl font-bold">0</p>
+                  <p className="text-2xl font-bold">{unreadNotifications || 0}</p>
                   {unreadNotifications && unreadNotifications > 0 && (
                     <Badge variant="destructive" className="text-xs">
                       {unreadNotifications}
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">Mensajes</p>
+                <p className="text-sm text-muted-foreground">Notificaciones</p>
               </div>
             </CardContent>
           </Card>
@@ -167,10 +162,9 @@ const SimpleNetworkingDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="directory">Directorio</TabsTrigger>
             <TabsTrigger value="connections">Conexiones</TabsTrigger>
-            <TabsTrigger value="messages">Mensajes</TabsTrigger>
             <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
             <TabsTrigger value="mentorship">Mentoría</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -252,27 +246,23 @@ const SimpleNetworkingDashboard = () => {
                                   </p>
                               </div>
                             </div>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={async () => {
-                                const otherUserId = connection.requester_id === user?.id 
-                                  ? connection.requested_id 
-                                  : connection.requester_id;
-                                const conv = await getOrCreateConversation.mutateAsync(otherUserId);
-                                setInitialConversationId(conv.id);
-                                setInitialOtherUser({
-                                  id: otherUserId,
-                                  display_name: otherUser?.display_name,
-                                  avatar_url: otherUser?.avatar_url,
-                                });
-                                setActiveTab("messages");
-                              }}
-                              disabled={getOrCreateConversation.isPending}
-                            >
-                              <MessageSquare className="h-4 w-4 mr-2" />
-                              Mensaje
-                            </Button>
+                            {otherUser?.phone ? (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  const phone = otherUser.phone.replace(/\D/g, '');
+                                  window.open(`https://wa.me/${phone}`, '_blank');
+                                }}
+                              >
+                                <Phone className="h-4 w-4 mr-2" />
+                                WhatsApp
+                              </Button>
+                            ) : (
+                              <Badge variant="secondary" className="text-xs">
+                                Sin teléfono
+                              </Badge>
+                            )}
                           </div>
                           );
                         })}
@@ -384,15 +374,6 @@ const SimpleNetworkingDashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* Messages Tab */}
-          <TabsContent value="messages" className="mt-6">
-            <div className="h-[600px]">
-              <MessagingInterface 
-                initialConversationId={initialConversationId}
-                initialOtherUser={initialOtherUser}
-              />
-            </div>
-          </TabsContent>
 
           {/* Suggestions Tab */}
           <TabsContent value="suggestions" className="mt-6">

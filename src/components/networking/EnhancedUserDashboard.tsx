@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Users, 
-  MessageSquare, 
   UserPlus, 
   BookOpen, 
   Bell, 
@@ -25,10 +24,8 @@ import {
   useMentorshipRequests 
 } from "@/hooks/useNetworkingData";
 import { useUnreadNotificationCount } from "@/hooks/useNotifications";
-import { useConversations } from "@/hooks/useMessaging";
 import { useNetworkingSuggestions } from "@/hooks/useNetworkingSuggestions";
 import { useNetworkingStats } from "@/hooks/useNetworkingAnalytics";
-import { MessagingInterface } from "@/components/messaging/MessagingInterface";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { NetworkingSuggestions } from "./NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "./NetworkingAnalyticsDashboard";
@@ -43,14 +40,13 @@ export const EnhancedUserDashboard = () => {
   const { data: connectionRequests } = useConnectionRequests();
   const { data: mentorshipRequests } = useMentorshipRequests();
   const { data: unreadNotifications } = useUnreadNotificationCount();
-  const { data: conversations } = useConversations();
+  
   const { data: suggestions } = useNetworkingSuggestions();
   const { data: networkingStats } = useNetworkingStats();
 
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
   const pendingConnectionRequests = connectionRequests?.filter(req => req.status === "pending") || [];
   const pendingMentorshipRequests = mentorshipRequests?.filter(req => req.status === "pending") || [];
-  const unreadMessages = conversations?.filter(conv => conv.messages?.some((msg: any) => !msg.is_read)) || [];
 
   const networkingStatsCards = [
     {
@@ -62,15 +58,6 @@ export const EnhancedUserDashboard = () => {
       description: "Conexiones activas"
     },
     {
-      title: "Mensajes",
-      value: unreadMessages.length,
-      icon: MessageSquare,
-      color: "text-green-500",
-      onClick: () => setActiveTab("messages"),
-      description: "Conversaciones sin leer",
-      badge: unreadMessages.length > 0 ? unreadMessages.length : undefined
-    },
-    {
       title: "Solicitudes",
       value: pendingConnectionRequests.length,
       icon: UserPlus,
@@ -78,6 +65,15 @@ export const EnhancedUserDashboard = () => {
       onClick: () => setActiveTab("requests"),
       description: "Solicitudes pendientes",
       badge: pendingConnectionRequests.length > 0 ? pendingConnectionRequests.length : undefined
+    },
+    {
+      title: "Notificaciones",
+      value: unreadNotifications || 0,
+      icon: Bell,
+      color: "text-green-500",
+      onClick: () => setActiveTab("notifications"),
+      description: "Sin leer",
+      badge: unreadNotifications && unreadNotifications > 0 ? unreadNotifications : undefined
     },
     {
       title: "Mentorías",
@@ -188,10 +184,9 @@ export const EnhancedUserDashboard = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
             <TabsTrigger value="overview">Resumen</TabsTrigger>
             <TabsTrigger value="connections">Conexiones</TabsTrigger>
-            <TabsTrigger value="messages">Mensajes</TabsTrigger>
             <TabsTrigger value="requests">Solicitudes</TabsTrigger>
             <TabsTrigger value="mentorship">Mentorías</TabsTrigger>
             <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
@@ -287,11 +282,6 @@ export const EnhancedUserDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="messages" className="mt-6">
-            <div className="h-[600px]">
-              <MessagingInterface />
-            </div>
-          </TabsContent>
 
           <TabsContent value="requests" className="mt-6">
             <Card>
