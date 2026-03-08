@@ -81,7 +81,7 @@ export const CommunitySync = () => {
           Sincronización con Legion Hack MX
         </CardTitle>
         <CardDescription>
-          Sincroniza las comunidades entre el HUB y Legion Hack MX
+          Sincroniza datos entre el HUB y Legion Hack MX
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
