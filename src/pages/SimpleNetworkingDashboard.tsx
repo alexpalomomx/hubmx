@@ -38,6 +38,7 @@ import { NotificationCenter } from "@/components/notifications/NotificationCente
 
 const SimpleNetworkingDashboard = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("directory");
   
@@ -49,8 +50,19 @@ const SimpleNetworkingDashboard = () => {
   const { data: mentorshipRequests } = useMentorshipRequests();
   const { data: unreadNotifications } = useUnreadNotificationCount();
   
+  const { data: currentUserProfile } = useQuery({
+    queryKey: ["current-user-profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from("profiles").select("phone").eq("user_id", user.id).single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+  
   const createConnection = useCreateConnection();
   const updateConnection = useUpdateConnection();
+  const currentUserHasPhone = !!currentUserProfile?.phone;
 
   // Calculate stats
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
