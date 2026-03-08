@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useCommunityCategories } from "@/hooks/useCommunityCategories";
 import { getAllCountryNames, getStatesForCountry } from "@/lib/latam-locations";
+import SEOHead from "@/components/SEOHead";
 
 const CommunitiesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
