@@ -24,7 +24,6 @@ import {
   useMentorshipRequests 
 } from "@/hooks/useNetworkingData";
 import { useUnreadNotificationCount } from "@/hooks/useNotifications";
-import { useConversations } from "@/hooks/useMessaging";
 import { useNetworkingSuggestions } from "@/hooks/useNetworkingSuggestions";
 import { useNetworkingStats } from "@/hooks/useNetworkingAnalytics";
 import { MessagingInterface } from "@/components/messaging/MessagingInterface";
