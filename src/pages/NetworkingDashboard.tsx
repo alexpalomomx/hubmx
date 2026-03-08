@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ import { useMentorshipRequests } from "@/hooks/useNetworkingData";
 
 const NetworkingDashboard = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("directory");
@@ -48,10 +49,10 @@ const NetworkingDashboard = () => {
     search: searchQuery
   });
   const { data: networkingProfile } = useNetworkingProfile(user?.id);
+  const { data: mentorshipRequests } = useMentorshipRequests();
   
   const updateConnection = useUpdateConnection();
   const createConnection = useCreateConnection();
-  const { data: mentorshipRequests } = useMentorshipRequests();
 
   if (loading) {
     return (
@@ -320,7 +321,15 @@ const NetworkingDashboard = () => {
                                    WhatsApp
                                  </Button>
                                ) : (
-                                 <Badge variant="secondary" className="text-xs">Sin teléfono</Badge>
+                                 <Button 
+                                   variant="outline" 
+                                   size="sm"
+                                   onClick={() => navigate("/profile")}
+                                   className="text-xs"
+                                 >
+                                   <Phone className="h-3 w-3 mr-1" />
+                                   Sin teléfono
+                                 </Button>
                                )}
                             </div>
                           </CardContent>

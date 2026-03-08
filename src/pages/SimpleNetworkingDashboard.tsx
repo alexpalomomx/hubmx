@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,8 @@ import {
   useUpdateConnection
 } from "@/hooks/useNetworkingData";
 import { useUnreadNotificationCount } from "@/hooks/useNotifications";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { MemberCard } from "@/components/networking/MemberCard";
 import NetworkingProfileForm from "@/components/networking/NetworkingProfileForm";
 import MentorshipCenter from "@/components/networking/MentorshipCenter";
@@ -35,6 +38,7 @@ import { NotificationCenter } from "@/components/notifications/NotificationCente
 
 const SimpleNetworkingDashboard = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("directory");
   
@@ -46,8 +50,19 @@ const SimpleNetworkingDashboard = () => {
   const { data: mentorshipRequests } = useMentorshipRequests();
   const { data: unreadNotifications } = useUnreadNotificationCount();
   
+  const { data: currentUserProfile } = useQuery({
+    queryKey: ["current-user-profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from("profiles").select("phone").eq("user_id", user.id).single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+  
   const createConnection = useCreateConnection();
   const updateConnection = useUpdateConnection();
+  const currentUserHasPhone = !!currentUserProfile?.phone;
 
   // Calculate stats
   const acceptedConnections = connections?.filter(conn => conn.status === "accepted") || [];
@@ -259,9 +274,15 @@ const SimpleNetworkingDashboard = () => {
                                 WhatsApp
                               </Button>
                             ) : (
-                              <Badge variant="secondary" className="text-xs">
-                                Sin teléfono
-                              </Badge>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => navigate("/profile")}
+                                className="text-xs"
+                              >
+                                <Phone className="h-3 w-3 mr-1" />
+                                Invitar a configurar
+                              </Button>
                             )}
                           </div>
                           );
@@ -374,6 +395,25 @@ const SimpleNetworkingDashboard = () => {
             </Card>
           </TabsContent>
 
+        {/* Banner si el usuario no tiene teléfono */}
+        {!currentUserHasPhone && (
+          <Card className="mb-6 border-primary/30 bg-primary/5">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Phone className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="font-medium">Configura tu número de WhatsApp</p>
+                  <p className="text-sm text-muted-foreground">
+                    Para que tus conexiones puedan contactarte, agrega tu número de teléfono en tu perfil.
+                  </p>
+                </div>
+              </div>
+              <Button size="sm" onClick={() => navigate("/profile")}>
+                Configurar
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
           {/* Suggestions Tab */}
           <TabsContent value="suggestions" className="mt-6">
