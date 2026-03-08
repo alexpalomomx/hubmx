@@ -14,11 +14,23 @@ import { Input } from "@/components/ui/input";
 
 export function ManageEventInterests() {
   const [selectedEventId, setSelectedEventId] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: events, isLoading: eventsLoading } = useEvents();
   const { data: interests, isLoading: interestsLoading } = useAllEventInterests(
     selectedEventId === "all" ? undefined : selectedEventId
   );
   const { data: allInterests } = useAllEventInterests();
+
+  const filteredInterests = useMemo(() => {
+    if (!interests) return [];
+    if (!searchQuery.trim()) return interests;
+    const q = searchQuery.toLowerCase();
+    return interests.filter((i) => {
+      const eventTitle = ((i.events as any)?.title || "").toLowerCase();
+      const userName = ((i.profiles as any)?.display_name || "").toLowerCase();
+      return eventTitle.includes(q) || userName.includes(q);
+    });
+  }, [interests, searchQuery]);
 
   // Function to export interests to Excel
   const exportToExcel = (dataToExport: any[], filename: string) => {
