@@ -213,7 +213,7 @@ const EventsSection = () => {
           {upcomingEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {upcomingEvents.slice(0, 3).map((event) => (
-                <Card key={event.id} className="group hover:shadow-glow transition-all duration-300 hover:-translate-y-1">
+                <Card key={event.id} className="group hover:shadow-glow transition-all duration-300 hover:-translate-y-1 flex flex-col">
                   <CardHeader className="pb-4">
                     <div className="flex justify-between items-start mb-2">
                        <Badge className={getTypeColor(event.event_type)}>
@@ -230,51 +230,51 @@ const EventsSection = () => {
                         </Button>
                       )}
                     </div>
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors duration-200">
+                    <CardTitle className="text-lg group-hover:text-primary transition-colors duration-200 line-clamp-2">
                       {event.title}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex flex-col flex-1">
                     <p className="text-muted-foreground mb-4 text-sm line-clamp-2">
                       {event.description}
                     </p>
                     
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        <span>{formatDate(event.event_date)}</span>
+                        <Calendar className="h-4 w-4 text-primary shrink-0" />
+                        <span className="truncate">{formatDate(event.event_date)}</span>
                       </div>
                       {event.event_time && (
                         <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-primary" />
+                          <Clock className="h-4 w-4 text-primary shrink-0" />
                           <span>{event.event_time}</span>
                         </div>
                       )}
                       {event.location && (
                         <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="h-4 w-4 text-primary" />
-                          <span>{event.location}</span>
+                          <MapPin className="h-4 w-4 text-primary shrink-0" />
+                          <span className="line-clamp-2">{event.location}</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mt-auto">
                       <Button 
                         variant={hasInterest(event.id) ? "secondary" : "default"}
                         size="sm" 
-                        className="flex-1"
+                        className="flex-1 min-w-0"
                         onClick={() => handleInterest(event)}
                         disabled={loadingEventId === event.id || hasInterest(event.id)}
                       >
                         {hasInterest(event.id) ? (
                           <>
-                            <Check className="h-4 w-4 mr-2" />
-                            Me interesa
+                            <Check className="h-4 w-4 mr-2 shrink-0" />
+                            <span className="truncate">Me interesa</span>
                           </>
                         ) : (
                           <>
-                            <Heart className="h-4 w-4 mr-2" />
-                            Me interesa
+                            <Heart className="h-4 w-4 mr-2 shrink-0" />
+                            <span className="truncate">Me interesa</span>
                           </>
                         )}
                       </Button>
