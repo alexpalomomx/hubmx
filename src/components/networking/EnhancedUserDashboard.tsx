@@ -68,13 +68,13 @@ export const EnhancedUserDashboard = () => {
       badge: pendingConnectionRequests.length > 0 ? pendingConnectionRequests.length : undefined
     },
     {
-      title: "Solicitudes",
-      value: pendingConnectionRequests.length,
-      icon: UserPlus,
-      color: "text-orange-500",
-      onClick: () => setActiveTab("requests"),
-      description: "Solicitudes pendientes",
-      badge: pendingConnectionRequests.length > 0 ? pendingConnectionRequests.length : undefined
+      title: "Notificaciones",
+      value: unreadNotifications || 0,
+      icon: Bell,
+      color: "text-green-500",
+      onClick: () => setActiveTab("notifications"),
+      description: "Sin leer",
+      badge: unreadNotifications && unreadNotifications > 0 ? unreadNotifications : undefined
     },
     {
       title: "Mentorías",
