@@ -38,6 +38,7 @@ import { useMentorshipRequests } from "@/hooks/useNetworkingData";
 
 const NetworkingDashboard = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("directory");
@@ -48,10 +49,10 @@ const NetworkingDashboard = () => {
     search: searchQuery
   });
   const { data: networkingProfile } = useNetworkingProfile(user?.id);
+  const { data: mentorshipRequests } = useMentorshipRequests();
   
   const updateConnection = useUpdateConnection();
   const createConnection = useCreateConnection();
-  const { data: mentorshipRequests } = useMentorshipRequests();
 
   if (loading) {
     return (
