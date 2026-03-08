@@ -251,7 +251,7 @@ const AdminDashboard = () => {
             {/* Desktop Menu - Tabs */}
             <div className="hidden sm:block w-full">
               <Tabs value={selectedSection} onValueChange={setSelectedSection}>
-                <TabsList className="grid grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 w-full h-auto p-1 gap-1">
+                <TabsList className="grid grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 w-full h-auto p-1 gap-1">
                   <TabsTrigger value="communities" className="flex items-center gap-1 text-xs px-2 py-2">
                     <Users className="h-3 w-3" />
                     <span className="hidden lg:inline">Comunidades</span>
@@ -281,6 +281,10 @@ const AdminDashboard = () => {
                         {(pendingData.events?.length || 0) + (pendingData.calls?.length || 0) + (pendingData.blogPosts?.length || 0) + (pendingData.alliances?.length || 0)}
                       </span>
                     )}
+                  </TabsTrigger>
+                  <TabsTrigger value="categories" className="flex items-center gap-1 text-xs px-2 py-2">
+                    <Settings className="h-3 w-3" />
+                    <span className="hidden lg:inline">Categorías</span>
                   </TabsTrigger>
                   <TabsTrigger value="users" className="flex items-center gap-1 text-xs px-2 py-2 hidden xl:flex">
                     <Users className="h-3 w-3" />
