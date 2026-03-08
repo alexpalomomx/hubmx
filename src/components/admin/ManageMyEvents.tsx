@@ -45,6 +45,18 @@ export default function ManageMyEvents({ communityId }: ManageMyEventsProps) {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timeFilter, setTimeFilter] = useState<"all" | "upcoming" | "past">("upcoming");
+
+  const isEventPast = (eventDate: string) => {
+    const date = parseISO(eventDate);
+    return isPast(date) && !isToday(date);
+  };
+
+  const filteredEvents = events?.filter((event) => {
+    if (timeFilter === "upcoming" && isEventPast(event.event_date)) return false;
+    if (timeFilter === "past" && !isEventPast(event.event_date)) return false;
+    return true;
+  });
 
   const handleEdit = (event: Event) => {
     setEditingEvent(event);
