@@ -9,13 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Users, 
   UserPlus, 
-  MessageSquare, 
   BookOpen, 
   Search,
   Network,
   ArrowLeft,
   TrendingUp,
-  Bell
+  Bell,
+  Phone
 } from "lucide-react";
 import { 
   useMemberDirectory, 
