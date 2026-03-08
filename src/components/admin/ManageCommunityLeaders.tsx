@@ -179,7 +179,7 @@ const ManageCommunityLeaders = () => {
       });
 
       setIsAssignDialogOpen(false);
-      setFormData({ email: "", communityId: "" });
+      setFormData({ userId: "", communityId: "" });
       fetchLeaders();
       queryClient.invalidateQueries({ queryKey: ['user-roles'] });
     } catch (error: any) {
