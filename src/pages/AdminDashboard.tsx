@@ -20,7 +20,8 @@ import {
   Briefcase,
   RefreshCw,
   Trophy,
-  Sparkles
+  Sparkles,
+  TrendingUp
 } from "lucide-react";
 import { useStats, useCommunities, useEvents, useAlliances, useCalls, usePendingApprovals } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
@@ -49,6 +50,7 @@ import ManageNetworking from "@/components/admin/ManageNetworking";
 import ManageEventSources from "@/components/admin/ManageEventSources";
 import ManageLeaderRegistrations from "@/components/admin/ManageLeaderRegistrations";
 import EventDateRecommender from "@/components/admin/EventDateRecommender";
+import { ImpactReport } from "@/components/admin/ImpactReport";
 
 const AdminDashboard = () => {
   const { user, isAdmin, isCoordinator, loading } = useAuth();
@@ -244,6 +246,7 @@ const AdminDashboard = () => {
                   <SelectItem value="networking">Networking</SelectItem>
                   <SelectItem value="gamification">Gamificación</SelectItem>
                   <SelectItem value="categories">Categorías</SelectItem>
+                  <SelectItem value="impact-report">Reporte de Impacto</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -383,6 +386,15 @@ const AdminDashboard = () => {
                 >
                   <Sparkles className="h-3 w-3 mr-1" />
                   IA Fechas
+                </Button>
+                <Button
+                  variant={selectedSection === "impact-report" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedSection("impact-report")}
+                  className="h-8 text-xs"
+                >
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Impacto
                 </Button>
                 <div className="xl:hidden flex gap-2">
                   <Button
@@ -648,6 +660,12 @@ const AdminDashboard = () => {
           {selectedSection === "categories" && (
             <div className="space-y-6">
               <ManageCommunityCategories />
+            </div>
+          )}
+
+          {selectedSection === "impact-report" && (
+            <div className="space-y-6">
+              <ImpactReport />
             </div>
           )}
         </div>
