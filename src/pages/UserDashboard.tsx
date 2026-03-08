@@ -286,7 +286,7 @@ const UserDashboard = () => {
                           <div className="flex items-center justify-between text-sm text-muted-foreground">
                             <span className="flex items-center">
                               <Users className="mr-1 h-4 w-4" />
-                              {community.members_count} miembros
+                              {community.members_count} interesados
                             </span>
                             <span>
                               Unido el {format(new Date(membership.joined_at), "dd 'de' MMMM, yyyy", { locale: es })}

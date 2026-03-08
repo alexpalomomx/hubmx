@@ -133,7 +133,7 @@ const AddCommunityDialog = ({ children }: AddCommunityDialogProps) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="members_count">Número de miembros</Label>
+              <Label htmlFor="members_count">Número de interesados</Label>
               <Input id="members_count" name="members_count" type="number" placeholder="100" min="0" />
             </div>
             <div className="space-y-2">

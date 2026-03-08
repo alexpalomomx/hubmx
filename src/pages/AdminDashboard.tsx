@@ -331,8 +331,8 @@ const AdminDashboard = () => {
                   className="h-8 text-xs"
                 >
                   <Users className="h-3 w-3 mr-1" />
-                  Miembros
-                </Button>
+                   Interesados
+                 </Button>
                 <Button
                   variant={selectedSection === "leaders" ? "default" : "outline"}
                   size="sm"
