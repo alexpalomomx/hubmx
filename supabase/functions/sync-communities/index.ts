@@ -344,4 +344,3 @@ async function syncInterestsFromLegion(legionSupabase: any, hubSupabase: any) {
 
   console.log(`Interesados sincronizados: ${synced} nuevos, ${syncedIds.length - synced} ya existían`)
 }
-}
