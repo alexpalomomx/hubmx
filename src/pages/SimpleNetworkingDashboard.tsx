@@ -274,9 +274,15 @@ const SimpleNetworkingDashboard = () => {
                                 WhatsApp
                               </Button>
                             ) : (
-                              <Badge variant="secondary" className="text-xs">
-                                Sin teléfono
-                              </Badge>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => navigate("/profile")}
+                                className="text-xs"
+                              >
+                                <Phone className="h-3 w-3 mr-1" />
+                                Invitar a configurar
+                              </Button>
                             )}
                           </div>
                           );
