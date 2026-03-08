@@ -164,41 +164,41 @@ export default function ManageCommunities() {
         {communities?.map((community) => (
           <Card key={community.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                <div className="flex items-start gap-3 min-w-0">
                   {community.logo_url ? (
                     <img
                       src={community.logo_url}
                       alt={`Logo de ${community.name}`}
-                      className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-primary font-semibold text-lg">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary font-semibold text-base sm:text-lg">
                         {community.name.charAt(0).toUpperCase()}
                       </span>
                     </div>
                   )}
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{community.name}</CardTitle>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="space-y-1 min-w-0">
+                    <CardTitle className="text-base sm:text-lg truncate">{community.name}</CardTitle>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        {community.members_count} miembros
+                        <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                        {community.members_count}
                       </span>
                       {(community.state || community.country) && (
                         <span className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
+                          <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
                           {[community.state, community.country].filter(Boolean).join(", ")}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <Badge variant={community.status === "active" ? "default" : "secondary"}>
                     {community.status === "active" ? "Activa" : "Inactiva"}
                   </Badge>
