@@ -25,6 +25,20 @@ import CommunityMapPage from "./pages/CommunityMapPage";
 
 const queryClient = new QueryClient();
 
+const RedirectFromLegacy404 = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const redirectTo = new URLSearchParams(window.location.search).get("redirect");
+
+    if (redirectTo && redirectTo.startsWith("/")) {
+      navigate(redirectTo, { replace: true });
+    }
+  }, [navigate]);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
