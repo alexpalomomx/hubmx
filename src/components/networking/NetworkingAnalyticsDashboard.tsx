@@ -53,28 +53,24 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
       value: userStats?.profile_views || 0,
       icon: Eye,
       color: "text-blue-500",
-      change: "+12%"
     },
     {
       title: "Conexiones Realizadas",
       value: userStats?.connections_made || 0,
       icon: Users,
       color: "text-green-500",
-      change: "+5%"
     },
     {
       title: "Mensajes Enviados",
       value: userStats?.messages_sent || 0,
       icon: MessageSquare,
       color: "text-purple-500",
-      change: "+18%"
     },
     {
       title: "Total Actividades",
       value: userStats?.total_activities || 0,
       icon: Activity,
       color: "text-orange-500",
-      change: "+8%"
     }
   ];
 
@@ -101,7 +97,6 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
                 <div>
                   <p className="text-sm text-muted-foreground">{stat.title}</p>
                   <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-green-600">{stat.change} esta semana</p>
                 </div>
                 <stat.icon className={`h-8 w-8 ${stat.color}`} />
               </div>
@@ -131,23 +126,29 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={engagementData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area 
-                      type="monotone" 
-                      dataKey="actividad" 
-                      stroke="#8884d8" 
-                      fill="#8884d8" 
-                      fillOpacity={0.3}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+              {engagementData.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No hay actividad registrada en los últimos 7 días
+                </div>
+              ) : (
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={engagementData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area 
+                        type="monotone" 
+                        dataKey="actividad" 
+                        stroke="#8884d8" 
+                        fill="#8884d8" 
+                        fillOpacity={0.3}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -163,27 +164,33 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={actionTypeData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {actionTypeData.map((_, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+                {actionTypeData.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No hay acciones registradas
+                  </div>
+                ) : (
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={actionTypeData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {actionTypeData.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -247,27 +254,33 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {adminAnalytics?.slice(0, 20).map((activity) => (
-                    <div key={activity.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-primary rounded-full"></div>
-                        <div>
-                          <p className="font-medium">
-                            {activity.user?.display_name || 'Usuario desconocido'}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {activity.action_type.replace('_', ' ')}
-                            {activity.target_user && ` → ${activity.target_user?.display_name}`}
-                          </p>
+                {(!adminAnalytics || adminAnalytics.length === 0) ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No hay actividad registrada
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {adminAnalytics.slice(0, 20).map((activity) => (
+                      <div key={activity.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 bg-primary rounded-full"></div>
+                          <div>
+                            <p className="font-medium">
+                              {activity.user?.display_name || 'Usuario desconocido'}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {activity.action_type.replace('_', ' ')}
+                              {activity.target_user && ` → ${activity.target_user?.display_name}`}
+                            </p>
+                          </div>
                         </div>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(activity.created_at).toLocaleDateString()}
+                        </span>
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(activity.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -304,7 +317,7 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
                   <CardContent className="p-4">
                     <div className="text-center">
                       <p className="text-2xl font-bold">
-                        {suggestionStats?.acceptance_rate.toFixed(1) || 0}%
+                        {suggestionStats?.acceptance_rate?.toFixed(1) || 0}%
                       </p>
                       <p className="text-sm text-muted-foreground">Tasa de aceptación</p>
                     </div>
@@ -317,7 +330,7 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
                   <span>Pendientes</span>
                   <span>{suggestionStats?.pending || 0}</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-muted rounded-full h-2">
                   <div 
                     className="bg-yellow-500 h-2 rounded-full" 
                     style={{ 
