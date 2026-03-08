@@ -464,7 +464,7 @@ export default function ManageEvents() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-event_type">Tipo de Evento *</Label>
                   <Select name="event_type" defaultValue={editingEvent.event_type}>
