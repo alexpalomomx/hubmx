@@ -37,8 +37,6 @@ const SimpleNetworkingDashboard = () => {
   const { user, loading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("directory");
-  const [initialConversationId, setInitialConversationId] = useState<string | undefined>(undefined);
-  const [initialOtherUser, setInitialOtherUser] = useState<any>(undefined);
   
   const { data: members, isLoading: membersLoading } = useMemberDirectory({
     search: searchQuery
