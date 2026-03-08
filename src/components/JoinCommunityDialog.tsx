@@ -177,7 +177,7 @@ export const JoinCommunityDialog = ({ community, children }: JoinCommunityDialog
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Uniéndose..." : "Unirse"}
+              {loading ? "Enviando..." : "Me interesa saber de la comunidad"}
             </Button>
           </div>
         </form>
