@@ -42,12 +42,21 @@ const App = () => (
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/networking" element={<SimpleNetworkingDashboard />} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/terminos" element={<TermsAndConditions />} />
+            <Route path="/terminos-y-condiciones" element={<TermsAndConditions />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/politica-privacidad" element={<PrivacyPolicy />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/code-of-conduct" element={<CodeOfConduct />} />
+            <Route path="/codigo-de-conducta" element={<CodeOfConduct />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/calendario" element={<PublicCalendar />} />
+            <Route path="/calendar" element={<PublicCalendar />} />
             <Route path="/comunidades" element={<CommunitiesPage />} />
+            <Route path="/communities" element={<CommunitiesPage />} />
             <Route path="/mapa" element={<CommunityMapPage />} />
+            <Route path="/community-map" element={<CommunityMapPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
