@@ -311,16 +311,24 @@ const ManageCommunityLeaders = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Nombre o Email del Usuario</Label>
-              <Input
-                id="email"
-                type="text"
-                placeholder="Nombre del usuario o email@ejemplo.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
+              <Label>Líder</Label>
+              <Select
+                value={formData.userId}
+                onValueChange={(value) => setFormData({ ...formData, userId: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un líder" />
+                </SelectTrigger>
+                <SelectContent>
+                  {leaderUsers.map((u: any) => (
+                    <SelectItem key={u.user_id} value={u.user_id}>
+                      {u.display_name || 'Sin nombre'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <p className="text-xs text-muted-foreground">
-                Puedes buscar por nombre de usuario o email
+                Solo se muestran usuarios con el rol de líder de comunidad
               </p>
             </div>
             <div className="space-y-2">
