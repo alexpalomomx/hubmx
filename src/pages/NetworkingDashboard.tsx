@@ -48,9 +48,9 @@ const NetworkingDashboard = () => {
     search: searchQuery
   });
   const { data: networkingProfile } = useNetworkingProfile(user?.id);
-  const { data: conversations } = useConversations();
-  const { data: mentorshipRequests } = useMentorshipRequests();
-  const getOrCreateConversation = useGetOrCreateConversation();
+  
+  const updateConnection = useUpdateConnection();
+  const createConnection = useCreateConnection();
   
   const updateConnection = useUpdateConnection();
   const createConnection = useCreateConnection();
