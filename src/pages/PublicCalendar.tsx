@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEventInterests } from "@/hooks/useSupabaseData";
 import { useToast } from "@/hooks/use-toast";
 import SEOHead from "@/components/SEOHead";
+import { CalendarSourceSelector } from "@/components/calendar/CalendarSourceSelector";
 
 const PublicCalendar = () => {
   useEffect(() => { window.scrollTo(0, 0); }, []);
