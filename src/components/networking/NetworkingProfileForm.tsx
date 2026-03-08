@@ -303,29 +303,6 @@ const NetworkingProfileForm = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="offer-mentorship"
-                    checked={newSkill.is_offering_mentorship}
-                    onCheckedChange={(checked) => 
-                      setNewSkill({ ...newSkill, is_offering_mentorship: checked })
-                    }
-                  />
-                  <Label htmlFor="offer-mentorship" className="text-sm">Ofrezco mentoría</Label>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="seek-mentorship"
-                    checked={newSkill.is_seeking_mentorship}
-                    onCheckedChange={(checked) => 
-                      setNewSkill({ ...newSkill, is_seeking_mentorship: checked })
-                    }
-                  />
-                  <Label htmlFor="seek-mentorship" className="text-sm">Busco mentoría</Label>
-                </div>
-              </div>
             </div>
 
             <Button 
