@@ -162,10 +162,9 @@ const SimpleNetworkingDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="directory">Directorio</TabsTrigger>
             <TabsTrigger value="connections">Conexiones</TabsTrigger>
-            <TabsTrigger value="messages">Mensajes</TabsTrigger>
             <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
             <TabsTrigger value="mentorship">Mentoría</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
