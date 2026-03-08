@@ -389,6 +389,25 @@ const SimpleNetworkingDashboard = () => {
             </Card>
           </TabsContent>
 
+        {/* Banner si el usuario no tiene teléfono */}
+        {!currentUserHasPhone && (
+          <Card className="mb-6 border-primary/30 bg-primary/5">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Phone className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="font-medium">Configura tu número de WhatsApp</p>
+                  <p className="text-sm text-muted-foreground">
+                    Para que tus conexiones puedan contactarte, agrega tu número de teléfono en tu perfil.
+                  </p>
+                </div>
+              </div>
+              <Button size="sm" onClick={() => navigate("/profile")}>
+                Configurar
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
           {/* Suggestions Tab */}
           <TabsContent value="suggestions" className="mt-6">
