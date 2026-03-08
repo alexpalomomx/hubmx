@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen, ArrowLeft, Network, MessageSquare, UserPlus, ChevronDown } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen, ArrowLeft, Network, MessageSquare, UserPlus, ChevronDown, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -170,18 +171,50 @@ const UserDashboard = () => {
 
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Dashboard</h1>
-          <Select value={activeSection} onValueChange={setActiveSection}>
-            <SelectTrigger className="w-[200px] bg-background border border-border shadow-sm z-50">
-              <SelectValue placeholder="Seleccionar sección" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border border-border shadow-lg z-50">
-              <SelectItem value="communities">Comunidades</SelectItem>
-              <SelectItem value="events">Eventos</SelectItem>
-              <SelectItem value="networking">Networking</SelectItem>
-              <SelectItem value="messages">Mensajes</SelectItem>
-              <SelectItem value="analytics">Analytics</SelectItem>
-            </SelectContent>
-          </Select>
+          
+          {/* Mobile - Select dropdown */}
+          <div className="sm:hidden">
+            <Select value={activeSection} onValueChange={setActiveSection}>
+              <SelectTrigger className="w-[200px] bg-background border border-border shadow-sm z-50">
+                <SelectValue placeholder="Seleccionar sección" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border border-border shadow-lg z-50">
+                <SelectItem value="communities">Comunidades</SelectItem>
+                <SelectItem value="events">Eventos</SelectItem>
+                <SelectItem value="networking">Networking</SelectItem>
+                <SelectItem value="messages">Mensajes</SelectItem>
+                <SelectItem value="analytics">Analytics</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Desktop - Tabs */}
+        <div className="hidden sm:block mb-6">
+          <Tabs value={activeSection} onValueChange={setActiveSection}>
+            <TabsList className="w-full justify-start h-auto p-1 gap-1">
+              <TabsTrigger value="communities" className="flex items-center gap-2 px-4 py-2">
+                <Users className="h-4 w-4" />
+                Comunidades
+              </TabsTrigger>
+              <TabsTrigger value="events" className="flex items-center gap-2 px-4 py-2">
+                <Calendar className="h-4 w-4" />
+                Eventos
+              </TabsTrigger>
+              <TabsTrigger value="networking" className="flex items-center gap-2 px-4 py-2">
+                <Network className="h-4 w-4" />
+                Networking
+              </TabsTrigger>
+              <TabsTrigger value="messages" className="flex items-center gap-2 px-4 py-2">
+                <MessageSquare className="h-4 w-4" />
+                Mensajes
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2 px-4 py-2">
+                <BarChart3 className="h-4 w-4" />
+                Analytics
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="space-y-6">
