@@ -80,8 +80,54 @@ serve(async (req) => {
   }
 })
 
+async function loadCategoryMappings(hubSupabase: any): Promise<{ toHub: Record<string, string>, toLegion: Record<string, string> }> {
+  const { data: categories } = await hubSupabase
+    .from('community_categories')
+    .select('value, label')
+    .eq('is_active', true)
+
+  // Build dynamic mappings based on category values
+  const toHub: Record<string, string> = {}
+  const toLegion: Record<string, string> = {}
+
+  // Default static mappings as fallback
+  const staticToHub: Record<string, string> = {
+    'tech': 'tecnologia',
+    'education': 'educacion',
+    'business': 'emprendimiento',
+    'social': 'social',
+    'cultural': 'cultura'
+  }
+  const staticToLegion: Record<string, string> = {
+    'tecnologia': 'tech',
+    'educacion': 'education',
+    'emprendimiento': 'business',
+    'social': 'social',
+    'cultura': 'cultural'
+  }
+
+  // Merge static mappings
+  Object.assign(toHub, staticToHub)
+  Object.assign(toLegion, staticToLegion)
+
+  // Add dynamic categories: map each value to itself (identity) so they pass through
+  // and also register them for Legion mapping
+  if (categories) {
+    for (const cat of categories) {
+      // If a Legion type matches a Hub category value, map it
+      toHub[cat.value] = cat.value
+      toLegion[cat.value] = cat.value
+    }
+  }
+
+  console.log(`Categorías cargadas: ${categories?.length || 0} dinámicas + estáticas`)
+  return { toHub, toLegion }
+}
+
 async function syncCommunitiesFromLegion(legionSupabase: any, hubSupabase: any) {
   console.log('Sincronizando comunidades desde Legion Hack MX...')
+  
+  const { toHub } = await loadCategoryMappings(hubSupabase)
   
   const { data: legionCommunities, error: legionError } = await legionSupabase
     .from('communities')
@@ -95,9 +141,10 @@ async function syncCommunitiesFromLegion(legionSupabase: any, hubSupabase: any) 
   console.log(`Encontradas ${legionCommunities?.length || 0} comunidades en Legion Hack MX`)
 
   for (const legion of legionCommunities as LegionCommunity[]) {
+    const mappedCategory = toHub[legion.tipo] || 'otros'
     const hubCommunity: Partial<HubCommunity> = {
       name: legion.nombre,
-      category: mapCategoryFromLegion(legion.tipo),
+      category: mappedCategory,
       description: legion.descripcion,
       created_by: null,
       members_count: legion.miembros_count || 0,
@@ -123,7 +170,7 @@ async function syncCommunitiesFromLegion(legionSupabase: any, hubSupabase: any) 
         console.error(`Error actualizando ${legion.nombre}:`, updateError)
         throw updateError
       }
-      console.log(`Actualizada: ${legion.nombre}`)
+      console.log(`Actualizada: ${legion.nombre} (categoría: ${legion.tipo} -> ${mappedCategory})`)
     } else {
       const { error: insertError } = await hubSupabase
         .from('communities')
@@ -133,13 +180,15 @@ async function syncCommunitiesFromLegion(legionSupabase: any, hubSupabase: any) 
         console.error(`Error creando ${legion.nombre}:`, insertError)
         throw insertError
       }
-      console.log(`Creada: ${legion.nombre}`)
+      console.log(`Creada: ${legion.nombre} (categoría: ${legion.tipo} -> ${mappedCategory})`)
     }
   }
 }
 
 async function syncCommunitiesToLegion(hubSupabase: any, legionSupabase: any) {
   console.log('Sincronizando comunidades hacia Legion Hack MX...')
+  
+  const { toLegion } = await loadCategoryMappings(hubSupabase)
   
   const { data: hubCommunities, error: hubError } = await hubSupabase
     .from('communities')
@@ -149,9 +198,10 @@ async function syncCommunitiesToLegion(hubSupabase: any, legionSupabase: any) {
   if (hubError) throw hubError
 
   for (const hub of hubCommunities as HubCommunity[]) {
+    const mappedType = toLegion[hub.category] || hub.category
     const legionCommunity: Partial<LegionCommunity> = {
       nombre: hub.name,
-      tipo: mapCategoryToLegion(hub.category),
+      tipo: mappedType,
       descripcion: hub.description,
       lider_id: hub.created_by,
       miembros_count: hub.members_count || 0,
@@ -171,34 +221,12 @@ async function syncCommunitiesToLegion(hubSupabase: any, legionSupabase: any) {
         .from('communities')
         .update(legionCommunity)
         .eq('id', existing.id)
-      console.log(`Actualizada en Legion: ${hub.name}`)
+      console.log(`Actualizada en Legion: ${hub.name} (categoría: ${hub.category} -> ${mappedType})`)
     } else {
       await legionSupabase
         .from('communities')
         .insert(legionCommunity)
-      console.log(`Creada en Legion: ${hub.name}`)
+      console.log(`Creada en Legion: ${hub.name} (categoría: ${hub.category} -> ${mappedType})`)
     }
   }
-}
-
-function mapCategoryFromLegion(legionType: string): string {
-  const mapping: Record<string, string> = {
-    'tech': 'tecnologia',
-    'education': 'educacion',
-    'business': 'emprendimiento',
-    'social': 'social',
-    'cultural': 'cultura'
-  }
-  return mapping[legionType] || 'otros'
-}
-
-function mapCategoryToLegion(hubCategory: string): string {
-  const mapping: Record<string, string> = {
-    'tecnologia': 'tech',
-    'educacion': 'education',
-    'emprendimiento': 'business',
-    'social': 'social',
-    'cultura': 'cultural'
-  }
-  return mapping[hubCategory] || 'tech'
 }
