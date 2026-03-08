@@ -48,12 +48,14 @@ export const useEvents = (status?: string) => {
 };
 
 // Hook para obtener eventos del usuario actual (para líderes de comunidad)
+// Incluye eventos creados por el líder, de su comunidad, y de fuentes externas asignadas
 export const useMyEvents = (userId?: string, communityId?: string) => {
   return useQuery({
     queryKey: ["my-events", userId, communityId],
     queryFn: async () => {
       if (!userId) return [];
       
+      // 1. Get events created by the user or from their community
       let query = supabase
         .from("events")
         .select(`
@@ -62,16 +64,42 @@ export const useMyEvents = (userId?: string, communityId?: string) => {
         `)
         .order("event_date", { ascending: true });
 
-      // Filtrar eventos creados por el usuario O de su comunidad
       if (communityId) {
         query = query.or(`submitted_by.eq.${userId},created_by.eq.${userId},organizer_id.eq.${communityId}`);
       } else {
         query = query.or(`submitted_by.eq.${userId},created_by.eq.${userId}`);
       }
 
-      const { data, error } = await query;
+      const { data: ownEvents, error } = await query;
       if (error) throw error;
-      return data;
+
+      // 2. Get events from assigned external sources
+      const { data: sources } = await supabase
+        .from("event_sources")
+        .select("id")
+        .eq("assigned_leader_id", userId);
+
+      let sourceEvents: any[] = [];
+      if (sources && sources.length > 0) {
+        const sourceIds = sources.map(s => s.id);
+        const { data: sEvents } = await supabase
+          .from("events")
+          .select(`*, organizer:organizer_id(name)`)
+          .in("source_id", sourceIds)
+          .order("event_date", { ascending: true });
+        sourceEvents = sEvents || [];
+      }
+
+      // 3. Merge and deduplicate
+      const allEvents = [...(ownEvents || [])];
+      const existingIds = new Set(allEvents.map(e => e.id));
+      for (const ev of sourceEvents) {
+        if (!existingIds.has(ev.id)) {
+          allEvents.push(ev);
+        }
+      }
+
+      return allEvents.sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime());
     },
     enabled: !!userId,
   });
