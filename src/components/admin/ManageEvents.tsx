@@ -54,24 +54,8 @@ export default function ManageEvents() {
     return isPast(date) && !isToday(date);
   };
 
-  const filteredEvents = events?.filter((event) => {
-    // Time filter
-    if (timeFilter === "upcoming" && isEventPast(event.event_date)) return false;
-    if (timeFilter === "past" && !isEventPast(event.event_date)) return false;
-
-    // Source filter
-    if (sourceFilter !== "all") {
-      const { isExternal } = getEventSourceMeta(event as Event);
-      if (sourceFilter === "external" && !isExternal) return false;
-      if (sourceFilter === "manual" && isExternal) return false;
-    }
-
-    return true;
-  });
-
   const getExternalSourceTypeFromUrl = (registrationUrl?: string | null) => {
     if (!registrationUrl) return null;
-
     try {
       const hostname = new URL(registrationUrl).hostname.toLowerCase();
       if (hostname.includes("lu.ma")) return "luma";
@@ -87,13 +71,23 @@ export default function ManageEvents() {
     const sourceTypeFromUrl = getExternalSourceTypeFromUrl(event.registration_url);
     const sourceType = event.source?.source_type || sourceTypeFromUrl;
     const sourceName = event.source?.name || (sourceType ? "Fuente externa" : null);
-
     return {
       isExternal: Boolean(event.source_id || sourceType),
       sourceName,
       sourceType,
     };
   };
+
+  const filteredEvents = events?.filter((event) => {
+    if (timeFilter === "upcoming" && isEventPast(event.event_date)) return false;
+    if (timeFilter === "past" && !isEventPast(event.event_date)) return false;
+    if (sourceFilter !== "all") {
+      const { isExternal } = getEventSourceMeta(event as Event);
+      if (sourceFilter === "external" && !isExternal) return false;
+      if (sourceFilter === "manual" && isExternal) return false;
+    }
+    return true;
+  });
 
   const handleEdit = (event: Event) => {
     setEditingEvent(event);
