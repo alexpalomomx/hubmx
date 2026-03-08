@@ -10,6 +10,7 @@ import { useState, useMemo } from "react";
 import { Download, FileSpreadsheet, Heart, Search } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 
 export function ManageEventInterests() {
   const [selectedEventId, setSelectedEventId] = useState<string>("all");
