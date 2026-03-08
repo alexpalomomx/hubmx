@@ -15,20 +15,27 @@ import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+interface EventSource {
+  name: string;
+  source_type: string;
+}
+
 interface Event {
   id: string;
   title: string;
   description: string;
   event_date: string;
-  event_time: string;
+  event_time: string | null;
   location: string;
   event_type: string;
   category: string;
   max_attendees: number;
   current_attendees: number;
-  registration_url: string;
+  registration_url: string | null;
   image_url: string;
   status: string;
+  source_id: string | null;
+  source: EventSource | null;
   organizer: { name: string } | null;
 }
 
@@ -39,6 +46,32 @@ export default function ManageEvents() {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const getExternalSourceTypeFromUrl = (registrationUrl?: string | null) => {
+    if (!registrationUrl) return null;
+
+    try {
+      const hostname = new URL(registrationUrl).hostname.toLowerCase();
+      if (hostname.includes("lu.ma")) return "luma";
+      if (hostname.includes("meetup.com")) return "meetup";
+      if (hostname.includes("eventbrite")) return "eventbrite";
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
+  const getEventSourceMeta = (event: Event) => {
+    const sourceTypeFromUrl = getExternalSourceTypeFromUrl(event.registration_url);
+    const sourceType = event.source?.source_type || sourceTypeFromUrl;
+    const sourceName = event.source?.name || (sourceType ? "Fuente externa" : null);
+
+    return {
+      isExternal: Boolean(event.source_id || sourceType),
+      sourceName,
+      sourceType,
+    };
+  };
 
   const handleEdit = (event: Event) => {
     setEditingEvent(event);
@@ -176,7 +209,7 @@ export default function ManageEvents() {
     <div className="space-y-6">
       <div className="grid gap-4">
         {events?.map((event) => {
-          const isExternal = !!(event as any).source_id;
+          const { isExternal, sourceName, sourceType } = getEventSourceMeta(event as Event);
 
           return (
           <Card key={event.id} className="hover:shadow-lg transition-shadow">
@@ -187,8 +220,8 @@ export default function ManageEvents() {
                     <CardTitle className="text-lg">{event.title}</CardTitle>
                     {isExternal && (
                       <Badge variant="secondary" className="text-xs">
-                        📡 {(event as any).source?.name || "Fuente externa"}
-                        {(event as any).source?.source_type && ` (${(event as any).source.source_type})`}
+                        📡 {sourceName || "Fuente externa"}
+                        {sourceType && ` (${sourceType})`}
                       </Badge>
                     )}
                   </div>
