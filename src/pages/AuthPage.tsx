@@ -17,10 +17,15 @@ const AuthPage = () => {
   const [inviteMode, setInviteMode] = useState(false);
   const [newPassword, setNewPassword] = useState("");
 
-  // Get default tab from URL params
+  // Get default tab and referral code from URL params
   const defaultTab = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('tab') === 'signup' ? 'signup' : 'signin';
+  }, []);
+
+  const referralCode = useMemo(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('ref') || null;
   }, []);
 
   useEffect(() => {
