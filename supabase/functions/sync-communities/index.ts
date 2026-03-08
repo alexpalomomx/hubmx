@@ -55,7 +55,6 @@ serve(async (req) => {
 
     if (action === 'sync') {
       if (direction === 'from_legion' || direction === 'bidirectional') {
-        await syncCommunitiesFromLegion(legionSupabase, hubSupabase)
         await syncInterestsFromLegion(legionSupabase, hubSupabase)
       }
       
