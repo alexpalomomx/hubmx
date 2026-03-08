@@ -17,7 +17,7 @@ import {
   Sparkles,
   Heart
 } from "lucide-react";
-import { useMyEvents, useCommunityEventInterests } from "@/hooks/useSupabaseData";
+import { useMyEvents, useLeaderSourceEvents, useLeaderEventInterests } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import AddEventDialog from "@/components/admin/AddEventDialog";
 import ManageMyEvents from "@/components/admin/ManageMyEvents";
@@ -33,7 +33,8 @@ const CommunityLeaderDashboard = () => {
   const [loadingCommunity, setLoadingCommunity] = useState(true);
   
   const { data: myEvents } = useMyEvents(user?.id, myCommunity?.id);
-  const { data: communityInterests } = useCommunityEventInterests(myCommunity?.id);
+  const { data: leaderSourceEvents } = useLeaderSourceEvents(user?.id);
+  const { data: leaderInterests } = useLeaderEventInterests(user?.id);
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
