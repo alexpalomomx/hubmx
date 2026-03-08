@@ -18,7 +18,8 @@ import {
   ArrowLeft,
   Sparkles,
   BarChart3,
-  ChevronDown
+  ChevronDown,
+  Phone
 } from "lucide-react";
 import { 
   useUserConnections, 
