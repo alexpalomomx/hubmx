@@ -14,8 +14,11 @@ RUN npm run build
 # Etapa 2: Servidor de Producción (Nginx)
 FROM nginx:stable-alpine AS production
 
+# Eliminamos la config por defecto de Nginx y copiamos la nuestra con SPA fallback
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Copiamos el resultado del build desde la etapa anterior a la carpeta de Nginx
-# Vite por defecto exporta a la carpeta 'dist'
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Exponemos el puerto 80
