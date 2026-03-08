@@ -212,7 +212,7 @@ const EventsSection = () => {
           </h3>
           {upcomingEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.slice(0, 6).map((event) => (
+              {upcomingEvents.slice(0, 3).map((event) => (
                 <Card key={event.id} className="group hover:shadow-glow transition-all duration-300 hover:-translate-y-1">
                   <CardHeader className="pb-4">
                     <div className="flex justify-between items-start mb-2">
