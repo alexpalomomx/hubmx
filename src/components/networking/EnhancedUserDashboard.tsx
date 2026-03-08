@@ -59,13 +59,13 @@ export const EnhancedUserDashboard = () => {
       description: "Conexiones activas"
     },
     {
-      title: "Mensajes",
-      value: unreadMessages.length,
-      icon: MessageSquare,
-      color: "text-green-500",
-      onClick: () => setActiveTab("messages"),
-      description: "Conversaciones sin leer",
-      badge: unreadMessages.length > 0 ? unreadMessages.length : undefined
+      title: "Solicitudes",
+      value: pendingConnectionRequests.length,
+      icon: UserPlus,
+      color: "text-orange-500",
+      onClick: () => setActiveTab("requests"),
+      description: "Solicitudes pendientes",
+      badge: pendingConnectionRequests.length > 0 ? pendingConnectionRequests.length : undefined
     },
     {
       title: "Solicitudes",
