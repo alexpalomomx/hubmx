@@ -307,14 +307,21 @@ const NetworkingDashboard = () => {
                                   Conectado desde {new Date(connection.created_at).toLocaleDateString()}
                                 </p>
                               </div>
-                               <Button 
-                                 variant="outline" 
-                                 size="sm"
-                                 onClick={() => handleStartConversation(otherUser?.user_id || '')}
-                                 disabled={getOrCreateConversation.isPending}
-                               >
-                                 <MessageSquare className="h-4 w-4" />
-                               </Button>
+                               {otherUser?.phone ? (
+                                 <Button 
+                                   variant="outline" 
+                                   size="sm"
+                                   onClick={() => {
+                                     const phone = otherUser.phone.replace(/\D/g, '');
+                                     window.open(`https://wa.me/${phone}`, '_blank');
+                                   }}
+                                 >
+                                   <Phone className="h-4 w-4 mr-1" />
+                                   WhatsApp
+                                 </Button>
+                               ) : (
+                                 <Badge variant="secondary" className="text-xs">Sin teléfono</Badge>
+                               )}
                             </div>
                           </CardContent>
                         </Card>
