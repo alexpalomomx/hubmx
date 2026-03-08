@@ -125,6 +125,7 @@ const AuthPage = () => {
   };
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
+      <SEOHead title="Iniciar Sesión" description="Accede a HUB MX para conectar con comunidades tech en México y Latinoamérica." path="/auth" />
       <div className="w-full max-w-md">
         {/* Back Button */}
         <Button
