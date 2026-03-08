@@ -185,10 +185,9 @@ export const EnhancedUserDashboard = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
             <TabsTrigger value="overview">Resumen</TabsTrigger>
             <TabsTrigger value="connections">Conexiones</TabsTrigger>
-            <TabsTrigger value="messages">Mensajes</TabsTrigger>
             <TabsTrigger value="requests">Solicitudes</TabsTrigger>
             <TabsTrigger value="mentorship">Mentorías</TabsTrigger>
             <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
