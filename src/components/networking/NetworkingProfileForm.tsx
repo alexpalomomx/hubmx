@@ -137,16 +137,18 @@ const NetworkingProfileForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Ubicación</Label>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <Input
-                id="location"
-                placeholder="Ciudad, País"
-                value={profileData.location}
-                onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-              />
-            </div>
+            <Label>Ubicación</Label>
+            <LocationSelector
+              country={profileData.location?.split(", ").pop() || ""}
+              state={profileData.location?.split(", ").shift() !== profileData.location?.split(", ").pop() ? profileData.location?.split(", ").shift() || "" : ""}
+              onCountryChange={(country) => {
+                setProfileData({ ...profileData, location: country });
+              }}
+              onStateChange={(state) => {
+                const country = profileData.location?.split(", ").pop() || "";
+                setProfileData({ ...profileData, location: state ? `${state}, ${country}` : country });
+              }}
+            />
           </div>
 
           <Separator />
