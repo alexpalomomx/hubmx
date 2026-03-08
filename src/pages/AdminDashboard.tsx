@@ -631,6 +631,12 @@ const AdminDashboard = () => {
               <GamificationManager />
             </div>
           )}
+
+          {selectedSection === "categories" && (
+            <div className="space-y-6">
+              <ManageCommunityCategories />
+            </div>
+          )}
         </div>
       </div>
     </div>
