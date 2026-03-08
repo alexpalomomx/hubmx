@@ -183,7 +183,10 @@ export default function ManageEvents() {
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-lg">{event.title}</CardTitle>
                     {(event as any).source_id && (
-                      <Badge variant="secondary" className="text-xs">Fuente externa</Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        📡 {(event as any).source?.name || "Fuente externa"}
+                        {(event as any).source?.source_type && ` (${(event as any).source.source_type})`}
+                      </Badge>
                     )}
                   </div>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
