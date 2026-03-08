@@ -339,17 +339,17 @@ export default function ManageEvents() {
                 </p>
               )}
               
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                 {event.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    {event.location}
+                  <span className="flex items-center gap-1 max-w-full">
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="truncate">{event.location}</span>
                   </span>
                 )}
                 {event.max_attendees && (
                   <span className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    {event.current_attendees || 0}/{event.max_attendees} asistentes
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                    {event.current_attendees || 0}/{event.max_attendees}
                   </span>
                 )}
                 {event.category && (
