@@ -224,12 +224,13 @@ export default function ManageEvents() {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Filter className="h-4 w-4" />
           Filtrar:
         </div>
-        <div className="flex gap-1">
+
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={timeFilter === "all" ? "default" : "outline"}
             size="sm"
@@ -252,8 +253,8 @@ export default function ManageEvents() {
             Pasados
           </Button>
         </div>
-        <div className="w-px h-6 bg-border" />
-        <div className="flex gap-1">
+
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={sourceFilter === "all" ? "default" : "outline"}
             size="sm"
@@ -276,9 +277,10 @@ export default function ManageEvents() {
             Externos
           </Button>
         </div>
-        <span className="ml-auto text-xs text-muted-foreground">
+
+        <p className="text-xs text-muted-foreground sm:text-right">
           {filteredEvents?.length || 0} de {events?.length || 0} eventos
-        </span>
+        </p>
       </div>
 
       <div className="grid gap-4">
@@ -292,75 +294,85 @@ export default function ManageEvents() {
           const past = isEventPast(event.event_date);
 
           return (
-          <Card key={event.id} className={`hover:shadow-lg transition-shadow ${past ? "opacity-70" : ""}`}>
+          <Card key={event.id} className={`hover:shadow-lg transition-shadow overflow-hidden ${past ? "opacity-70" : ""}`}>
             <CardHeader className="pb-3">
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <CardTitle className="text-base sm:text-lg">{event.title}</CardTitle>
-                    {past ? (
-                      <Badge variant="outline" className="text-xs border-muted-foreground/40">
-                        Ya pasó
-                      </Badge>
-                    ) : (
-                      <Badge className="text-xs bg-green-600 hover:bg-green-700 text-white">
-                        Próximo
-                      </Badge>
-                    )}
-                    {isExternal && (
-                      <Badge variant="secondary" className="text-xs">
+              <div className="space-y-2 min-w-0">
+                <CardTitle className="text-base sm:text-lg leading-tight break-words">
+                  {event.title}
+                </CardTitle>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {past ? (
+                    <Badge variant="outline" className="text-xs border-muted-foreground/40">
+                      Ya pasó
+                    </Badge>
+                  ) : (
+                    <Badge variant="default" className="text-xs">
+                      Próximo
+                    </Badge>
+                  )}
+
+                  <Badge variant="outline" className="text-xs">
+                    {event.event_type}
+                  </Badge>
+
+                  {isExternal && (
+                    <Badge variant="secondary" className="text-xs max-w-full">
+                      <span className="truncate max-w-[220px] inline-block align-bottom">
                         📡 {sourceName || "Fuente externa"}
                         {sourceType && ` (${sourceType})`}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                      {format(new Date(event.event_date), "dd 'de' MMMM, yyyy", { locale: es })}
-                    </span>
-                    {event.event_time && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                        {event.event_time}
                       </span>
-                    )}
-                  </div>
+                    </Badge>
+                  )}
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge variant="outline">{event.event_type}</Badge>
+
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                    {format(new Date(event.event_date), "dd 'de' MMMM, yyyy", { locale: es })}
+                  </span>
+                  {event.event_time && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                      {event.event_time}
+                    </span>
+                  )}
                 </div>
               </div>
             </CardHeader>
+
             <CardContent className="space-y-4">
               {event.description && (
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {event.description}
                 </p>
               )}
-              
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+
+              <div className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                 {event.location && (
-                  <span className="flex items-center gap-1 max-w-full">
-                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="truncate">{event.location}</span>
-                  </span>
+                  <div className="flex items-start gap-1 min-w-0">
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 mt-0.5" />
+                    <span className="break-words">{event.location}</span>
+                  </div>
                 )}
-                {event.max_attendees && (
-                  <span className="flex items-center gap-1">
-                    <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-                    {event.current_attendees || 0}/{event.max_attendees}
-                  </span>
-                )}
-                {event.category && (
-                  <Badge variant="secondary" className="text-xs">
-                    {event.category}
-                  </Badge>
-                )}
+
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                  {event.max_attendees && (
+                    <span className="flex items-center gap-1">
+                      <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                      {event.current_attendees || 0}/{event.max_attendees}
+                    </span>
+                  )}
+                  {event.category && (
+                    <Badge variant="secondary" className="text-xs">
+                      {event.category}
+                    </Badge>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-                <div className="text-xs sm:text-sm text-muted-foreground truncate">
+                <div className="text-xs sm:text-sm text-muted-foreground break-words">
                   {event.organizer?.name && `Organizado por: ${event.organizer.name}`}
                 </div>
 
