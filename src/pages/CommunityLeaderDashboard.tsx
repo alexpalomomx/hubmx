@@ -17,7 +17,7 @@ import {
   Sparkles,
   Heart
 } from "lucide-react";
-import { useMyEvents, useLeaderSourceEvents, useLeaderEventInterests } from "@/hooks/useSupabaseData";
+import { useMyEvents, useLeaderSourceEvents, useLeaderEventInterests, useCommunityMembers } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
 import AddEventDialog from "@/components/admin/AddEventDialog";
 import ManageMyEvents from "@/components/admin/ManageMyEvents";
@@ -35,6 +35,7 @@ const CommunityLeaderDashboard = () => {
   const { data: myEvents } = useMyEvents(user?.id, myCommunity?.id);
   const { data: leaderSourceEvents } = useLeaderSourceEvents(user?.id);
   const { data: leaderInterests } = useLeaderEventInterests(user?.id);
+  const { data: communityMembers } = useCommunityMembers(myCommunity?.id);
 
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
@@ -197,6 +198,7 @@ const CommunityLeaderDashboard = () => {
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border shadow-lg z-50">
                   <SelectItem value="events">Mis Eventos</SelectItem>
+                  <SelectItem value="community-interests">Interesados en la Comunidad</SelectItem>
                   <SelectItem value="ai-recommender">Recomendador IA</SelectItem>
                   <SelectItem value="sources">Fuentes Externas</SelectItem>
                   <SelectItem value="interests">Intereses en Eventos</SelectItem>
@@ -219,6 +221,52 @@ const CommunityLeaderDashboard = () => {
                 </AddEventDialog>
               </div>
               <ManageMyEvents communityId={myCommunity?.id} />
+            </div>
+          )}
+
+          {selectedSection === "community-interests" && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Users className="h-6 w-6" />
+                  Personas interesadas en la comunidad
+                </h2>
+                <Badge variant="secondary">{communityMembers?.length || 0} interesados</Badge>
+              </div>
+              {communityMembers && communityMembers.length > 0 ? (
+                <div className="grid gap-4">
+                  {communityMembers.map((member: any) => (
+                    <Card key={member.id}>
+                      <CardContent className="flex items-center gap-4 py-4">
+                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-semibold">
+                          {(member.full_name || member.nickname || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium">{member.full_name || member.nickname}</p>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            {member.email && <span>{member.email}</span>}
+                            {member.phone && <span>{member.phone}</span>}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="outline">{member.status}</Badge>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(member.joined_at).toLocaleDateString('es-MX')}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="flex items-center justify-center h-32">
+                    <p className="text-muted-foreground">
+                      Aún no hay personas interesadas en tu comunidad
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
 
