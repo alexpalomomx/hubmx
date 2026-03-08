@@ -884,6 +884,42 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          points_awarded: boolean
+          referral_code: string
+          referred_email: string
+          referred_user_id: string | null
+          referrer_id: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          points_awarded?: boolean
+          referral_code: string
+          referred_email: string
+          referred_user_id?: string | null
+          referrer_id: string
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          points_awarded?: boolean
+          referral_code?: string
+          referred_email?: string
+          referred_user_id?: string | null
+          referrer_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       user_calendar_preferences: {
         Row: {
           created_at: string
@@ -1017,28 +1053,37 @@ export type Database = {
       }
       user_points: {
         Row: {
+          blog_posts: number
           community_joins: number
+          content_shares: number
           created_at: string
           event_registrations: number
           id: string
+          referrals: number
           total_points: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          blog_posts?: number
           community_joins?: number
+          content_shares?: number
           created_at?: string
           event_registrations?: number
           id?: string
+          referrals?: number
           total_points?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          blog_posts?: number
           community_joins?: number
+          content_shares?: number
           created_at?: string
           event_registrations?: number
           id?: string
+          referrals?: number
           total_points?: number
           updated_at?: string
           user_id?: string
