@@ -6,6 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SocialShareProps {
   url: string;
@@ -15,25 +17,39 @@ interface SocialShareProps {
 }
 
 export function SocialShare({ url, title, description, hashtags }: SocialShareProps) {
+  const { user } = useAuth();
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
   const encodedDescription = encodeURIComponent(description || "");
-  const encodedHashtags = hashtags ? encodeURIComponent(hashtags.join(",")) : "";
 
   const shareLinks = {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}&title=${encodedTitle}&summary=${encodedDescription}`,
     whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
-    instagram: `https://www.instagram.com/` // Instagram doesn't support direct sharing via URL
+    instagram: `https://www.instagram.com/`
   };
 
-  const handleShare = (platform: keyof typeof shareLinks) => {
-    if (platform === 'instagram') {
-      // For Instagram, we'll copy to clipboard since they don't support direct URL sharing
-      navigator.clipboard.writeText(`${title}\n${url}`);
-      return;
+  const trackShare = async (platform: string) => {
+    if (!user) return;
+    try {
+      await supabase.rpc('award_points', {
+        _user_id: user.id,
+        _points: 3,
+        _action_type: 'content_share',
+        _description: `Compartir en ${platform}: ${title}`
+      });
+    } catch (err) {
+      console.warn('Error tracking share points:', err);
     }
-    window.open(shareLinks[platform], '_blank', 'width=600,height=400');
+  };
+
+  const handleShare = async (platform: keyof typeof shareLinks) => {
+    if (platform === 'instagram') {
+      navigator.clipboard.writeText(`${title}\n${url}`);
+    } else {
+      window.open(shareLinks[platform], '_blank', 'width=600,height=400');
+    }
+    await trackShare(platform);
   };
 
   return (
