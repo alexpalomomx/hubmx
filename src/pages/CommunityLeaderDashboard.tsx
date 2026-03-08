@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -190,22 +191,53 @@ const CommunityLeaderDashboard = () => {
         {/* Main Content */}
         <div className="space-y-6">
           {/* Section Selector */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="w-full sm:w-auto">
-              <Select value={selectedSection} onValueChange={setSelectedSection}>
-                <SelectTrigger className="w-full sm:w-[280px] bg-background">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background border border-border shadow-lg z-50">
-                  <SelectItem value="events">Mis Eventos</SelectItem>
-                  <SelectItem value="community-interests">Interesados en la Comunidad</SelectItem>
-                  <SelectItem value="ai-recommender">Recomendador IA</SelectItem>
-                  <SelectItem value="sources">Fuentes Externas</SelectItem>
-                  <SelectItem value="interests">Intereses en Eventos</SelectItem>
-                  <SelectItem value="networking">Networking</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Mobile - Select dropdown */}
+          <div className="sm:hidden w-full">
+            <Select value={selectedSection} onValueChange={setSelectedSection}>
+              <SelectTrigger className="w-full bg-background">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-background border border-border shadow-lg z-50">
+                <SelectItem value="events">Mis Eventos</SelectItem>
+                <SelectItem value="community-interests">Interesados en la Comunidad</SelectItem>
+                <SelectItem value="ai-recommender">Recomendador IA</SelectItem>
+                <SelectItem value="sources">Fuentes Externas</SelectItem>
+                <SelectItem value="interests">Intereses en Eventos</SelectItem>
+                <SelectItem value="networking">Networking</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Desktop - Tabs */}
+          <div className="hidden sm:block w-full">
+            <Tabs value={selectedSection} onValueChange={setSelectedSection}>
+              <TabsList className="w-full justify-start h-auto p-1 gap-1 flex-wrap">
+                <TabsTrigger value="events" className="flex items-center gap-2 px-4 py-2">
+                  <Calendar className="h-4 w-4" />
+                  Mis Eventos
+                </TabsTrigger>
+                <TabsTrigger value="community-interests" className="flex items-center gap-2 px-4 py-2">
+                  <Users className="h-4 w-4" />
+                  Interesados
+                </TabsTrigger>
+                <TabsTrigger value="ai-recommender" className="flex items-center gap-2 px-4 py-2">
+                  <Sparkles className="h-4 w-4" />
+                  Recomendador IA
+                </TabsTrigger>
+                <TabsTrigger value="sources" className="flex items-center gap-2 px-4 py-2">
+                  <Link2 className="h-4 w-4" />
+                  Fuentes Externas
+                </TabsTrigger>
+                <TabsTrigger value="interests" className="flex items-center gap-2 px-4 py-2">
+                  <Heart className="h-4 w-4" />
+                  Intereses
+                </TabsTrigger>
+                <TabsTrigger value="networking" className="flex items-center gap-2 px-4 py-2">
+                  <Network className="h-4 w-4" />
+                  Networking
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           {/* Content Sections */}
