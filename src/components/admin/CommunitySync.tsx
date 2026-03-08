@@ -26,7 +26,7 @@ export const CommunitySync = () => {
 
       toast({
         title: "Sincronización exitosa",
-        description: "Las comunidades se han sincronizado correctamente",
+        description: direction === 'from_legion' ? "Los interesados se han sincronizado correctamente" : direction === 'to_legion' ? "Las comunidades se han sincronizado correctamente" : "Interesados y comunidades sincronizados correctamente",
       });
     } catch (error) {
       console.error('Error en sincronización:', error);
