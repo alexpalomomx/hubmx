@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExternalLink, Filter, Users, MapPin, Loader2, ArrowLeft } from "lucide-react";
 import { useCommunities } from "@/hooks/useSupabaseData";
 import { JoinCommunityDialog } from "@/components/JoinCommunityDialog";
@@ -10,9 +11,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useCommunityCategories } from "@/hooks/useCommunityCategories";
+import { getAllCountryNames, getStatesForCountry } from "@/lib/latam-locations";
 
 const CommunitiesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCountry, setSelectedCountry] = useState("all");
+  const [selectedState, setSelectedState] = useState("all");
   const { data: communities, isLoading, error } = useCommunities(selectedCategory);
   const { data: dbCategories = [] } = useCommunityCategories();
   const { user } = useAuth();
@@ -23,6 +27,16 @@ const CommunitiesPage = () => {
     { id: "all", name: "Todas" },
     ...dbCategories.map((c) => ({ id: c.value, name: c.label })),
   ];
+
+  const countries = getAllCountryNames();
+  const states = selectedCountry !== "all" ? getStatesForCountry(selectedCountry) : [];
+
+  // Filter by location client-side
+  const filteredCommunities = communities?.filter((c) => {
+    if (selectedCountry !== "all" && c.country !== selectedCountry) return false;
+    if (selectedState !== "all" && c.state !== selectedState) return false;
+    return true;
+  });
 
   const handleJoinCommunity = () => {
     if (!user) {
@@ -65,23 +79,58 @@ const CommunitiesPage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filter */}
-        <div className="flex flex-wrap items-center gap-2 mb-8">
-          <div className="flex items-center gap-2 mr-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">Filtrar por:</span>
+        {/* Filters */}
+        <div className="space-y-4 mb-8">
+          {/* Category filter */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 mr-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">Categoría:</span>
+            </div>
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category.id)}
+                className="text-xs"
+              >
+                {category.name}
+              </Button>
+            ))}
           </div>
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              variant={selectedCategory === category.id ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(category.id)}
-              className="transition-all duration-200"
-            >
-              {category.name}
-            </Button>
-          ))}
+
+          {/* Location filter */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 mr-2">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">Ubicación:</span>
+            </div>
+            <Select value={selectedCountry} onValueChange={(v) => { setSelectedCountry(v); setSelectedState("all"); }}>
+              <SelectTrigger className="w-[180px] h-8 text-xs">
+                <SelectValue placeholder="País" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los países</SelectItem>
+                {countries.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {states.length > 0 && (
+              <Select value={selectedState} onValueChange={setSelectedState}>
+                <SelectTrigger className="w-[180px] h-8 text-xs">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  {states.map((s) => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
         </div>
 
         {/* Error */}
@@ -99,10 +148,17 @@ const CommunitiesPage = () => {
           </div>
         )}
 
+        {/* Results count */}
+        {filteredCommunities && (
+          <p className="text-sm text-muted-foreground mb-4">
+            {filteredCommunities.length} comunidad{filteredCommunities.length !== 1 ? "es" : ""} encontrada{filteredCommunities.length !== 1 ? "s" : ""}
+          </p>
+        )}
+
         {/* Grid */}
-        {communities && communities.length > 0 && (
+        {filteredCommunities && filteredCommunities.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {communities.map((community) => (
+            {filteredCommunities.map((community) => (
               <Card key={community.id} className="group hover:shadow-community transition-all duration-300 hover:-translate-y-2">
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
@@ -134,6 +190,15 @@ const CommunitiesPage = () => {
                   <CardTitle className="text-xl group-hover:text-primary transition-colors duration-200">
                     {community.name}
                   </CardTitle>
+                  {/* Country/State badge */}
+                  {(community.country || community.state) && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <MapPin className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">
+                        {[community.state, community.country].filter(Boolean).join(", ")}
+                      </span>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4 line-clamp-3">{community.description}</p>
@@ -191,9 +256,9 @@ const CommunitiesPage = () => {
           </div>
         )}
 
-        {communities && communities.length === 0 && (
+        {filteredCommunities && filteredCommunities.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No se encontraron comunidades en esta categoría.</p>
+            <p className="text-muted-foreground">No se encontraron comunidades con estos filtros.</p>
           </div>
         )}
       </div>
