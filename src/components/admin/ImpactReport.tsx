@@ -204,14 +204,14 @@ export const ImpactReport = () => {
       </div>
 
       <Tabs defaultValue="events" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="events">Top Eventos</TabsTrigger>
-          <TabsTrigger value="categories">Categorías</TabsTrigger>
-          <TabsTrigger value="ai-themes" className="flex items-center gap-1">
+        <TabsList className="w-full sm:w-auto flex overflow-x-auto">
+          <TabsTrigger value="events" className="text-xs sm:text-sm flex-shrink-0">Top Eventos</TabsTrigger>
+          <TabsTrigger value="categories" className="text-xs sm:text-sm flex-shrink-0">Categorías</TabsTrigger>
+          <TabsTrigger value="ai-themes" className="flex items-center gap-1 text-xs sm:text-sm flex-shrink-0">
             <Sparkles className="h-3 w-3" />
             Temáticas IA
           </TabsTrigger>
-          <TabsTrigger value="connections">Conexiones</TabsTrigger>
+          <TabsTrigger value="connections" className="text-xs sm:text-sm flex-shrink-0">Conexiones</TabsTrigger>
         </TabsList>
 
         {/* Top Events */}

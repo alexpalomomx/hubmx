@@ -290,17 +290,17 @@ const ManageEventSources = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Calendar className="h-5 w-5" />
               Fuentes de Eventos Externos
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Importa eventos desde Meetup, Luma o feeds ICS
             </CardDescription>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
               variant="outline"
               size="sm"
@@ -387,114 +387,130 @@ const ManageEventSources = () => {
       </CardHeader>
       <CardContent>
         {sources && sources.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Última Sync</TableHead>
-                <TableHead>Eventos</TableHead>
-                <TableHead>Líder asignado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            {/* Desktop Table */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Última Sync</TableHead>
+                    <TableHead>Eventos</TableHead>
+                    <TableHead>Líder asignado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sources.map((source) => {
+                    const typeInfo = getSourceTypeLabel(source.source_type);
+                    return (
+                      <TableRow key={source.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{source.name}</span>
+                            <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`${typeInfo.color} text-white`}>{typeInfo.label}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Switch checked={source.is_active} onCheckedChange={(checked) => toggleActiveMutation.mutate({ id: source.id, isActive: checked })} />
+                            {source.sync_error ? (
+                              <span title={source.sync_error}><AlertCircle className="h-4 w-4 text-destructive" /></span>
+                            ) : source.last_synced_at ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            ) : null}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {source.last_synced_at ? format(new Date(source.last_synced_at), "dd MMM yyyy HH:mm", { locale: es }) : "Nunca"}
+                        </TableCell>
+                        <TableCell><Badge variant="secondary">{source.events_imported}</Badge></TableCell>
+                        <TableCell>
+                          <Select value={source.assigned_leader_id || "none"} onValueChange={(value) => assignLeaderMutation.mutate({ id: source.id, leaderId: value === "none" ? null : value })}>
+                            <SelectTrigger className="w-[180px]"><SelectValue placeholder="Sin asignar" /></SelectTrigger>
+                            <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                              <SelectItem value="none">Sin asignar</SelectItem>
+                              {leaders?.map((leader) => (<SelectItem key={leader.user_id} value={leader.user_id}>{leader.display_name || "Sin nombre"}</SelectItem>))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex justify-end gap-2">
+                            <Button variant="outline" size="sm" onClick={() => syncSource(source)} disabled={syncingId === source.id}>
+                              <RefreshCw className={`h-4 w-4 ${syncingId === source.id ? "animate-spin" : ""}`} />
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => deleteSourceMutation.mutate(source.id)} className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-3">
               {sources.map((source) => {
                 const typeInfo = getSourceTypeLabel(source.source_type);
                 return (
-                  <TableRow key={source.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{source.name}</span>
-                        <a
-                          href={source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-primary"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
+                  <div key={source.id} className="border rounded-lg p-3 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm truncate">{source.name}</span>
+                          <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary flex-shrink-0">
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge className={`${typeInfo.color} text-white text-xs`}>{typeInfo.label}</Badge>
+                          <Badge variant="secondary" className="text-xs">{source.events_imported} eventos</Badge>
+                        </div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`${typeInfo.color} text-white`}>
-                        {typeInfo.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={source.is_active}
-                          onCheckedChange={(checked) =>
-                            toggleActiveMutation.mutate({ id: source.id, isActive: checked })
-                          }
-                        />
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Switch checked={source.is_active} onCheckedChange={(checked) => toggleActiveMutation.mutate({ id: source.id, isActive: checked })} />
                         {source.sync_error ? (
-                          <span title={source.sync_error}>
-                            <AlertCircle className="h-4 w-4 text-destructive" />
-                          </span>
+                          <span title={source.sync_error}><AlertCircle className="h-4 w-4 text-destructive" /></span>
                         ) : source.last_synced_at ? (
                           <CheckCircle2 className="h-4 w-4 text-green-500" />
                         ) : null}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {source.last_synced_at
-                        ? format(new Date(source.last_synced_at), "dd MMM yyyy HH:mm", { locale: es })
-                        : "Nunca"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{source.events_imported}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={source.assigned_leader_id || "none"}
-                        onValueChange={(value) =>
-                          assignLeaderMutation.mutate({
-                            id: source.id,
-                            leaderId: value === "none" ? null : value,
-                          })
-                        }
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Sin asignar" />
-                        </SelectTrigger>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Última sync: {source.last_synced_at ? format(new Date(source.last_synced_at), "dd MMM yyyy HH:mm", { locale: es }) : "Nunca"}
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <Select value={source.assigned_leader_id || "none"} onValueChange={(value) => assignLeaderMutation.mutate({ id: source.id, leaderId: value === "none" ? null : value })}>
+                        <SelectTrigger className="h-8 text-xs flex-1"><SelectValue placeholder="Sin asignar" /></SelectTrigger>
                         <SelectContent onCloseAutoFocus={(e) => e.preventDefault()}>
                           <SelectItem value="none">Sin asignar</SelectItem>
-                          {leaders?.map((leader) => (
-                            <SelectItem key={leader.user_id} value={leader.user_id}>
-                              {leader.display_name || "Sin nombre"}
-                            </SelectItem>
-                          ))}
+                          {leaders?.map((leader) => (<SelectItem key={leader.user_id} value={leader.user_id}>{leader.display_name || "Sin nombre"}</SelectItem>))}
                         </SelectContent>
                       </Select>
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => syncSource(source)}
-                          disabled={syncingId === source.id}
-                        >
-                          <RefreshCw
-                            className={`h-4 w-4 ${syncingId === source.id ? "animate-spin" : ""}`}
-                          />
+                      <div className="flex gap-1 flex-shrink-0">
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => syncSource(source)} disabled={syncingId === source.id}>
+                          <RefreshCw className={`h-3 w-3 ${syncingId === source.id ? "animate-spin" : ""}`} />
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => deleteSourceMutation.mutate(source.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-destructive hover:text-destructive" onClick={() => deleteSourceMutation.mutate(source.id)}>
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                  </div>
                 );
               })}
-            </TableBody>
-          </Table>
+            </div>
+          </>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />

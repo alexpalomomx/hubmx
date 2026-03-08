@@ -209,25 +209,25 @@ const ManageUsers = () => {
             {users?.map((user) => (
               <div
                 key={user.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+                <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
+                  <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary/10 flex-shrink-0">
                     {getRoleIcon(user.role || 'user')}
                   </div>
-                  <div>
-                    <h3 className="font-medium">
+                  <div className="min-w-0">
+                    <h3 className="font-medium text-sm sm:text-base truncate">
                       {user.display_name || 'Sin nombre'}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
                       {user.email}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-2 flex-wrap pl-11 sm:pl-0">
                   <Badge 
                     variant="outline" 
-                    className={getRoleBadgeColor(user.role || 'user')}
+                    className={`${getRoleBadgeColor(user.role || 'user')} text-xs`}
                   >
                     {getRoleLabel(user.role || 'user')}
                   </Badge>
@@ -235,6 +235,7 @@ const ManageUsers = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleChangeRole(user)}
+                    className="text-xs"
                   >
                     Cambiar Rol
                   </Button>
