@@ -118,8 +118,15 @@ const CommunityLeaderDashboard = () => {
       color: "text-blue-600"
     },
     {
+      title: "Eventos de Fuentes Externas",
+      value: leaderSourceEvents?.length || 0,
+      icon: Link2,
+      description: "De fuentes asignadas",
+      color: "text-green-600"
+    },
+    {
       title: "Intereses Totales",
-      value: communityInterests?.length || 0,
+      value: leaderInterests?.length || 0,
       icon: Heart,
       description: "Intereses en eventos externos",
       color: "text-red-600"
