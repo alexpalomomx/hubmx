@@ -56,6 +56,7 @@ serve(async (req) => {
     if (action === 'sync') {
       if (direction === 'from_legion' || direction === 'bidirectional') {
         await syncCommunitiesFromLegion(legionSupabase, hubSupabase)
+        await syncInterestsFromLegion(legionSupabase, hubSupabase)
       }
       
       if (direction === 'to_legion' || direction === 'bidirectional') {
@@ -64,7 +65,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Sincronización de comunidades completada' }),
+      JSON.stringify({ success: true, message: 'Sincronización de comunidades e interesados completada' }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 
