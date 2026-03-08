@@ -29,11 +29,9 @@ import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 import { MemberCard } from "@/components/networking/MemberCard";
 import NetworkingProfileForm from "@/components/networking/NetworkingProfileForm";
 import MentorshipCenter from "@/components/networking/MentorshipCenter";
-import { MessagingInterface } from "@/components/messaging/MessagingInterface";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
-import { useGetOrCreateConversation } from "@/hooks/useMessaging";
 
 const SimpleNetworkingDashboard = () => {
   const { user, loading } = useAuth();
