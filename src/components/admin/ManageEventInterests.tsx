@@ -153,7 +153,7 @@ export function ManageEventInterests() {
       </div>
 
       <div className="grid gap-4">
-        {interests?.length === 0 ? (
+        {filteredInterests.length === 0 ? (
           <Card>
             <CardContent className="flex items-center justify-center h-32">
               <p className="text-muted-foreground">
@@ -162,7 +162,7 @@ export function ManageEventInterests() {
             </CardContent>
           </Card>
         ) : (
-          interests?.map((interest) => (
+          filteredInterests.map((interest) => (
             <Card key={interest.id}>
               <CardHeader>
                 <div className="flex justify-between items-start">
