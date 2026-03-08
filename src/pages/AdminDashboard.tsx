@@ -42,6 +42,7 @@ import ManageUsers from "@/components/admin/ManageUsers";
 import { CommunitySync } from "@/components/admin/CommunitySync";
 import { ApiCredentials } from "@/components/admin/ApiCredentials";
 import { GamificationManager } from "@/components/admin/GamificationManager";
+import { ManageCommunityCategories } from "@/components/admin/ManageCommunityCategories";
 import { ManageCommunityMembers } from "@/components/admin/ManageCommunityMembers";
 import ManageCommunityLeaders from "@/components/admin/ManageCommunityLeaders";
 import ManageNetworking from "@/components/admin/ManageNetworking";
