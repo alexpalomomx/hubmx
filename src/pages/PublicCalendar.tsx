@@ -31,6 +31,7 @@ const PublicCalendar = () => {
   const [selectedTimeOfDay, setSelectedTimeOfDay] = useState<string>("all");
   const [selectedSource, setSelectedSource] = useState<string>("all");
   const [loadingEventId, setLoadingEventId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<string>("cards");
   
   const { data: userInterests } = useEventInterests(user?.id);
 
