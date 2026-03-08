@@ -283,11 +283,6 @@ export const EnhancedUserDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="messages" className="mt-6">
-            <div className="h-[600px]">
-              <MessagingInterface />
-            </div>
-          </TabsContent>
 
           <TabsContent value="requests" className="mt-6">
             <Card>
