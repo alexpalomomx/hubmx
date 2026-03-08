@@ -51,9 +51,7 @@ const NetworkingDashboard = () => {
   
   const updateConnection = useUpdateConnection();
   const createConnection = useCreateConnection();
-  
-  const updateConnection = useUpdateConnection();
-  const createConnection = useCreateConnection();
+  const { data: mentorshipRequests } = useMentorshipRequests();
 
   if (loading) {
     return (
