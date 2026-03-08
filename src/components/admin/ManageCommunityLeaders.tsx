@@ -31,18 +31,20 @@ const ManageCommunityLeaders = () => {
   const { data: communities } = useCommunities();
   
   const [leaders, setLeaders] = useState<any[]>([]);
+  const [leaderUsers, setLeaderUsers] = useState<any[]>([]);
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const [selectedLeader, setSelectedLeader] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    userId: "",
     communityId: "",
   });
 
   // Fetch leaders on component mount
   useEffect(() => {
     fetchLeaders();
+    fetchLeaderUsers();
   }, []);
 
   const fetchLeaders = async () => {
@@ -89,11 +91,33 @@ const ManageCommunityLeaders = () => {
     }
   };
 
+  const fetchLeaderUsers = async () => {
+    try {
+      // Get users with community_leader role
+      const { data: roles, error } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'community_leader');
+      if (error) throw error;
+      if (!roles || roles.length === 0) { setLeaderUsers([]); return; }
+
+      const userIds = roles.map(r => r.user_id);
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, display_name')
+        .in('user_id', userIds);
+
+      setLeaderUsers(profiles || []);
+    } catch (error) {
+      console.error('Error fetching leader users:', error);
+    }
+  };
+
   const handleAssignLeader = async () => {
-    if (!formData.email || !formData.communityId) {
+    if (!formData.userId || !formData.communityId) {
       toast({
         title: "Error",
-        description: "Por favor completa todos los campos",
+        description: "Por favor selecciona un líder y una comunidad",
         variant: "destructive",
       });
       return;
@@ -101,30 +125,7 @@ const ManageCommunityLeaders = () => {
 
     setLoading(true);
     try {
-      let userId: string | null = null;
-
-      if (formData.email.includes('@')) {
-        const { data: uid, error: rpcError } = await supabase.rpc('get_user_id_by_email', { _email: formData.email });
-        if (rpcError) throw rpcError;
-        userId = uid as unknown as string | null;
-      } else {
-        const { data: profileByName, error: nameError } = await supabase
-          .from('profiles')
-          .select('user_id, display_name')
-          .ilike('display_name', `%${formData.email}%`)
-          .maybeSingle();
-        if (nameError) throw nameError;
-        userId = profileByName?.user_id || null;
-      }
-
-      if (!userId) {
-        toast({
-          title: "Usuario no encontrado",
-          description: "Verifica el correo o nombre e inténtalo de nuevo",
-          variant: "destructive",
-        });
-        return;
-      }
+      const userId = formData.userId;
 
       // Check if user already has community_leader role
       const { data: existingRole } = await supabase
@@ -178,7 +179,7 @@ const ManageCommunityLeaders = () => {
       });
 
       setIsAssignDialogOpen(false);
-      setFormData({ email: "", communityId: "" });
+      setFormData({ userId: "", communityId: "" });
       fetchLeaders();
       queryClient.invalidateQueries({ queryKey: ['user-roles'] });
     } catch (error: any) {
@@ -310,16 +311,24 @@ const ManageCommunityLeaders = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Nombre o Email del Usuario</Label>
-              <Input
-                id="email"
-                type="text"
-                placeholder="Nombre del usuario o email@ejemplo.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
+              <Label>Líder</Label>
+              <Select
+                value={formData.userId}
+                onValueChange={(value) => setFormData({ ...formData, userId: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un líder" />
+                </SelectTrigger>
+                <SelectContent>
+                  {leaderUsers.map((u: any) => (
+                    <SelectItem key={u.user_id} value={u.user_id}>
+                      {u.display_name || 'Sin nombre'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <p className="text-xs text-muted-foreground">
-                Puedes buscar por nombre de usuario o email
+                Solo se muestran usuarios con el rol de líder de comunidad
               </p>
             </div>
             <div className="space-y-2">
