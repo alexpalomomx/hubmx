@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, MapPin, Users, ExternalLink, X, Globe } from "lucide-react";
 import { useCommunities } from "@/hooks/useSupabaseData";
 import { LATAM_COUNTRIES } from "@/lib/latam-locations";
+import SEOHead from "@/components/SEOHead";
 
 // SVG paths for simplified LATAM country shapes (centered positions for markers)
 const COUNTRY_POSITIONS: Record<string, { x: number; y: number; label: string }> = {
