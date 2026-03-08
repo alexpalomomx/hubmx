@@ -20,7 +20,8 @@ import {
   Briefcase,
   RefreshCw,
   Trophy,
-  Sparkles
+  Sparkles,
+  TrendingUp
 } from "lucide-react";
 import { useStats, useCommunities, useEvents, useAlliances, useCalls, usePendingApprovals } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
