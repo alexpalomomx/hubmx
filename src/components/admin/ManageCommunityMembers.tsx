@@ -45,7 +45,7 @@ export const ManageCommunityMembers: React.FC = () => {
             <Badge variant="secondary">Total: {members?.length || 0}</Badge>
           </div>
           <CardDescription>
-            Visualiza los miembros sincronizados desde Legion Hack MX hacia el HUB.
+            Visualiza los interesados sincronizados desde Legion Hack MX hacia el HUB.
           </CardDescription>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
             <Input
