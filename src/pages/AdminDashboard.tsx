@@ -139,10 +139,10 @@ const AdminDashboard = () => {
       color: "text-purple-600"
     },
     {
-      title: "Miembros",
+      title: "Interesados",
       value: stats?.members || 0,
       icon: Users,
-      description: "Total de miembros",
+      description: "Total de interesados",
       color: "text-orange-600"
     }
   ];
@@ -234,7 +234,7 @@ const AdminDashboard = () => {
                   </SelectItem>
                   <SelectItem value="events">Eventos</SelectItem>
                   <SelectItem value="registrations">Intereses</SelectItem>
-                  <SelectItem value="members">Miembros</SelectItem>
+                  <SelectItem value="members">Interesados</SelectItem>
                   <SelectItem value="leaders">Líderes</SelectItem>
                   <SelectItem value="leader-registrations">Solicitudes Líder</SelectItem>
                   <SelectItem value="users">Usuarios</SelectItem>
@@ -331,8 +331,8 @@ const AdminDashboard = () => {
                   className="h-8 text-xs"
                 >
                   <Users className="h-3 w-3 mr-1" />
-                  Miembros
-                </Button>
+                   Interesados
+                 </Button>
                 <Button
                   variant={selectedSection === "leaders" ? "default" : "outline"}
                   size="sm"

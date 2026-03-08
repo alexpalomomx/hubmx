@@ -40,12 +40,12 @@ export const ManageCommunityMembers: React.FC = () => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              <CardTitle>Miembros de Comunidades</CardTitle>
+              <CardTitle>Interesados de Comunidades</CardTitle>
             </div>
             <Badge variant="secondary">Total: {members?.length || 0}</Badge>
           </div>
           <CardDescription>
-            Visualiza los miembros sincronizados desde Legion Hack MX hacia el HUB.
+            Visualiza los interesados sincronizados desde Legion Hack MX hacia el HUB.
           </CardDescription>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
             <Input
@@ -68,11 +68,11 @@ export const ManageCommunityMembers: React.FC = () => {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-sm text-muted-foreground">Cargando miembros...</div>
+            <div className="text-sm text-muted-foreground">Cargando interesados...</div>
           ) : error ? (
-            <div className="text-sm text-destructive">Error al cargar miembros.</div>
+            <div className="text-sm text-destructive">Error al cargar interesados.</div>
           ) : filtered.length === 0 ? (
-            <div className="text-sm text-muted-foreground">No hay miembros para mostrar.</div>
+            <div className="text-sm text-muted-foreground">No hay interesados para mostrar.</div>
           ) : (
             <div className="rounded-md border border-border overflow-x-auto">
               <Table>
