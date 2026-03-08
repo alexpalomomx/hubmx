@@ -114,7 +114,7 @@ export const ImpactReport = () => {
       "Nº Comunidades": c.value,
     }));
     const wsCat = XLSX.utils.json_to_sheet(catData);
-    XLSX.utils.book_append_sheet(wb, wsCat, "Temáticas");
+    XLSX.utils.book_append_sheet(wb, wsCat, "Categorías");
 
     const commData = data.communities.map((c) => ({
       Comunidad: c.name,
@@ -206,7 +206,7 @@ export const ImpactReport = () => {
       <Tabs defaultValue="events" className="space-y-4">
         <TabsList>
           <TabsTrigger value="events">Top Eventos</TabsTrigger>
-          <TabsTrigger value="categories">Temáticas</TabsTrigger>
+          <TabsTrigger value="categories">Categorías</TabsTrigger>
           <TabsTrigger value="ai-themes" className="flex items-center gap-1">
             <Sparkles className="h-3 w-3" />
             Temáticas IA
@@ -255,7 +255,7 @@ export const ImpactReport = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Distribución por Temática</CardTitle>
+                <CardTitle>Distribución por Categoría</CardTitle>
                 <CardDescription>Comunidades agrupadas por categoría</CardDescription>
               </CardHeader>
               <CardContent>
@@ -288,7 +288,7 @@ export const ImpactReport = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Detalle por Temática</CardTitle>
+                <CardTitle>Detalle por Categoría</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {data.categoryData.map((cat, i) => (
