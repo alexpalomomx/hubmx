@@ -175,14 +175,17 @@ export default function ManageEvents() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4">
-        {events?.map((event) => (
+        {events?.map((event) => {
+          const isExternal = !!(event as any).source_id;
+
+          return (
           <Card key={event.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-lg">{event.title}</CardTitle>
-                    {(event as any).source_id && (
+                    {isExternal && (
                       <Badge variant="secondary" className="text-xs">
                         📡 {(event as any).source?.name || "Fuente externa"}
                         {(event as any).source?.source_type && ` (${(event as any).source.source_type})`}
@@ -241,36 +244,43 @@ export default function ManageEvents() {
                 <div className="text-sm text-muted-foreground">
                   {event.organizer?.name && `Organizado por: ${event.organizer.name}`}
                 </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleToggleStatus(event.id, event.status, event.title)}
-                  >
-                    Cambiar Estado
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(event)}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDelete(event.id, event.title)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Eliminar
-                  </Button>
-                </div>
+
+                {isExternal ? (
+                  <p className="text-xs text-muted-foreground italic">
+                    Este evento se gestiona desde la fuente externa
+                  </p>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleToggleStatus(event.id, event.status, event.title)}
+                    >
+                      Cambiar Estado
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(event)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(event.id, event.title)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Eliminar
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
-        ))}
+          );
+        })}
       </div>
 
       {/* Edit Dialog */}
