@@ -662,6 +662,12 @@ const AdminDashboard = () => {
               <ManageCommunityCategories />
             </div>
           )}
+
+          {selectedSection === "impact-report" && (
+            <div className="space-y-6">
+              <ImpactReport />
+            </div>
+          )}
         </div>
       </div>
     </div>
