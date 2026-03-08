@@ -54,11 +54,22 @@ export const CommunitySync = () => {
   const getSyncDescription = () => {
     switch (direction) {
       case 'from_legion':
-        return "Importar usuarios, comunidades y datos desde Legion Hack MX al HUB";
+        return "Importar interesados desde Legion Hack MX al HUB";
       case 'to_legion':
-        return "Exportar usuarios, comunidades y datos del HUB a Legion Hack MX";
+        return "Exportar comunidades del HUB a Legion Hack MX";
       default:
-        return "Sincronización bidireccional completa entre ambas plataformas";
+        return "Sincronización completa: interesados desde Legion + comunidades hacia Legion";
+    }
+  };
+
+  const getSyncBadges = () => {
+    switch (direction) {
+      case 'from_legion':
+        return [{ label: 'Interesados' }];
+      case 'to_legion':
+        return [{ label: 'Comunidades' }];
+      default:
+        return [{ label: 'Interesados' }, { label: 'Comunidades' }];
     }
   };
 
