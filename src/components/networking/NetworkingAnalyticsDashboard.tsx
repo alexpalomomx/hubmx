@@ -104,12 +104,183 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
           </Card>
         ))}
       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(activity.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  ))}
+
+      <Tabs defaultValue="engagement" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="engagement">Engagement</TabsTrigger>
+          <TabsTrigger value="actions">Tipos de Acción</TabsTrigger>
+          {isAdmin && <TabsTrigger value="admin">Vista Admin</TabsTrigger>}
+          <TabsTrigger value="suggestions">Sugerencias</TabsTrigger>
+        </TabsList>
+
+        {/* Engagement Tab */}
+        <TabsContent value="engagement">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Actividad de Networking (Últimos 7 días)
+              </CardTitle>
+              <CardDescription>
+                Tu actividad de networking durante la última semana
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {engagementData.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No hay actividad registrada en los últimos 7 días
                 </div>
+              ) : (
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={engagementData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area 
+                        type="monotone" 
+                        dataKey="actividad" 
+                        stroke="#8884d8" 
+                        fill="#8884d8" 
+                        fillOpacity={0.3}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Actions Tab */}
+        <TabsContent value="actions">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Distribución de Acciones</CardTitle>
+                <CardDescription>
+                  Tipos de actividades de networking que realizas
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {actionTypeData.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No hay acciones registradas
+                  </div>
+                ) : (
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={actionTypeData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {actionTypeData.map((_, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Desglose de Actividades</CardTitle>
+                <CardDescription>
+                  Resumen detallado de tu networking
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <UserPlus className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm">Solicitudes enviadas</span>
+                  </div>
+                  <Badge variant="secondary">
+                    {userStats?.connection_requests_sent || 0}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">Solicitudes recibidas</span>
+                  </div>
+                  <Badge variant="secondary">
+                    {userStats?.connection_requests_received || 0}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-purple-500" />
+                    <span className="text-sm">Mentorías solicitadas</span>
+                  </div>
+                  <Badge variant="secondary">
+                    {userStats?.mentorship_requests_sent || 0}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-orange-500" />
+                    <span className="text-sm">Mentorías recibidas</span>
+                  </div>
+                  <Badge variant="secondary">
+                    {userStats?.mentorship_requests_received || 0}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Admin Tab */}
+        {isAdmin && (
+          <TabsContent value="admin">
+            <Card>
+              <CardHeader>
+                <CardTitle>Analytics Administrativo</CardTitle>
+                <CardDescription>
+                  Vista general de la actividad de networking en la plataforma
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {(!adminAnalytics || adminAnalytics.length === 0) ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No hay actividad registrada
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {adminAnalytics.slice(0, 20).map((activity) => (
+                      <div key={activity.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 bg-primary rounded-full"></div>
+                          <div>
+                            <p className="font-medium">
+                              {activity.user?.display_name || 'Usuario desconocido'}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {activity.action_type.replace('_', ' ')}
+                              {activity.target_user && ` → ${activity.target_user?.display_name}`}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(activity.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -146,7 +317,7 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
                   <CardContent className="p-4">
                     <div className="text-center">
                       <p className="text-2xl font-bold">
-                        {suggestionStats?.acceptance_rate.toFixed(1) || 0}%
+                        {suggestionStats?.acceptance_rate?.toFixed(1) || 0}%
                       </p>
                       <p className="text-sm text-muted-foreground">Tasa de aceptación</p>
                     </div>
@@ -159,7 +330,7 @@ export const NetworkingAnalyticsDashboard = ({ userId, isAdmin = false }: Networ
                   <span>Pendientes</span>
                   <span>{suggestionStats?.pending || 0}</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-muted rounded-full h-2">
                   <div 
                     className="bg-yellow-500 h-2 rounded-full" 
                     style={{ 
