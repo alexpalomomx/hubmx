@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ScrollToTop } from "./components/ScrollToTop";
 import Index from "./pages/Index";
@@ -24,6 +25,20 @@ import CommunityMapPage from "./pages/CommunityMapPage";
 
 const queryClient = new QueryClient();
 
+const RedirectFromLegacy404 = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const redirectTo = new URLSearchParams(window.location.search).get("redirect");
+
+    if (redirectTo && redirectTo.startsWith("/")) {
+      navigate(redirectTo, { replace: true });
+    }
+  }, [navigate]);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -31,6 +46,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <RedirectFromLegacy404 />
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
@@ -42,12 +58,21 @@ const App = () => (
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/networking" element={<SimpleNetworkingDashboard />} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/terminos" element={<TermsAndConditions />} />
+            <Route path="/terminos-y-condiciones" element={<TermsAndConditions />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/politica-privacidad" element={<PrivacyPolicy />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/code-of-conduct" element={<CodeOfConduct />} />
+            <Route path="/codigo-de-conducta" element={<CodeOfConduct />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/calendario" element={<PublicCalendar />} />
+            <Route path="/calendar" element={<PublicCalendar />} />
             <Route path="/comunidades" element={<CommunitiesPage />} />
+            <Route path="/communities" element={<CommunitiesPage />} />
             <Route path="/mapa" element={<CommunityMapPage />} />
+            <Route path="/community-map" element={<CommunityMapPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

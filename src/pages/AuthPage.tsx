@@ -240,9 +240,9 @@ const AuthPage = () => {
             <div className="mt-6 text-center text-sm text-muted-foreground">
               <p>
                 Al registrarte, aceptas nuestros{" "}
-                <Link to="#" className="text-primary hover:underline">Términos y Condiciones</Link>{" "}
+                <Link to="/terms" className="text-primary hover:underline">Términos y Condiciones</Link>{" "}
                 y{" "}
-                <Link to="#" className="text-primary hover:underline">Política de Privacidad</Link>
+                <Link to="/privacy" className="text-primary hover:underline">Política de Privacidad</Link>
               </p>
             </div>
           </CardContent>
