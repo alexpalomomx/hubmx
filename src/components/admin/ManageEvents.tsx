@@ -46,6 +46,28 @@ export default function ManageEvents() {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timeFilter, setTimeFilter] = useState<"all" | "upcoming" | "past">("upcoming");
+  const [sourceFilter, setSourceFilter] = useState<"all" | "manual" | "external">("all");
+
+  const isEventPast = (eventDate: string) => {
+    const date = parseISO(eventDate);
+    return isPast(date) && !isToday(date);
+  };
+
+  const filteredEvents = events?.filter((event) => {
+    // Time filter
+    if (timeFilter === "upcoming" && isEventPast(event.event_date)) return false;
+    if (timeFilter === "past" && !isEventPast(event.event_date)) return false;
+
+    // Source filter
+    if (sourceFilter !== "all") {
+      const { isExternal } = getEventSourceMeta(event as Event);
+      if (sourceFilter === "external" && !isExternal) return false;
+      if (sourceFilter === "manual" && isExternal) return false;
+    }
+
+    return true;
+  });
 
   const getExternalSourceTypeFromUrl = (registrationUrl?: string | null) => {
     if (!registrationUrl) return null;
