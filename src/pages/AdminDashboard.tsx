@@ -150,6 +150,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <SEOHead title="Panel de Administración" description="Administra comunidades, eventos y contenido de HUB MX." path="/admin" noindex />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

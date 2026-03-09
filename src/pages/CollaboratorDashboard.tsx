@@ -112,6 +112,7 @@ const CollaboratorDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Dashboard Colaborador" description="Panel de colaborador en HUB MX." path="/collaborator" noindex />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

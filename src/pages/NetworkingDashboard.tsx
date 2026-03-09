@@ -110,6 +110,7 @@ const NetworkingDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background/80 to-primary/5">
+      <SEOHead title="Networking" description="Conecta con profesionales tech en HUB MX." path="/networking" noindex />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-8">
           <Button 
