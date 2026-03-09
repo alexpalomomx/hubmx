@@ -121,7 +121,7 @@ const UserDashboard = () => {
           <ReferralLink />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/networking")}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
