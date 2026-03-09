@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen, ArrowLeft, Network, MessageSquare, UserPlus, ChevronDown, BarChart3 } from "lucide-react";
+import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen, ArrowLeft, Network, UserPlus, ChevronDown, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { useUserConnections, useConnectionRequests, useMentorshipRequests } from "@/hooks/useNetworkingData";
 import { useUnreadNotificationCount } from "@/hooks/useNotifications";
-import { MessagingInterface } from "@/components/messaging/MessagingInterface";
+
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
@@ -121,7 +121,7 @@ const UserDashboard = () => {
           <ReferralLink />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/networking")}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -134,17 +134,6 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
           
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <MessageSquare className="h-8 w-8 text-green-500" />
-                <div>
-                  <p className="text-2xl font-bold">0</p>
-                  <p className="text-sm text-muted-foreground">Mensajes</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
           
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardContent className="p-4">
@@ -189,7 +178,7 @@ const UserDashboard = () => {
                 <SelectItem value="communities">Comunidades</SelectItem>
                 <SelectItem value="events">Eventos</SelectItem>
                 <SelectItem value="networking">Networking</SelectItem>
-                <SelectItem value="messages">Mensajes</SelectItem>
+                
                 <SelectItem value="analytics">Analytics</SelectItem>
               </SelectContent>
             </Select>
@@ -211,10 +200,6 @@ const UserDashboard = () => {
               <TabsTrigger value="networking" className="flex items-center gap-2 px-4 py-2">
                 <Network className="h-4 w-4" />
                 Networking
-              </TabsTrigger>
-              <TabsTrigger value="messages" className="flex items-center gap-2 px-4 py-2">
-                <MessageSquare className="h-4 w-4" />
-                Mensajes
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2 px-4 py-2">
                 <BarChart3 className="h-4 w-4" />
@@ -425,11 +410,6 @@ const UserDashboard = () => {
             </div>
           )}
 
-          {activeSection === "messages" && (
-            <div>
-              <MessagingInterface />
-            </div>
-          )}
 
           {activeSection === "analytics" && (
             <div>
