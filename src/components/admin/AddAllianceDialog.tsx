@@ -65,16 +65,20 @@ const AddAllianceDialog = ({ children, alliance, open: controlledOpen, onOpenCha
   });
 
   useEffect(() => {
-    if (alliance && open) {
-      setFormData({
-        name: alliance.name || "",
-        description: alliance.description || "",
-        alliance_type: alliance.alliance_type || "",
-        contact_email: alliance.contact_email || "",
-        website_url: alliance.website_url || "",
-        logo_url: alliance.logo_url || "",
-      });
-      setBenefits(alliance.benefits || []);
+    if (open) {
+      if (alliance) {
+        setFormData({
+          name: alliance.name || "",
+          description: alliance.description || "",
+          alliance_type: alliance.alliance_type || "",
+          contact_email: alliance.contact_email || "",
+          website_url: alliance.website_url || "",
+          logo_url: alliance.logo_url || "",
+        });
+        setBenefits(alliance.benefits || []);
+      } else {
+        resetForm();
+      }
     }
   }, [alliance, open]);
 
