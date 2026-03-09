@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Lock, User, Phone } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 const Profile = () => {
   const navigate = useNavigate();
