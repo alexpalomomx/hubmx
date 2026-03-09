@@ -201,10 +201,6 @@ const UserDashboard = () => {
                 <Network className="h-4 w-4" />
                 Networking
               </TabsTrigger>
-              <TabsTrigger value="messages" className="flex items-center gap-2 px-4 py-2">
-                <MessageSquare className="h-4 w-4" />
-                Mensajes
-              </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2 px-4 py-2">
                 <BarChart3 className="h-4 w-4" />
                 Analytics
