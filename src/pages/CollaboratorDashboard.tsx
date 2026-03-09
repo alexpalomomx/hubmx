@@ -27,6 +27,7 @@ import ManageCalls from "@/components/admin/ManageCalls";
 import ManageBlogPosts from "@/components/admin/ManageBlogPosts";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
+import SEOHead from "@/components/SEOHead";
 
 const CollaboratorDashboard = () => {
   const { user, isCollaborator, loading } = useAuth();
@@ -111,6 +112,7 @@ const CollaboratorDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Dashboard Colaborador" description="Panel de colaborador en HUB MX." path="/collaborator" noindex />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

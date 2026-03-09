@@ -18,6 +18,7 @@ import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggest
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
 import { ReferralLink } from "@/components/ReferralLink";
 import { useState } from "react";
+import SEOHead from "@/components/SEOHead";
 
 const UserDashboard = () => {
   const { user } = useAuth();
@@ -94,6 +95,7 @@ const UserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Mi Dashboard" description="Tu panel personal en HUB MX." path="/dashboard" noindex />
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">

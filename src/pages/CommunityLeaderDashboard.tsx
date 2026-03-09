@@ -25,6 +25,7 @@ import ManageMyEvents from "@/components/admin/ManageMyEvents";
 import ManageMyEventSources from "@/components/admin/ManageMyEventSources";
 
 import EventDateRecommender from "@/components/admin/EventDateRecommender";
+import SEOHead from "@/components/SEOHead";
 
 const CommunityLeaderDashboard = () => {
   const { user, isCommunityLeader, loading } = useAuth();
@@ -137,6 +138,7 @@ const CommunityLeaderDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Dashboard Líder de Comunidad" description="Gestiona tu comunidad en HUB MX." path="/community-leader" noindex />
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

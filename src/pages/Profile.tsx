@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Lock, User, Phone } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -101,6 +102,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Mi Perfil" description="Gestiona tu perfil en HUB MX." path="/profile" noindex />
       <div className="border-b border-border bg-card">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
