@@ -410,11 +410,6 @@ const UserDashboard = () => {
             </div>
           )}
 
-          {activeSection === "messages" && (
-            <div>
-              <MessagingInterface />
-            </div>
-          )}
 
           {activeSection === "analytics" && (
             <div>
