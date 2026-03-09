@@ -178,7 +178,7 @@ const UserDashboard = () => {
                 <SelectItem value="communities">Comunidades</SelectItem>
                 <SelectItem value="events">Eventos</SelectItem>
                 <SelectItem value="networking">Networking</SelectItem>
-                <SelectItem value="messages">Mensajes</SelectItem>
+                
                 <SelectItem value="analytics">Analytics</SelectItem>
               </SelectContent>
             </Select>
