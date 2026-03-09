@@ -12,7 +12,7 @@ import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { useUserConnections, useConnectionRequests, useMentorshipRequests } from "@/hooks/useNetworkingData";
 import { useUnreadNotificationCount } from "@/hooks/useNotifications";
-import { MessagingInterface } from "@/components/messaging/MessagingInterface";
+
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
