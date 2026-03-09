@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useStats, useCommunities, useEvents, useAlliances, useCalls, usePendingApprovals } from "@/hooks/useSupabaseData";
 import { useRealtimeUpdates } from "@/hooks/useRealtimeUpdates";
+import SEOHead from "@/components/SEOHead";
 import AddCommunityDialog from "@/components/admin/AddCommunityDialog";
 import AddEventDialog from "@/components/admin/AddEventDialog";
 import AddCallDialog from "@/components/admin/AddCallDialog";

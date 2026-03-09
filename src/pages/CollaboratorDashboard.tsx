@@ -27,6 +27,7 @@ import ManageCalls from "@/components/admin/ManageCalls";
 import ManageBlogPosts from "@/components/admin/ManageBlogPosts";
 import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggestions";
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
+import SEOHead from "@/components/SEOHead";
 
 const CollaboratorDashboard = () => {
   const { user, isCollaborator, loading } = useAuth();

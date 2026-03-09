@@ -25,6 +25,7 @@ import ManageMyEvents from "@/components/admin/ManageMyEvents";
 import ManageMyEventSources from "@/components/admin/ManageMyEventSources";
 
 import EventDateRecommender from "@/components/admin/EventDateRecommender";
+import SEOHead from "@/components/SEOHead";
 
 const CommunityLeaderDashboard = () => {
   const { user, isCommunityLeader, loading } = useAuth();

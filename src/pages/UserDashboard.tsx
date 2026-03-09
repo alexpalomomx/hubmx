@@ -18,6 +18,7 @@ import { NetworkingSuggestions } from "@/components/networking/NetworkingSuggest
 import { NetworkingAnalyticsDashboard } from "@/components/networking/NetworkingAnalyticsDashboard";
 import { ReferralLink } from "@/components/ReferralLink";
 import { useState } from "react";
+import SEOHead from "@/components/SEOHead";
 
 const UserDashboard = () => {
   const { user } = useAuth();
