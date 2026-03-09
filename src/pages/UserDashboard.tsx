@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen, ArrowLeft, Network, MessageSquare, UserPlus, ChevronDown, BarChart3 } from "lucide-react";
+import { ExternalLink, Calendar, MapPin, Users, Globe, BookOpen, ArrowLeft, Network, UserPlus, ChevronDown, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
