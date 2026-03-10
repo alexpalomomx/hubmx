@@ -74,6 +74,7 @@ const App = () => (
             <Route path="/communities" element={<CommunitiesPage />} />
             <Route path="/mapa" element={<CommunityMapPage />} />
             <Route path="/community-map" element={<CommunityMapPage />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
