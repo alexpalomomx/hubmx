@@ -31,8 +31,11 @@ const CommunityLeaderDashboard = () => {
   const { user, isCommunityLeader, loading } = useAuth();
   const navigate = useNavigate();
   const [selectedSection, setSelectedSection] = useState("events");
-  const [myCommunity, setMyCommunity] = useState<any>(null);
+  const [myCommunities, setMyCommunities] = useState<any[]>([]);
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string>("");
   const [loadingCommunity, setLoadingCommunity] = useState(true);
+
+  const myCommunity = myCommunities.find(c => c.id === selectedCommunityId) || null;
   
   const { data: myEvents } = useMyEvents(user?.id, myCommunity?.id);
   const { data: leaderSourceEvents } = useLeaderSourceEvents(user?.id);
@@ -42,31 +45,35 @@ const CommunityLeaderDashboard = () => {
   // Habilitar actualizaciones en tiempo real
   useRealtimeUpdates();
 
-  // Fetch community data for this leader
+  // Fetch all communities for this leader
   useEffect(() => {
-    const fetchMyCommunity = async () => {
+    const fetchMyCommunities = async () => {
       if (!user) return;
 
       try {
-        const { data: leader, error } = await supabase
+        const { data: leaders, error } = await supabase
           .from('community_leaders')
           .select('community_id')
           .eq('user_id', user.id)
-          .eq('status', 'active')
-          .maybeSingle();
+          .eq('status', 'active');
 
         if (error) {
-          console.error('Error fetching community leader record:', error);
+          console.error('Error fetching community leader records:', error);
           return;
         }
 
-        if (leader?.community_id) {
-          const { data: community, error: commError } = await supabase
+        if (leaders && leaders.length > 0) {
+          const communityIds = leaders.map(l => l.community_id);
+          const { data: communities, error: commError } = await supabase
             .from('communities')
             .select('*')
-            .eq('id', leader.community_id)
-            .maybeSingle();
-          if (!commError) setMyCommunity(community);
+            .in('id', communityIds);
+          if (!commError && communities) {
+            setMyCommunities(communities);
+            if (!selectedCommunityId || !communityIds.includes(selectedCommunityId)) {
+              setSelectedCommunityId(communities[0]?.id || "");
+            }
+          }
         }
 
       } catch (error) {
@@ -77,7 +84,7 @@ const CommunityLeaderDashboard = () => {
     };
 
     if (user && isCommunityLeader) {
-      fetchMyCommunity();
+      fetchMyCommunities();
     }
   }, [user, isCommunityLeader]);
 
