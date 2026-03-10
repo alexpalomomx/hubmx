@@ -161,7 +161,7 @@ const CommunityLeaderDashboard = () => {
               </Button>
               <div className="h-6 w-px bg-border"></div>
               <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-                Dashboard de Líder - {myCommunity?.name || 'Comunidad'}
+                Dashboard de Líder
               </h1>
             </div>
             <div className="flex items-center space-x-2">
@@ -173,6 +173,23 @@ const CommunityLeaderDashboard = () => {
               </span>
             </div>
           </div>
+          {/* Community Selector */}
+          {myCommunities.length > 1 && (
+            <div className="pb-3 flex items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Comunidad:</span>
+              <Select value={selectedCommunityId} onValueChange={setSelectedCommunityId}>
+                <SelectTrigger className="w-64 bg-background">
+                  <SelectValue placeholder="Selecciona una comunidad" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border border-border shadow-lg z-50">
+                  {myCommunities.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Badge variant="secondary">{myCommunities.length} comunidades</Badge>
+            </div>
+          )}
         </div>
       </div>
 
