@@ -22,6 +22,7 @@ import PublicCalendar from "./pages/PublicCalendar";
 import FAQ from "./pages/FAQ";
 import CommunitiesPage from "./pages/CommunitiesPage";
 import CommunityMapPage from "./pages/CommunityMapPage";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 

@@ -9,16 +9,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/SEOHead";
+import { useToast } from "@/hooks/use-toast";
 
 const AuthPage = () => {
   const navigate = useNavigate();
   const { signIn, signUp, user } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [inviteMode, setInviteMode] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
 
-  // Get default tab and referral code from URL params
   const defaultTab = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('tab') === 'signup' ? 'signup' : 'signin';
@@ -41,7 +44,6 @@ const AuthPage = () => {
     }
   }, []);
 
-  // Redirect if already authenticated (except invite flow)
   useEffect(() => {
     if (user && !inviteMode) {
       navigate("/");
@@ -51,22 +53,17 @@ const AuthPage = () => {
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-
     const { error } = await signIn(email, password);
-    if (!error) {
-      navigate("/");
-    }
+    if (!error) navigate("/");
     setLoading(false);
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -75,40 +72,27 @@ const AuthPage = () => {
 
     const { error } = await signUp(email, password, displayName);
     if (!error) {
-      // Update profile with phone after successful signup
       try {
         const currentUser = (await supabase.auth.getUser()).data.user;
         if (currentUser) {
           await supabase.from("profiles").update({ phone }).eq("user_id", currentUser.id);
-          
-          // Handle referral code - record who referred this user
           if (referralCode) {
             try {
               await supabase.from("referrals" as any).update({
-                referred_user_id: currentUser.id,
-                referred_email: email,
-                status: 'completed',
-                completed_at: new Date().toISOString()
+                referred_user_id: currentUser.id, referred_email: email,
+                status: 'completed', completed_at: new Date().toISOString()
               } as any).eq('referral_code', referralCode).eq('status', 'pending');
-              
-              // Award points to referrer
               const { data: referral } = await supabase.from("referrals" as any).select('referrer_id').eq('referral_code', referralCode).single();
               if (referral) {
                 await supabase.rpc('award_points', {
-                  _user_id: (referral as any).referrer_id,
-                  _points: 10,
-                  _action_type: 'referral',
-                  _description: 'Usuario referido se registró'
+                  _user_id: (referral as any).referrer_id, _points: 10,
+                  _action_type: 'referral', _description: 'Usuario referido se registró'
                 });
               }
-            } catch (refErr) {
-              console.warn('Error processing referral:', refErr);
-            }
+            } catch (refErr) { console.warn('Error processing referral:', refErr); }
           }
         }
-      } catch (profileError) {
-        console.warn("Could not update profile:", profileError);
-      }
+      } catch (profileError) { console.warn("Could not update profile:", profileError); }
       navigate("/");
     }
     setLoading(false);
@@ -118,21 +102,30 @@ const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (!error) {
-      navigate("/");
+    if (!error) navigate("/");
+    setLoading(false);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Correo enviado", description: "Revisa tu bandeja de entrada para restablecer tu contraseña." });
+      setForgotPasswordMode(false);
     }
     setLoading(false);
   };
+
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <SEOHead title="Iniciar Sesión" description="Accede a HUB MX para conectar con comunidades tech en México y Latinoamérica." path="/auth" />
       <div className="w-full max-w-md">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/")}
-          className="mb-6 text-white hover:bg-white/10"
-        >
+        <Button variant="ghost" onClick={() => navigate("/")} className="mb-6 text-white hover:bg-white/10">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Volver al inicio
         </Button>
@@ -149,34 +142,31 @@ const AuthPage = () => {
                 <div className="space-y-2">
                   <Label htmlFor="new-password">Crea tu contraseña</Label>
                   <div className="relative">
-                    <Input
-                      id="new-password"
-                      name="new-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      minLength={6}
-                      required
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full px-3"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                    <Input id="new-password" name="new-password" type={showPassword ? "text" : "password"} placeholder="••••••••" minLength={6} required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                    <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3" onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">Mínimo 6 caracteres</p>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading} variant="hero">
                   {loading ? "Guardando..." : "Guardar contraseña"}
+                </Button>
+              </form>
+            ) : forgotPasswordMode ? (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <p className="text-sm text-muted-foreground text-center">
+                  Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="forgot-email">Email</Label>
+                  <Input id="forgot-email" type="email" placeholder="tu@email.com" required value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading} variant="hero">
+                  {loading ? "Enviando..." : "Enviar enlace de recuperación"}
+                </Button>
+                <Button type="button" variant="ghost" className="w-full" onClick={() => setForgotPasswordMode(false)}>
+                  Volver a Iniciar Sesión
                 </Button>
               </form>
             ) : (
@@ -202,6 +192,9 @@ const AuthPage = () => {
                     </div>
                     <Button type="submit" className="w-full" disabled={loading} variant="hero">
                       {loading ? "Iniciando..." : "Iniciar Sesión"}
+                    </Button>
+                    <Button type="button" variant="link" className="w-full text-sm" onClick={() => setForgotPasswordMode(true)}>
+                      ¿Olvidaste tu contraseña?
                     </Button>
                   </form>
                 </TabsContent>
